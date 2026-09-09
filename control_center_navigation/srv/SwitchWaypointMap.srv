@@ -1,0 +1,6 @@
+string map_yaml
+---
+bool success
+string message
+string waypoints_file
+string[] names

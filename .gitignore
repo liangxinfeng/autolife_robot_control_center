@@ -1,0 +1,24 @@
+build/
+install/
+log/
+logs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.codex_backups/
+.DS_Store
+Thumbs.db
+*.bak
+*.orig
+*.rej
+*~
+*.before*
+*.backup*
+*.log
+*.db3
+*.mcap
+.env
+.env.*
+*.pem
+*.key
+# Keep functional runtime/, vendor/ archives, maps and motion resources tracked.

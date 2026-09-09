@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>control_center_shell</name>
+  <version>0.1.0</version>
+  <description>Integrated operator console for navigation, SLAM, whole-body joints and user services.</description>
+  <maintainer email="ubuntu@example.com">ubuntu</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>control_center_navigation</exec_depend>
+  <exec_depend>control_center_slam</exec_depend>
+  <exec_depend>control_center_joint_control</exec_depend>
+  <exec_depend>control_center_service_manager</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>python3-pyqt5</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

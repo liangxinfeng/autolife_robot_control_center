@@ -1,0 +1,3 @@
+version: 1
+active_map: /home/ubuntu/ros2_ws/src/autolife_robot_control_center/multi_lidar_slam/maps/yundie_2f.yaml
+waypoints_file: maps/waypoints/yundie_2f/yundie_2f.yaml

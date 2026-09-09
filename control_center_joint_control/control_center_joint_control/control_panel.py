@@ -1,0 +1,2212 @@
+#!/usr/bin/env python3
+"""Compact PyQt operator panel for live joint monitoring and guarded control."""
+
+import json
+from pathlib import Path
+import signal
+import sys
+import time
+
+from ament_index_python.packages import get_package_share_directory
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+from std_srvs.srv import SetBool
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+from .action_editor import ActionLibraryPage
+from .action_library import (
+    action_joint_names,
+    interpolate_joint_values,
+    load_action_library,
+    normalize_action_record,
+    save_action_library,
+    validate_action_name,
+)
+from .body_height import (
+    BODY_HEIGHT_JOINTS,
+    MAX_BODY_LOWERING_M,
+    body_height_targets,
+    estimate_body_lowering,
+)
+from .joint_definitions import ALL_JOINTS, GROUPS, GROUP_ORDER, JOINT_LABELS, JOINT_TO_GROUP
+from .motion_storage import (
+    ACTION_FILE_NAME,
+    POSE_FILE_NAME,
+    action_pickle_path,
+    initialize_motion_library,
+    resolve_motion_library_dir,
+)
+from .pose_library import (
+    load_pose_library,
+    make_pose_record,
+    save_pose_library,
+    validate_pose_name,
+)
+from .robot_view import RobotViewPanel
+from .trajectory_pickle import export_action_pickle
+from .vr_reset_pose import VR_RESET_JOINTS, VrResetPoseStore
+
+
+class NoWheelSlider(QtWidgets.QSlider):
+    def wheelEvent(self, event):
+        event.ignore()
+
+
+class NoWheelSpinBox(QtWidgets.QDoubleSpinBox):
+    def wheelEvent(self, event):
+        if self.hasFocus():
+            super().wheelEvent(event)
+        else:
+            event.ignore()
+
+
+class JointRow(QtWidgets.QFrame):
+    target_changed = QtCore.pyqtSignal(str)
+
+    def __init__(self, name, label, lower, upper, parent=None):
+        super().__init__(parent)
+        self.name = name
+        self.label_text = label
+        self.lower = lower
+        self.upper = upper
+        self.current = None
+        self._changing = False
+        self.setObjectName('jointRow')
+        self.setToolTip(f'{name}\n允许范围：{lower:.1f}° ～ {upper:.1f}°')
+
+        layout = QtWidgets.QGridLayout(self)
+        layout.setContentsMargins(10, 7, 10, 7)
+        layout.setHorizontalSpacing(10)
+
+        self.name_label = QtWidgets.QLabel(label)
+        self.name_label.setMinimumWidth(104)
+        self.name_label.setToolTip(name)
+        self.current_label = QtWidgets.QLabel('--.-°')
+        self.current_label.setObjectName('currentValue')
+        self.current_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.current_label.setMinimumWidth(65)
+
+        self.slider = NoWheelSlider(QtCore.Qt.Horizontal)
+        self.slider.setRange(round(lower * 10), round(upper * 10))
+        self.slider.setSingleStep(1)
+        self.slider.setPageStep(10)
+        self.slider.setEnabled(False)
+
+        self.target_box = NoWheelSpinBox()
+        self.target_box.setDecimals(1)
+        self.target_box.setSingleStep(0.5)
+        self.target_box.setRange(lower, upper)
+        self.target_box.setSuffix('°')
+        self.target_box.setKeyboardTracking(False)
+        self.target_box.setMinimumWidth(92)
+        self.target_box.setEnabled(False)
+
+        self.delta_label = QtWidgets.QLabel('Δ --.-°')
+        self.delta_label.setObjectName('deltaValue')
+        self.delta_label.setMinimumWidth(72)
+        self.delta_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+        self.health = QtWidgets.QLabel('●')
+        self.health.setObjectName('healthUnknown')
+        self.health.setToolTip('尚未收到状态')
+
+        layout.addWidget(self.health, 0, 0)
+        layout.addWidget(self.name_label, 0, 1)
+        layout.addWidget(self.current_label, 0, 2)
+        layout.addWidget(self.slider, 0, 3)
+        layout.addWidget(self.target_box, 0, 4)
+        layout.addWidget(self.delta_label, 0, 5)
+        layout.setColumnStretch(3, 1)
+
+        self.slider.valueChanged.connect(self._slider_changed)
+        self.target_box.valueChanged.connect(self._spin_changed)
+
+    def _slider_changed(self, value):
+        if self._changing:
+            return
+        self._changing = True
+        self.target_box.setValue(value / 10.0)
+        self._changing = False
+        self._update_delta()
+        self.target_changed.emit(self.name)
+
+    def _spin_changed(self, value):
+        if self._changing:
+            return
+        self._changing = True
+        self.slider.setValue(round(value * 10))
+        self._changing = False
+        self._update_delta()
+        self.target_changed.emit(self.name)
+
+    def set_target(self, value, notify=False):
+        value = min(self.upper, max(self.lower, float(value)))
+        self._changing = True
+        self.target_box.setValue(value)
+        self.slider.setValue(round(value * 10))
+        self._changing = False
+        self._update_delta()
+        if notify:
+            self.target_changed.emit(self.name)
+
+    def target(self):
+        return float(self.target_box.value())
+
+    def update_current(self, state):
+        current = state.get('current_deg')
+        self.current = None if current is None else float(current)
+        enabled = self.current is not None
+        self.slider.setEnabled(enabled)
+        self.target_box.setEnabled(enabled)
+        if self.current is None:
+            self.current_label.setText('--.-°')
+        else:
+            self.current_label.setText(f'{self.current:.1f}°')
+        self._update_delta()
+
+        lost = bool(state.get('communication_lost', True))
+        temperature = state.get('temperature_c')
+        speed = state.get('speed_deg_s')
+        torque = state.get('torque')
+        if lost:
+            self.health.setObjectName('healthBad')
+            self.health.setToolTip('关节通信丢失')
+        else:
+            self.health.setObjectName('healthGood')
+            self.health.setToolTip(
+                f'通信正常\n速度：{_number(speed)} °/s\n'
+                f'力矩：{_number(torque)}\n温度：{_number(temperature)} °C'
+            )
+        self.health.style().unpolish(self.health)
+        self.health.style().polish(self.health)
+
+    def _update_delta(self):
+        if self.current is None:
+            self.delta_label.setText('Δ --.-°')
+            self.delta_label.setProperty('changed', False)
+        else:
+            delta = self.target() - self.current
+            self.delta_label.setText(f'Δ {delta:+.1f}°')
+            self.delta_label.setProperty('changed', abs(delta) >= 0.15)
+        self.delta_label.style().unpolish(self.delta_label)
+        self.delta_label.style().polish(self.delta_label)
+
+    def matches(self, text):
+        text = text.lower().strip()
+        return not text or text in self.name.lower() or text in self.label_text.lower()
+
+
+class BodyHeightControl(QtWidgets.QFrame):
+    """One-dimensional UI for the vendor-verified waist/leg height profile."""
+
+    height_changed = QtCore.pyqtSignal(float)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._changing = False
+        self._target_lowering_m = 0.0
+        self._target_residual_deg = 0.0
+        self._current_lowering_m = None
+        self._current_residual_deg = 0.0
+        self.setObjectName('bodyHeightCard')
+        self.setToolTip(
+            '采用厂家 S2 高度联动比例，同步调整踝、膝和腰部俯仰；'
+            '腰部旋转保持不动。'
+        )
+
+        layout = QtWidgets.QGridLayout(self)
+        layout.setContentsMargins(12, 9, 12, 9)
+        layout.setHorizontalSpacing(10)
+        layout.setVerticalSpacing(5)
+
+        title = QtWidgets.QLabel('身体高度联动')
+        title.setObjectName('bodyHeightTitle')
+        self.state_label = QtWidgets.QLabel('等待腰腿反馈')
+        self.state_label.setObjectName('bodyHeightState')
+        self.state_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        layout.addWidget(title, 0, 0, 1, 2)
+        layout.addWidget(self.state_label, 0, 2, 1, 3)
+
+        high_label = QtWidgets.QLabel('标准高度')
+        high_label.setObjectName('columnHeader')
+        self.slider = NoWheelSlider(QtCore.Qt.Horizontal)
+        self.slider.setRange(0, round(MAX_BODY_LOWERING_M * 1000.0))
+        self.slider.setSingleStep(5)
+        self.slider.setPageStep(20)
+        self.slider.setEnabled(False)
+        low_label = QtWidgets.QLabel('降低 56 cm')
+        low_label.setObjectName('columnHeader')
+        self.target_box = NoWheelSpinBox()
+        self.target_box.setDecimals(1)
+        self.target_box.setSingleStep(1.0)
+        self.target_box.setRange(0.0, MAX_BODY_LOWERING_M * 100.0)
+        self.target_box.setSuffix(' cm')
+        self.target_box.setKeyboardTracking(False)
+        self.target_box.setMinimumWidth(96)
+        self.target_box.setEnabled(False)
+        self.straight_button = QtWidgets.QPushButton('标准高度')
+        self.straight_button.setToolTip('把联动目标恢复到直立的 0° 腰腿姿态')
+        self.straight_button.setEnabled(False)
+        layout.addWidget(high_label, 1, 0)
+        layout.addWidget(self.slider, 1, 1, 1, 2)
+        layout.addWidget(low_label, 1, 3)
+        layout.addWidget(self.target_box, 1, 4)
+        layout.addWidget(self.straight_button, 1, 5)
+        layout.setColumnStretch(1, 1)
+        layout.setColumnStretch(2, 1)
+
+        note = QtWidgets.QLabel(
+            '一个控件同步联动踝、膝和腰部俯仰；腰部旋转保持不动；'
+            '锁定时只预览，真机仍需“腰腿二次解锁”。'
+        )
+        note.setObjectName('bodyHeightNote')
+        note.setWordWrap(True)
+        layout.addWidget(note, 2, 0, 1, 6)
+
+        self.slider.valueChanged.connect(self._slider_changed)
+        self.target_box.valueChanged.connect(self._spin_changed)
+        self.straight_button.clicked.connect(lambda: self._set_from_user(0.0))
+
+    def _slider_changed(self, value):
+        if self._changing:
+            return
+        lowering_m = float(value) / 1000.0
+        self._changing = True
+        self.target_box.setValue(lowering_m * 100.0)
+        self._changing = False
+        self.height_changed.emit(lowering_m)
+
+    def _spin_changed(self, value):
+        if self._changing:
+            return
+        lowering_m = float(value) / 100.0
+        self._changing = True
+        self.slider.setValue(round(lowering_m * 1000.0))
+        self._changing = False
+        self.height_changed.emit(lowering_m)
+
+    def _set_from_user(self, lowering_m):
+        self.set_target(lowering_m, 0.0)
+        self.height_changed.emit(float(lowering_m))
+
+    def set_target(self, lowering_m, residual_deg=0.0):
+        lowering_m = min(MAX_BODY_LOWERING_M, max(0.0, float(lowering_m)))
+        self._target_lowering_m = lowering_m
+        self._target_residual_deg = float(residual_deg)
+        self._changing = True
+        self.slider.setValue(round(lowering_m * 1000.0))
+        self.target_box.setValue(lowering_m * 100.0)
+        self._changing = False
+        self._refresh_state()
+
+    def set_current(self, lowering_m, residual_deg=0.0):
+        if lowering_m is None:
+            self._current_lowering_m = None
+            self.state_label.setToolTip('尚未收到完整腰腿反馈')
+            self._refresh_state()
+            return
+        self._current_lowering_m = float(lowering_m)
+        self._current_residual_deg = float(residual_deg)
+        qualifier = '约' if self._current_residual_deg > 2.0 else ''
+        self.state_label.setToolTip(
+            f'当前{qualifier}降低 {self._current_lowering_m * 100.0:.1f} cm'
+        )
+        self._refresh_state()
+
+    def _refresh_state(self):
+        target_qualifier = '约' if self._target_residual_deg > 2.0 else ''
+        target = f'目标{target_qualifier}降低 {self._target_lowering_m * 100.0:.1f} cm'
+        if self._current_lowering_m is None:
+            self.state_label.setText(target)
+            return
+        current_qualifier = '约' if self._current_residual_deg > 2.0 else ''
+        self.state_label.setText(
+            f'当前{current_qualifier} {self._current_lowering_m * 100.0:.1f} cm'
+            f' · {target}'
+        )
+
+    def set_available(self, available):
+        self.slider.setEnabled(bool(available))
+        self.target_box.setEnabled(bool(available))
+        self.straight_button.setEnabled(bool(available))
+
+
+class JointControlRosNode(Node):
+    def __init__(self):
+        super().__init__('control_center_joint_control_panel')
+        self.status_callback = None
+        self.preview_pub = self.create_publisher(
+            String, '/control_center_joint_control/preview_command', 10
+        )
+        self.apply_pub = self.create_publisher(
+            String, '/control_center_joint_control/apply_command', 10
+        )
+        self.action_pub = self.create_publisher(
+            String, '/control_center_joint_control/action_command', 10
+        )
+        self.create_subscription(
+            String, '/control_center_joint_control/status', self._on_status, 10
+        )
+        self.hardware_client = self.create_client(
+            SetBool, '/control_center_joint_control/set_hardware_enabled'
+        )
+        self.hardware_without_reset_client = self.create_client(
+            SetBool,
+            '/control_center_joint_control/set_hardware_enabled_without_reset',
+        )
+        self.leg_client = self.create_client(
+            SetBool, '/control_center_joint_control/set_leg_waist_enabled'
+        )
+
+    def _on_status(self, message):
+        try:
+            data = json.loads(message.data)
+            if self.status_callback is not None:
+                self.status_callback(data)
+        except Exception as error:
+            self.get_logger().warn(f'Invalid panel status: {error}')
+
+    def publish_targets(
+        self, topic, group_name, targets, speed_scale=None, motion_profile=''
+    ):
+        data = {'group': group_name, 'targets_deg': targets}
+        if speed_scale is not None:
+            data['speed_scale'] = float(speed_scale)
+        if motion_profile:
+            data['motion_profile'] = str(motion_profile)
+        payload = json.dumps(
+            data,
+            ensure_ascii=False,
+            separators=(',', ':'),
+        )
+        topic.publish(String(data=payload))
+
+    def publish_action_command(self, command, name='', action=None):
+        data = {'command': str(command)}
+        if name:
+            data['name'] = str(name)
+        if action is not None:
+            data['action'] = action
+        self.action_pub.publish(String(data=json.dumps(
+            data,
+            ensure_ascii=False,
+            separators=(',', ':'),
+        )))
+
+
+class GroupPage(QtWidgets.QWidget):
+    preview_requested = QtCore.pyqtSignal(str)
+    apply_requested = QtCore.pyqtSignal(str)
+    sync_requested = QtCore.pyqtSignal(str)
+
+    def __init__(self, group_name, parent=None):
+        super().__init__(parent)
+        self.group_name = group_name
+        self.rows = {}
+        self.body_height_control = None
+        self._motion_profile = ''
+        group = GROUPS[group_name]
+
+        outer = QtWidgets.QVBoxLayout(self)
+        outer.setContentsMargins(4, 8, 4, 4)
+
+        heading = QtWidgets.QHBoxLayout()
+        note = QtWidgets.QLabel(
+            '锁定时滑块只预览；解锁并开启实时跟随后，拖动会控制真机。'
+            if group_name != 'leg_waist'
+            else '高风险：腰腿运动可能改变重心，必须另行二次解锁。'
+        )
+        note.setObjectName('groupNote')
+        heading.addWidget(note)
+        heading.addStretch()
+        outer.addLayout(heading)
+
+        if group_name == 'leg_waist':
+            self.body_height_control = BodyHeightControl()
+            self.body_height_control.height_changed.connect(
+                self._body_height_changed
+            )
+            outer.addWidget(self.body_height_control)
+
+        header = QtWidgets.QGridLayout()
+        header.setContentsMargins(10, 0, 10, 0)
+        header.setHorizontalSpacing(10)
+        labels = [
+            ('', 0), ('关节', 1), ('当前', 2), ('调节', 3),
+            ('目标', 4), ('差值', 5),
+        ]
+        for text, column in labels:
+            widget = QtWidgets.QLabel(text)
+            widget.setObjectName('columnHeader')
+            if column in (2, 5):
+                widget.setAlignment(QtCore.Qt.AlignRight)
+            header.addWidget(widget, 0, column)
+        header.setColumnStretch(3, 1)
+        outer.addLayout(header)
+
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
+        body = QtWidgets.QWidget()
+        body_layout = QtWidgets.QVBoxLayout(body)
+        body_layout.setContentsMargins(0, 0, 0, 0)
+        body_layout.setSpacing(5)
+        for name, label, lower, upper in group['joints']:
+            row = JointRow(name, label, lower, upper)
+            row.target_changed.connect(self._row_target_changed)
+            body_layout.addWidget(row)
+            self.rows[name] = row
+        body_layout.addStretch()
+        scroll.setWidget(body)
+        self.scroll = scroll
+        outer.addWidget(scroll, 1)
+
+        actions = QtWidgets.QHBoxLayout()
+        self.sync_button = QtWidgets.QPushButton('目标 ← 当前')
+        self.sync_button.setToolTip('把本组所有目标值恢复为当前实测值')
+        self.sync_button.clicked.connect(lambda: self.sync_requested.emit(group_name))
+        self.apply_button = QtWidgets.QPushButton('发送本组')
+        self.apply_button.setObjectName('applyButton')
+        self.apply_button.setEnabled(False)
+        self.apply_button.setToolTip('需要先解锁真机控制')
+        self.apply_button.clicked.connect(lambda: self.apply_requested.emit(group_name))
+        actions.addStretch()
+        actions.addWidget(self.sync_button)
+        actions.addWidget(self.apply_button)
+        outer.addLayout(actions)
+
+    def targets(self):
+        return {name: row.target() for name, row in self.rows.items()}
+
+    def sync_to_current(self):
+        self._motion_profile = ''
+        for row in self.rows.values():
+            if row.current is not None:
+                row.set_target(row.current)
+        self.sync_body_height_target()
+
+    def _row_target_changed(self, _name):
+        self._motion_profile = ''
+        self.sync_body_height_target()
+        self.preview_requested.emit(self.group_name)
+
+    def _body_height_changed(self, lowering_m):
+        self._motion_profile = 'body_height'
+        # Height adjustment does not own waist yaw. Latch it to fresh feedback
+        # so an old yaw preview cannot be carried into the height command.
+        if self.rows['Joint_Waist_Yaw'].current is not None:
+            self.rows['Joint_Waist_Yaw'].set_target(
+                self.rows['Joint_Waist_Yaw'].current
+            )
+        for name, value in body_height_targets(lowering_m).items():
+            self.rows[name].set_target(value)
+        self.sync_body_height_target()
+        self.preview_requested.emit(self.group_name)
+
+    def motion_profile(self):
+        return self._motion_profile
+
+    def clear_motion_profile(self):
+        self._motion_profile = ''
+
+    def sync_body_height_target(self):
+        if self.body_height_control is None:
+            return
+        lowering_m, residual = estimate_body_lowering(self.targets())
+        self.body_height_control.set_target(lowering_m, residual)
+
+    def update_body_height_current(self):
+        if self.body_height_control is None:
+            return
+        current = {
+            name: self.rows[name].current
+            for name in BODY_HEIGHT_JOINTS
+        }
+        available = all(value is not None for value in current.values())
+        self.body_height_control.set_available(available)
+        if available:
+            lowering_m, residual = estimate_body_lowering(current)
+            self.body_height_control.set_current(lowering_m, residual)
+
+    def set_filter(self, text):
+        for row in self.rows.values():
+            row.setVisible(row.matches(text))
+
+    def set_apply_enabled(self, enabled, tooltip):
+        self.apply_button.setEnabled(enabled)
+        self.apply_button.setToolTip(tooltip)
+
+    def focus_joint(self, name):
+        for joint_name, row in self.rows.items():
+            row.setProperty('selectedFromModel', joint_name == name)
+            row.style().unpolish(row)
+            row.style().polish(row)
+        if name in self.rows:
+            self.scroll.ensureWidgetVisible(self.rows[name], 10, 45)
+
+
+class PoseLibraryPage(QtWidgets.QWidget):
+    save_requested = QtCore.pyqtSignal(str)
+    preview_requested = QtCore.pyqtSignal(str)
+    execute_requested = QtCore.pyqtSignal(str)
+    delete_requested = QtCore.pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
+
+        note = QtWidgets.QLabel(
+            '保存的是当前机器人实测的 23 个关节角度。'
+            '“预览”只更新三维目标虚影；“执行”才会让真机渐进到达该姿态。'
+        )
+        note.setWordWrap(True)
+        note.setObjectName('groupNote')
+        layout.addWidget(note)
+
+        name_row = QtWidgets.QHBoxLayout()
+        name_row.addWidget(QtWidgets.QLabel('姿态名称'))
+        self.name_edit = QtWidgets.QLineEdit()
+        self.name_edit.setPlaceholderText('例如：初始站姿、递水姿态')
+        self.name_edit.setMaxLength(32)
+        self.save_button = QtWidgets.QPushButton('保存当前全身姿态')
+        self.save_button.clicked.connect(
+            lambda: self.save_requested.emit(self.name_edit.text())
+        )
+        name_row.addWidget(self.name_edit, 1)
+        name_row.addWidget(self.save_button)
+        layout.addLayout(name_row)
+
+        self.pose_list = QtWidgets.QListWidget()
+        self.pose_list.setObjectName('poseList')
+        self.pose_list.setAlternatingRowColors(True)
+        self.pose_list.setUniformItemSizes(True)
+        self.pose_list.itemSelectionChanged.connect(self._selection_changed)
+        self.pose_list.itemDoubleClicked.connect(
+            lambda _item: self.preview_requested.emit(self.selected_name())
+        )
+        layout.addWidget(self.pose_list, 1)
+
+        speed_row = QtWidgets.QHBoxLayout()
+        speed_label = QtWidgets.QLabel('到达速度')
+        speed_label.setToolTip(
+            '控制预设姿态执行时每次渐进目标的步幅比例；'
+            '并非底层电机的精确角速度闭环。'
+        )
+        self.speed_slider = NoWheelSlider(QtCore.Qt.Horizontal)
+        self.speed_slider.setRange(10, 200)
+        self.speed_slider.setSingleStep(5)
+        self.speed_slider.setPageStep(10)
+        self.speed_slider.setValue(50)
+        self.speed_slider.setTickPosition(QtWidgets.QSlider.TicksBelow)
+        self.speed_slider.setTickInterval(10)
+        self.speed_box = QtWidgets.QSpinBox()
+        self.speed_box.setRange(10, 200)
+        self.speed_box.setSingleStep(5)
+        self.speed_box.setSuffix('%')
+        self.speed_box.setValue(50)
+        self.speed_box.setMinimumWidth(78)
+        self.speed_slider.valueChanged.connect(self.speed_box.setValue)
+        self.speed_box.valueChanged.connect(self.speed_slider.setValue)
+        speed_row.addWidget(speed_label)
+        speed_row.addWidget(QtWidgets.QLabel('慢'))
+        speed_row.addWidget(self.speed_slider, 1)
+        speed_row.addWidget(QtWidgets.QLabel('快'))
+        speed_row.addWidget(self.speed_box)
+        layout.addLayout(speed_row)
+
+        actions = QtWidgets.QHBoxLayout()
+        self.preview_button = QtWidgets.QPushButton('在三维视图预览')
+        self.execute_button = QtWidgets.QPushButton('让机器人到达')
+        self.execute_button.setObjectName('applyButton')
+        self.delete_button = QtWidgets.QPushButton('删除')
+        self.preview_button.clicked.connect(
+            lambda: self.preview_requested.emit(self.selected_name())
+        )
+        self.execute_button.clicked.connect(
+            lambda: self.execute_requested.emit(self.selected_name())
+        )
+        self.delete_button.clicked.connect(
+            lambda: self.delete_requested.emit(self.selected_name())
+        )
+        actions.addWidget(self.preview_button)
+        actions.addWidget(self.execute_button)
+        actions.addStretch()
+        actions.addWidget(self.delete_button)
+        layout.addLayout(actions)
+
+        self.path_label = QtWidgets.QLabel('')
+        self.path_label.setObjectName('safetyHint')
+        self.path_label.setWordWrap(True)
+        layout.addWidget(self.path_label)
+        self._selection_changed()
+
+    def selected_name(self):
+        item = self.pose_list.currentItem()
+        return '' if item is None else str(item.data(QtCore.Qt.UserRole))
+
+    def speed_scale(self):
+        return self.speed_box.value() / 100.0
+
+    def set_poses(self, poses, path):
+        selected = self.selected_name()
+        self.pose_list.clear()
+        selected_item = None
+        for name, record in poses.items():
+            saved_at = str(record.get('saved_at', '')).replace('T', ' ')[:19]
+            item = QtWidgets.QListWidgetItem(
+                f'{name}    {saved_at}' if saved_at else name
+            )
+            item.setData(QtCore.Qt.UserRole, name)
+            self.pose_list.addItem(item)
+            if name == selected:
+                selected_item = item
+        if selected_item is not None:
+            self.pose_list.setCurrentItem(selected_item)
+        elif self.pose_list.count():
+            self.pose_list.setCurrentRow(0)
+        self.path_label.setText(f'保存文件：{path}')
+        self._selection_changed()
+
+    def _selection_changed(self):
+        enabled = bool(self.selected_name())
+        self.preview_button.setEnabled(enabled)
+        self.execute_button.setEnabled(enabled)
+        self.delete_button.setEnabled(enabled)
+
+
+class ControlPanel(QtWidgets.QMainWindow):
+    def __init__(self, node):
+        super().__init__()
+        self.node = node
+        self.node.status_callback = self.on_status
+        self.pages = {}
+        self._initialized_targets = False
+        self._last_hardware_enabled = False
+        self._status = {}
+        self._pending_preview_groups = set()
+        self._pending_live_groups = set()
+        self._last_edited_group = 'right_arm'
+        package_share = Path(
+            get_package_share_directory('control_center_joint_control')
+        ).resolve()
+        self._motion_library_dir = initialize_motion_library(
+            resolve_motion_library_dir(package_share),
+            package_share / 'config',
+        )
+        self._pose_file = (
+            self._motion_library_dir / POSE_FILE_NAME
+        ).resolve()
+        try:
+            self._poses = load_pose_library(self._pose_file)
+            self._pose_load_error = ''
+        except Exception as error:
+            self._poses = {}
+            self._pose_load_error = str(error)
+        self._action_file = (
+            self._motion_library_dir / ACTION_FILE_NAME
+        ).resolve()
+        try:
+            self._actions = load_action_library(self._action_file)
+            self._action_load_error = ''
+        except Exception as error:
+            self._actions = {}
+            self._action_load_error = str(error)
+        self._action_preview = None
+        self._vr_reset_process = None
+        self._vr_reset_pending = ''
+        try:
+            self._vr_reset_store = VrResetPoseStore()
+            self._vr_reset_error = ''
+        except Exception as error:
+            self._vr_reset_store = None
+            self._vr_reset_error = str(error)
+
+        self.setWindowTitle('机器人全身关节监控与调节')
+        self.setMinimumSize(1180, 680)
+        self.resize(1480, 840)
+        self.setStyleSheet(STYLE)
+
+        central = QtWidgets.QWidget()
+        self.setCentralWidget(central)
+        layout = QtWidgets.QVBoxLayout(central)
+        layout.setContentsMargins(14, 12, 14, 10)
+        layout.setSpacing(9)
+
+        top = QtWidgets.QHBoxLayout()
+        self.connection_dot = QtWidgets.QLabel('●')
+        self.connection_dot.setObjectName('connectionOff')
+        self.connection_label = QtWidgets.QLabel('等待关节反馈')
+        self.connection_label.setObjectName('connectionLabel')
+        self.search = QtWidgets.QLineEdit()
+        self.search.setPlaceholderText('搜索关节（中文或英文）')
+        self.search.setClearButtonEnabled(True)
+        self.search.setMaximumWidth(280)
+        self.search.textChanged.connect(self._filter_rows)
+        self.sync_all_button = QtWidgets.QPushButton('全部同步当前值')
+        self.sync_all_button.clicked.connect(self.sync_all)
+        top.addWidget(self.connection_dot)
+        top.addWidget(self.connection_label)
+        top.addStretch()
+        top.addWidget(self.search)
+        top.addWidget(self.sync_all_button)
+        layout.addLayout(top)
+
+        safety = QtWidgets.QFrame()
+        safety.setObjectName('safetyBar')
+        safety_layout = QtWidgets.QHBoxLayout(safety)
+        safety_layout.setContentsMargins(12, 8, 12, 8)
+        self.unlock_reset_button = QtWidgets.QPushButton('解锁并复位')
+        self.unlock_reset_button.setObjectName('unlockResetButton')
+        self.unlock_reset_button.setToolTip(
+            '调用厂家官方复位与使能流程，机器人可能移动到复位姿态'
+        )
+        self.unlock_reset_button.setEnabled(False)
+        self.unlock_reset_button.clicked.connect(
+            lambda: self._unlock_hardware(with_reset=True)
+        )
+        self.unlock_without_reset_button = QtWidgets.QPushButton(
+            '解锁（不复位）'
+        )
+        self.unlock_without_reset_button.setObjectName(
+            'unlockWithoutResetButton'
+        )
+        self.unlock_without_reset_button.setToolTip(
+            '保持当前实测姿态，不改模式、不清错，同步使能全部关节'
+        )
+        self.unlock_without_reset_button.setEnabled(False)
+        self.unlock_without_reset_button.clicked.connect(
+            lambda: self._unlock_hardware(with_reset=False)
+        )
+        self.leg_toggle = QtWidgets.QCheckBox('腰腿二次解锁')
+        self.leg_toggle.setEnabled(False)
+        self.leg_toggle.toggled.connect(self._leg_toggled)
+        self.live_toggle = QtWidgets.QCheckBox('拖动实时跟随')
+        self.live_toggle.setChecked(True)
+        self.live_toggle.setEnabled(False)
+        self.live_toggle.setToolTip(
+            '开启后，真机解锁期间拖动滑块或修改目标值会自动下发当前分组'
+        )
+        self.lock_button = QtWidgets.QPushButton('立即锁定下发')
+        self.lock_button.setObjectName('lockButton')
+        self.lock_button.setEnabled(False)
+        self.lock_button.clicked.connect(self._force_lock)
+        self.countdown_label = QtWidgets.QLabel('默认只监控 · 滑块仅预览')
+        self.countdown_label.setObjectName('safetyHint')
+        safety_layout.addWidget(self.unlock_reset_button)
+        safety_layout.addWidget(self.unlock_without_reset_button)
+        safety_layout.addWidget(self.leg_toggle)
+        safety_layout.addWidget(self.live_toggle)
+        safety_layout.addWidget(self.lock_button)
+        safety_layout.addStretch()
+        safety_layout.addWidget(self.countdown_label)
+        layout.addWidget(safety)
+
+        vr_reset = QtWidgets.QFrame()
+        vr_reset.setObjectName('safetyBar')
+        vr_layout = QtWidgets.QHBoxLayout(vr_reset)
+        vr_layout.setContentsMargins(12, 7, 12, 7)
+        vr_title = QtWidgets.QLabel('VR 系统复位姿态')
+        vr_title.setObjectName('connectionLabel')
+        self.vr_reset_status_label = QtWidgets.QLabel('正在读取…')
+        self.vr_reset_status_label.setObjectName('safetyHint')
+        self.vr_reset_save_button = QtWidgets.QPushButton('保存当前为 VR 复位')
+        self.vr_reset_save_button.setToolTip(
+            '保存当前实测的头颈、双臂、腰腿和身体高度。保存过程不重启机械臂服务，'
+            '不会解除关节保持；夹爪不属于厂商 VR 系统复位项。'
+        )
+        self.vr_reset_save_button.clicked.connect(self._save_vr_reset_pose)
+        self.vr_reset_current_view_button = QtWidgets.QPushButton('查看当前复位姿态')
+        self.vr_reset_current_view_button.setToolTip('在三维模型中显示当前选用的 VR 复位姿态蓝色虚影')
+        self.vr_reset_current_view_button.clicked.connect(self._view_current_vr_reset_pose)
+        self.vr_reset_view_button = QtWidgets.QPushButton('查看原系统姿态')
+        self.vr_reset_view_button.setToolTip('在三维模型中显示首次保留的原系统姿态蓝色虚影')
+        self.vr_reset_view_button.clicked.connect(self._view_original_vr_reset_pose)
+        self.vr_reset_restore_button = QtWidgets.QPushButton('恢复原系统姿态')
+        self.vr_reset_restore_button.clicked.connect(self._restore_original_vr_reset_pose)
+        vr_layout.addWidget(vr_title)
+        vr_layout.addWidget(self.vr_reset_status_label)
+        vr_layout.addStretch()
+        vr_layout.addWidget(self.vr_reset_save_button)
+        vr_layout.addWidget(self.vr_reset_current_view_button)
+        vr_layout.addWidget(self.vr_reset_view_button)
+        vr_layout.addWidget(self.vr_reset_restore_button)
+        layout.addWidget(vr_reset)
+        self._refresh_vr_reset_status()
+
+        self.tabs = QtWidgets.QTabWidget()
+        for group_name in GROUP_ORDER:
+            page = GroupPage(group_name)
+            page.preview_requested.connect(self.schedule_preview)
+            page.apply_requested.connect(self.apply_group)
+            page.sync_requested.connect(self.sync_group)
+            self.pages[group_name] = page
+            self.tabs.addTab(page, GROUPS[group_name]['label'])
+        self.pose_page = PoseLibraryPage()
+        self.pose_page.save_requested.connect(self.save_current_pose)
+        self.pose_page.preview_requested.connect(self.preview_saved_pose)
+        self.pose_page.execute_requested.connect(self.execute_saved_pose)
+        self.pose_page.delete_requested.connect(self.delete_saved_pose)
+        self.pose_page.set_poses(self._poses, self._pose_file)
+        self.tabs.addTab(self.pose_page, '姿态库')
+        self.action_page = ActionLibraryPage()
+        self.action_page.capture_requested.connect(self.capture_action_frame)
+        self.action_page.frame_selected.connect(self.preview_action_frame)
+        self.action_page.save_requested.connect(self.save_joint_action)
+        self.action_page.delete_requested.connect(self.delete_joint_action)
+        self.action_page.preview_requested.connect(self.preview_joint_action)
+        self.action_page.stop_preview_requested.connect(self.stop_action_preview)
+        self.action_page.execute_requested.connect(self.execute_joint_action)
+        self.action_page.cancel_requested.connect(self.cancel_joint_action)
+        self.action_page.set_actions(self._actions, self._action_file)
+        self.tabs.addTab(self.action_page, '动作库')
+        self.tabs.currentChanged.connect(self._tab_changed)
+
+        urdf_path = (
+            Path(get_package_share_directory('control_center_joint_control'))
+            / 'urdf'
+            / 'robot_v2_2.urdf'
+        ).resolve()
+        self.robot_view = RobotViewPanel(urdf_path)
+        self.robot_view.joint_selected.connect(self._model_joint_selected)
+        self.robot_view.joint_target_changed.connect(
+            self._model_joint_target_changed
+        )
+        workspace = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
+        workspace.setChildrenCollapsible(False)
+        workspace.addWidget(self.tabs)
+        workspace.addWidget(self.robot_view)
+        workspace.setStretchFactor(0, 5)
+        workspace.setStretchFactor(1, 4)
+        workspace.setSizes([790, 650])
+        layout.addWidget(workspace, 1)
+
+        bottom = QtWidgets.QHBoxLayout()
+        self.event_label = QtWidgets.QLabel('启动后不会自动发送任何关节命令')
+        self.event_label.setObjectName('eventInfo')
+        self.publisher_label = QtWidgets.QLabel('')
+        self.publisher_label.setObjectName('publisherHint')
+        bottom.addWidget(self.event_label, 1)
+        bottom.addWidget(self.publisher_label)
+        layout.addLayout(bottom)
+
+        self.preview_timer = QtCore.QTimer(self)
+        self.preview_timer.setSingleShot(True)
+        self.preview_timer.setInterval(120)
+        self.preview_timer.timeout.connect(self.flush_previews)
+        self.action_preview_timer = QtCore.QTimer(self)
+        self.action_preview_timer.setInterval(33)
+        self.action_preview_timer.timeout.connect(self.advance_action_preview)
+
+        self.spin_timer = QtCore.QTimer(self)
+        self.spin_timer.timeout.connect(lambda: rclpy.spin_once(self.node, timeout_sec=0.0))
+        self.spin_timer.start(10)
+        if self._pose_load_error:
+            QtCore.QTimer.singleShot(
+                0,
+                lambda: QtWidgets.QMessageBox.warning(
+                    self, '姿态库读取失败', self._pose_load_error
+                ),
+            )
+        if self._action_load_error:
+            QtCore.QTimer.singleShot(
+                0,
+                lambda: QtWidgets.QMessageBox.warning(
+                    self, '动作库读取失败', self._action_load_error
+                ),
+            )
+
+    def on_status(self, status):
+        self._status = status
+        connected = bool(status.get('connected'))
+        self.robot_view.set_connected(connected)
+        self.connection_dot.setObjectName('connectionOn' if connected else 'connectionOff')
+        self.connection_dot.style().unpolish(self.connection_dot)
+        self.connection_dot.style().polish(self.connection_dot)
+        age = status.get('feedback_age_sec')
+        joint_count = int(status.get('joint_count', 0))
+        self.connection_label.setText(
+            f'已连接 · {joint_count}/23 关节 · 延迟 {_milliseconds(age)}'
+            if connected else '关节反馈已断开'
+        )
+
+        joints = status.get('joints', {})
+        current_degrees = {
+            name: state.get('current_deg')
+            for name, state in joints.items()
+            if state.get('current_deg') is not None
+        }
+        target_degrees = {
+            name: state.get('preview_deg')
+            for name, state in joints.items()
+            if state.get('preview_deg') is not None
+        }
+        if current_degrees:
+            self.robot_view.set_joint_states(current_degrees, target_degrees)
+        for page in self.pages.values():
+            for name, row in page.rows.items():
+                if name in joints:
+                    row.update_current(joints[name])
+            page.update_body_height_current()
+        if connected and not self._initialized_targets:
+            # Initialize explicitly from the bridge preview snapshot. This is
+            # the same snapshot as the first complete robot feedback and
+            # prevents the widgets' default 0° from looking like a command.
+            for page in self.pages.values():
+                for name, row in page.rows.items():
+                    state = joints.get(name, {})
+                    initial = state.get('preview_deg')
+                    if initial is None:
+                        initial = state.get('current_deg')
+                    if initial is not None:
+                        row.set_target(initial)
+                page.sync_body_height_target()
+            self._initialized_targets = True
+
+        hardware = bool(status.get('hardware_enabled'))
+        hardware_ready = bool(status.get('hardware_ready', hardware))
+        unlock_mode = str(status.get(
+            'hardware_unlock_mode',
+            'reset' if hardware else 'locked',
+        ))
+        leg = bool(status.get('leg_waist_enabled'))
+        if hardware and not self._last_hardware_enabled:
+            # Unlocking always starts from the measured pose. Old previews
+            # cannot silently remain armed for the next Send button click.
+            for group_name, page in self.pages.items():
+                page.sync_to_current()
+                self._pending_preview_groups.add(group_name)
+            self.preview_timer.start()
+        self._last_hardware_enabled = hardware
+        self.unlock_reset_button.setEnabled(connected and not hardware)
+        self.unlock_without_reset_button.setEnabled(connected and not hardware)
+        vr_available = self._vr_reset_store is not None and self._vr_reset_process is None
+        self.vr_reset_save_button.setEnabled(vr_available and connected)
+        self.vr_reset_current_view_button.setEnabled(vr_available)
+        self.vr_reset_view_button.setEnabled(vr_available)
+        self.vr_reset_restore_button.setEnabled(vr_available)
+        self.lock_button.setEnabled(hardware)
+        self._set_checked_silently(self.leg_toggle, leg)
+        self.leg_toggle.setEnabled(hardware and hardware_ready)
+        self.live_toggle.setEnabled(hardware and hardware_ready)
+        action_running = bool(status.get('action_running', False))
+        if self._action_preview is None:
+            self.action_page.set_progress(
+                action_running,
+                str(status.get('action_name', '')),
+                int(status.get('action_frame_index', 0)),
+                int(status.get('action_frame_count', 0)),
+                int(status.get('action_loop_index', 0)),
+                int(status.get('action_loop_count', 1)),
+                float(status.get('action_progress', 0.0)),
+                str(status.get('action_stage', '')),
+            )
+        if hardware:
+            remaining = float(status.get('auto_lock_remaining_sec', 0.0))
+            mode = '拖动实时下发' if self.live_toggle.isChecked() else '预览后手动发送'
+            active_errors = status.get('active_goal_error_deg', {})
+            if not hardware_ready:
+                self.countdown_label.setText(
+                    '正在执行厂家官方复位与使能 · 机器人可能移动 · 暂不接受控制'
+                )
+            elif action_running:
+                self.countdown_label.setText(
+                    f'动作“{status.get("action_name", "")}”执行中 · '
+                    f'速度 {int(status.get("action_speed_percent", 100))}% · '
+                    f'关键帧 {int(status.get("action_frame_index", 0)) + 1}/'
+                    f'{int(status.get("action_frame_count", 0))} · '
+                    f'{remaining:.0f} 秒后自动锁定'
+                )
+            elif active_errors:
+                maximum_error = max(float(value) for value in active_errors.values())
+                active_speeds = status.get('active_goal_speed_percent', {})
+                speed_values = [
+                    float(value) for value in active_speeds.values()
+                ]
+                speed_text = (
+                    f' · 速度 {min(speed_values):.0f}%'
+                    if speed_values else ''
+                )
+                self.countdown_label.setText(
+                    f'渐进运动中{speed_text} · '
+                    f'剩余最大偏差 {maximum_error:.1f}° · '
+                    f'{remaining:.0f} 秒后自动锁定'
+                )
+            else:
+                unlock_text = (
+                    '已复位' if unlock_mode == 'reset' else '未复位'
+                )
+                self.countdown_label.setText(
+                    f'真机已解锁（{unlock_text}） · {mode} · '
+                    f'{remaining:.0f} 秒后自动锁定'
+                )
+        else:
+            self.countdown_label.setText('只监控/预览 · 不会向真机下发')
+
+        for group_name, page in self.pages.items():
+            high_risk_blocked = group_name == 'leg_waist' and not leg
+            enabled = (
+                connected and hardware and hardware_ready
+                and not high_risk_blocked
+            )
+            if not connected:
+                tip = '机器人关节反馈未连接'
+            elif not hardware:
+                tip = '请先解锁真机控制'
+            elif not hardware_ready:
+                tip = '厂家电机正在配置位置模式并使能'
+            elif high_risk_blocked:
+                tip = '请先勾选“腰腿二次解锁”'
+            else:
+                tip = '把本组目标一次发送到真机'
+            page.set_apply_enabled(enabled, tip)
+
+        event_level = status.get('event_level', 'info')
+        self.event_label.setObjectName(
+            'eventWarn' if event_level in ('warn', 'error') else 'eventInfo'
+        )
+        self.event_label.setText(str(status.get('event', '')))
+        self.event_label.style().unpolish(self.event_label)
+        self.event_label.style().polish(self.event_label)
+        publishers = int(status.get('whole_body_command_publisher_count', 0))
+        self.publisher_label.setText(f'全身命令发布者：{publishers}')
+        self.publisher_label.setToolTip(
+            '包括本工具、厂家 Dashboard、VR、视觉及动作服务；'
+            '解锁期间检测到其他命令会自动锁定。'
+        )
+
+    @staticmethod
+    def _set_checked_silently(widget, checked):
+        old = widget.blockSignals(True)
+        widget.setChecked(checked)
+        widget.blockSignals(old)
+
+    def schedule_preview(self, group_name):
+        self._last_edited_group = group_name
+        self.action_page.suggest_groups([group_name])
+        for name, value in self.pages[group_name].targets().items():
+            self.robot_view.view.set_target_joint(name, value)
+        self._pending_preview_groups.add(group_name)
+        if self._live_apply_allowed(group_name):
+            self._pending_live_groups.add(group_name)
+        # Throttle continuous slider/model drags instead of debouncing until
+        # the user stops. This keeps both the ghost and unlocked hardware
+        # following at a bounded ~8 Hz command rate.
+        if not self.preview_timer.isActive():
+            self.preview_timer.start()
+
+    def flush_previews(self):
+        for group_name in list(self._pending_preview_groups):
+            self.node.publish_targets(
+                self.node.preview_pub,
+                group_name,
+                self.pages[group_name].targets(),
+                motion_profile=self.pages[group_name].motion_profile(),
+            )
+        for group_name in list(self._pending_live_groups):
+            if self._live_apply_allowed(group_name):
+                self.node.publish_targets(
+                    self.node.apply_pub,
+                    group_name,
+                    self.pages[group_name].targets(),
+                    motion_profile=self.pages[group_name].motion_profile(),
+                )
+        self._pending_preview_groups.clear()
+        self._pending_live_groups.clear()
+
+    def _live_apply_allowed(self, group_name):
+        if not self.live_toggle.isChecked():
+            return False
+        if not self._status.get('connected') or not self._status.get('hardware_enabled'):
+            return False
+        if not self._status.get('hardware_ready', False):
+            return False
+        return group_name != 'leg_waist' or bool(
+            self._status.get('leg_waist_enabled')
+        )
+
+    def sync_group(self, group_name):
+        self.pages[group_name].sync_to_current()
+        self.schedule_preview(group_name)
+
+    def sync_all(self):
+        for group_name in GROUP_ORDER:
+            self.pages[group_name].sync_to_current()
+            self._pending_preview_groups.add(group_name)
+        self.preview_timer.start()
+
+    def apply_group(self, group_name):
+        if not self._status.get('hardware_enabled'):
+            QtWidgets.QMessageBox.information(
+                self, '真机已锁定', '当前只会预览目标，请先解锁真机控制。'
+            )
+            return
+        if not self._status.get('hardware_ready'):
+            QtWidgets.QMessageBox.information(
+                self, '硬件准备中', '正在配置厂家位置模式、清错并使能，请稍候。'
+            )
+            return
+        if group_name == 'leg_waist' and not self._status.get('leg_waist_enabled'):
+            QtWidgets.QMessageBox.warning(
+                self, '腰腿未解锁', '腰腿关节需要单独二次解锁。'
+            )
+            return
+        self.node.publish_targets(
+            self.node.apply_pub,
+            group_name,
+            self.pages[group_name].targets(),
+            motion_profile=self.pages[group_name].motion_profile(),
+        )
+
+    def _model_joint_selected(self, name):
+        group_name = JOINT_TO_GROUP.get(name)
+        if not group_name or group_name not in self.pages:
+            return
+        self._last_edited_group = group_name
+        self.action_page.suggest_groups([group_name])
+        self.tabs.setCurrentWidget(self.pages[group_name])
+        for page_name, page in self.pages.items():
+            page.focus_joint(name if page_name == group_name else '')
+
+    def _model_joint_target_changed(self, name, value):
+        group_name = JOINT_TO_GROUP.get(name)
+        page = self.pages.get(group_name)
+        if page is None or name not in page.rows:
+            return
+        page.rows[name].set_target(value, notify=True)
+
+    def _current_joint_values(self):
+        values = {}
+        for page in self.pages.values():
+            for name, row in page.rows.items():
+                if row.current is None:
+                    return None
+                values[name] = row.current
+        return values if len(values) == len(ALL_JOINTS) else None
+
+    def _refresh_vr_reset_status(self):
+        available = self._vr_reset_store is not None
+        busy = self._vr_reset_process is not None
+        if not available:
+            self.vr_reset_status_label.setText(f'不可用：{self._vr_reset_error}')
+            self.vr_reset_save_button.setEnabled(False)
+            self.vr_reset_current_view_button.setEnabled(False)
+            self.vr_reset_view_button.setEnabled(False)
+            self.vr_reset_restore_button.setEnabled(False)
+            return
+        try:
+            status = self._vr_reset_store.status()
+            if status['mode'] == 'custom':
+                saved = status.get('custom_saved_at', '').replace('T', ' ')
+                self.vr_reset_status_label.setText(f'当前：自定义姿态 · {saved}')
+            else:
+                self.vr_reset_status_label.setText('当前：原系统姿态（已保留）')
+        except Exception as error:
+            self.vr_reset_status_label.setText(f'读取失败：{error}')
+        connected = bool(self._status.get('connected'))
+        self.vr_reset_save_button.setEnabled(not busy and connected)
+        self.vr_reset_current_view_button.setEnabled(not busy)
+        self.vr_reset_view_button.setEnabled(not busy)
+        self.vr_reset_restore_button.setEnabled(not busy)
+
+    def _save_vr_reset_pose(self):
+        current = self._current_joint_values()
+        if current is None or not self._status.get('connected'):
+            QtWidgets.QMessageBox.warning(
+                self, '无法保存', '尚未收到完整、有效的关节实测值。'
+            )
+            return
+        answer = QtWidgets.QMessageBox.warning(
+            self,
+            '保存为 VR 系统复位姿态',
+            '将把当前实测的头颈、双臂、腰腿及身体高度写入厂商复位配置。\n\n'
+            '原系统姿态会永久保留，可随时查看和恢复；夹爪不属于厂商 VR 系统复位项。\n'
+            '为避免关节突然失去保持，保存时不会重启机械臂服务，也不会改变当前使能状态。\n'
+            '新姿态会在机械臂服务下一次正常启动或机器人重启后加载。\n\n'
+            '确定保存吗？',
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        try:
+            self._vr_reset_store.save_current(current)
+        except Exception as error:
+            QtWidgets.QMessageBox.critical(self, '保存失败', str(error))
+            return
+        self._refresh_vr_reset_status()
+        self._preview_vr_reset_pose(current, '当前 VR 复位姿态')
+        QtWidgets.QMessageBox.information(
+            self, 'VR 复位姿态已保存',
+            '配置已经持久化，当前关节保持和使能状态没有改变。\n'
+            '为保证安全，本次没有自动重启机械臂服务；新姿态将在服务下次正常启动或机器人重启后加载。'
+        )
+
+    def _preview_vr_reset_pose(self, pose, label):
+        self.stop_action_preview(quiet=True)
+        targets = {}
+        for page in self.pages.values():
+            for name, row in page.rows.items():
+                value = pose.get(name)
+                if value is None:
+                    value = row.current if row.current is not None else row.target()
+                targets[name] = float(value)
+                self.robot_view.view.set_target_joint(name, float(value))
+        self._set_pose_targets(targets)
+        self.robot_view.target_toggle.setChecked(True)
+        self.robot_view.view.show_target = True
+        self.robot_view.view.update()
+        self.event_label.setText(f'正在三维视图显示“{label}”蓝色虚影，仅预览，不控制真机')
+
+    def _show_vr_reset_pose_dialog(self, window_title, heading, description, pose, height):
+        groups = (
+            ('腰腿', VR_RESET_JOINTS[0:4]),
+            ('左臂', VR_RESET_JOINTS[4:11]),
+            ('右臂', VR_RESET_JOINTS[11:18]),
+            ('头颈', VR_RESET_JOINTS[18:21]),
+        )
+        lines = [description, '', '该姿态已同步到三维视图蓝色虚影，关闭窗口后可旋转模型查看。', '']
+        for title, names in groups:
+            lines.append(title + '：')
+            lines.append('  ' + '，'.join(
+                f'{JOINT_LABELS.get(name, name)}={pose[name]:.1f}°' for name in names
+            ))
+        lines.extend(['', f'厂商复位身体高度目标：{height:.3f} m', '夹爪：厂商 VR 系统复位不读取夹爪角度'])
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle(window_title)
+        dialog.resize(820, 470)
+        layout = QtWidgets.QVBoxLayout(dialog)
+        title = QtWidgets.QLabel(heading)
+        title.setObjectName('connectionLabel')
+        values = QtWidgets.QPlainTextEdit()
+        values.setReadOnly(True)
+        values.setPlainText('\n'.join(lines))
+        buttons = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Close)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(title)
+        layout.addWidget(values)
+        layout.addWidget(buttons)
+        dialog.exec_()
+
+    def _view_current_vr_reset_pose(self):
+        try:
+            pose, height = self._vr_reset_store.current_pose()
+            mode = self._vr_reset_store.status().get('mode', 'original')
+        except Exception as error:
+            QtWidgets.QMessageBox.critical(self, '读取失败', str(error))
+            return
+        description = '当前选用：自定义 VR 复位姿态' if mode == 'custom' else '当前选用：原系统 VR 复位姿态'
+        self._preview_vr_reset_pose(pose, '当前 VR 复位姿态')
+        self._show_vr_reset_pose_dialog(
+            '当前 VR 复位姿态', '当前选用的 VR 系统复位姿态', description, pose, height
+        )
+
+    def _view_original_vr_reset_pose(self):
+        try:
+            pose, height = self._vr_reset_store.original_pose()
+        except Exception as error:
+            QtWidgets.QMessageBox.critical(self, '读取失败', str(error))
+            return
+        self._preview_vr_reset_pose(pose, '原系统 VR 复位姿态')
+        self._show_vr_reset_pose_dialog(
+            '原系统 VR 复位姿态', '原系统姿态已安全保留',
+            '首次启用此功能时固化，不会被后续保存覆盖。', pose, height
+        )
+
+    def _restore_original_vr_reset_pose(self):
+        answer = QtWidgets.QMessageBox.warning(
+            self,
+            '恢复原系统姿态',
+            '将恢复首次保留的厂商 standing/sitting、头颈和身体高度配置。\n'
+            '恢复时不会重启机械臂服务或改变关节使能状态；配置将在服务下次正常启动时加载。\n\n'
+            '确定恢复吗？',
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        try:
+            self._vr_reset_store.restore_original()
+        except Exception as error:
+            QtWidgets.QMessageBox.critical(self, '恢复失败', str(error))
+            return
+        self._refresh_vr_reset_status()
+        pose, height = self._vr_reset_store.original_pose()
+        self._preview_vr_reset_pose(pose, '原系统 VR 复位姿态')
+        QtWidgets.QMessageBox.information(
+            self, '原系统姿态已恢复',
+            '配置已经持久化，当前关节保持和使能状态没有改变。\n'
+            '原系统姿态将在机械臂服务下次正常启动或机器人重启后加载。'
+        )
+
+    def _restart_arm_service(self, operation):
+        self._vr_reset_pending = operation
+        self._vr_reset_process = QtCore.QProcess(self)
+        self._vr_reset_process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+        self._vr_reset_process.finished.connect(self._vr_reset_restart_finished)
+        self._refresh_vr_reset_status()
+        self.vr_reset_status_label.setText(f'{operation}已写入 · 正在重启机械臂服务…')
+        self._vr_reset_process.start(
+            'systemctl', ['--user', 'restart', 'arm-control-service.service']
+        )
+
+    def _vr_reset_restart_finished(self, exit_code, _exit_status):
+        output = bytes(self._vr_reset_process.readAllStandardOutput()).decode(
+            'utf-8', errors='replace'
+        ).strip()
+        operation = self._vr_reset_pending
+        self._vr_reset_process.deleteLater()
+        self._vr_reset_process = None
+        self._vr_reset_pending = ''
+        self._refresh_vr_reset_status()
+        if exit_code == 0:
+            QtWidgets.QMessageBox.information(
+                self, '配置已生效',
+                f'{operation}完成。\n关节反馈恢复后，官方 VR 的系统复位将使用当前选定的复位姿态。'
+            )
+        else:
+            QtWidgets.QMessageBox.warning(
+                self, '配置已保存但服务重启失败',
+                f'配置文件已经持久化，但 arm-control-service 重启失败（退出码 {exit_code}）。\n{output}'
+            )
+
+    def _set_pose_targets(self, joints):
+        for group_name, page in self.pages.items():
+            page.clear_motion_profile()
+            for name, row in page.rows.items():
+                row.set_target(joints[name])
+            page.sync_body_height_target()
+            self.node.publish_targets(
+                self.node.preview_pub, group_name, page.targets()
+            )
+
+    def _selected_pose(self, name):
+        name = str(name).strip()
+        if not name or name not in self._poses:
+            return None
+        return self._poses[name]
+
+    def save_current_pose(self, raw_name):
+        current = self._current_joint_values()
+        if current is None or not self._status.get('connected'):
+            QtWidgets.QMessageBox.warning(
+                self, '无法保存', '尚未收到完整、有效的 23 个关节实测值。'
+            )
+            return
+        try:
+            name = validate_pose_name(raw_name)
+        except ValueError as error:
+            QtWidgets.QMessageBox.warning(self, '名称无效', str(error))
+            return
+        if name in self._poses:
+            answer = QtWidgets.QMessageBox.question(
+                self,
+                '覆盖已有姿态',
+                f'“{name}”已经存在，是否用当前实测姿态覆盖？',
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.No,
+            )
+            if answer != QtWidgets.QMessageBox.Yes:
+                return
+        previous = self._poses.get(name)
+        self._poses[name] = make_pose_record(current)
+        try:
+            save_pose_library(self._pose_file, self._poses)
+        except Exception as error:
+            if previous is None:
+                self._poses.pop(name, None)
+            else:
+                self._poses[name] = previous
+            QtWidgets.QMessageBox.critical(self, '保存失败', str(error))
+            return
+        self.pose_page.set_poses(self._poses, self._pose_file)
+        self.pose_page.name_edit.clear()
+        self.event_label.setText(f'已保存当前全身实测姿态“{name}”')
+
+    def preview_saved_pose(self, name):
+        pose = self._selected_pose(name)
+        if pose is None:
+            return
+        self._set_pose_targets(pose['joints_deg'])
+        self.event_label.setText(f'正在三维视图预览姿态“{name}”，未控制真机')
+
+    def execute_saved_pose(self, name):
+        pose = self._selected_pose(name)
+        if pose is None:
+            return
+        if not self._status.get('connected'):
+            QtWidgets.QMessageBox.warning(self, '反馈断开', '无法安全执行保存姿态。')
+            return
+        if not self._status.get('hardware_enabled'):
+            QtWidgets.QMessageBox.information(
+                self, '真机已锁定', '请先勾选“解锁真机控制”。'
+            )
+            return
+        if not self._status.get('hardware_ready'):
+            QtWidgets.QMessageBox.information(
+                self, '硬件准备中', '正在配置厂家位置模式、清错并使能，请稍候。'
+            )
+            return
+        current = self._current_joint_values()
+        if current is None:
+            QtWidgets.QMessageBox.warning(self, '状态不完整', '未取得全部关节实测值。')
+            return
+        joints = pose['joints_deg']
+        changed_groups = []
+        group_errors = {}
+        for group_name, page in self.pages.items():
+            maximum = max(abs(joints[joint] - current[joint]) for joint in page.rows)
+            group_errors[group_name] = maximum
+            if maximum > 0.5:
+                changed_groups.append(group_name)
+        if not changed_groups:
+            self.preview_saved_pose(name)
+            QtWidgets.QMessageBox.information(
+                self, '已经到达', f'机器人已经处于“{name}”姿态。'
+            )
+            return
+        if (
+            'leg_waist' in changed_groups
+            and not self._status.get('leg_waist_enabled')
+        ):
+            QtWidgets.QMessageBox.warning(
+                self,
+                '腰腿未二次解锁',
+                '该保存姿态会改变腰腿关节。请确认机器人稳定并勾选'
+                '“腰腿二次解锁”后再执行。',
+            )
+            return
+        maximum = max(group_errors.values())
+        answer = QtWidgets.QMessageBox.warning(
+            self,
+            '执行保存姿态',
+            f'机器人将渐进到达“{name}”。\n'
+            f'到达速度：{self.pose_page.speed_box.value()}%，'
+            f'最大关节变化约 {maximum:.1f}°。\n'
+            '请确认周围无人且无碰撞风险。\n\n'
+            '是否开始？',
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        self._set_pose_targets(joints)
+        speed_scale = self.pose_page.speed_scale()
+        for group_name in changed_groups:
+            self.pages[group_name].sync_body_height_target()
+            self.node.publish_targets(
+                self.node.apply_pub,
+                group_name,
+                self.pages[group_name].targets(),
+                speed_scale=speed_scale,
+            )
+        self.event_label.setText(
+            f'正在以 {speed_scale * 100:.0f}% 速度执行保存姿态“{name}”'
+        )
+
+    def delete_saved_pose(self, name):
+        pose = self._selected_pose(name)
+        if pose is None:
+            return
+        answer = QtWidgets.QMessageBox.question(
+            self,
+            '删除保存姿态',
+            f'确定删除“{name}”吗？此操作无法撤销。',
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        previous = self._poses.pop(name)
+        try:
+            save_pose_library(self._pose_file, self._poses)
+        except Exception as error:
+            self._poses[name] = previous
+            QtWidgets.QMessageBox.critical(self, '删除失败', str(error))
+            return
+        self.pose_page.set_poses(self._poses, self._pose_file)
+        self.event_label.setText(f'已删除保存姿态“{name}”')
+
+    def _action_target_values(self, joint_names):
+        values = {}
+        for name in joint_names:
+            group = self.pages.get(JOINT_TO_GROUP.get(name))
+            if group is None or name not in group.rows:
+                raise ValueError(f'找不到关节目标：{name}')
+            if group.rows[name].current is None and not self._initialized_targets:
+                raise ValueError('尚未收到完整关节反馈，不能采集关键帧')
+            values[name] = group.rows[name].target()
+        return values
+
+    def capture_action_frame(self, replace):
+        try:
+            if not self.action_page.has_frames():
+                self.action_page.suggest_groups([self._last_edited_group])
+            names = self.action_page.capture_joint_names()
+            values = self._action_target_values(names)
+            self.action_page.add_captured_frame(values, bool(replace))
+        except ValueError as error:
+            QtWidgets.QMessageBox.warning(self, '无法添加关键帧', str(error))
+            return
+        action = '替换' if replace else '添加'
+        self.event_label.setText(
+            f'已{action}关键帧，包含 {len(values)} 个关节目标'
+        )
+
+    def _set_action_targets(self, values):
+        changed_groups = set()
+        for name, value in values.items():
+            group_name = JOINT_TO_GROUP.get(name)
+            page = self.pages.get(group_name)
+            if page is None or name not in page.rows:
+                continue
+            page.rows[name].set_target(float(value))
+            self.robot_view.view.set_target_joint(name, float(value))
+            changed_groups.add(group_name)
+        for group_name in changed_groups:
+            self.pages[group_name].clear_motion_profile()
+            self.pages[group_name].sync_body_height_target()
+            self.node.publish_targets(
+                self.node.preview_pub,
+                group_name,
+                self.pages[group_name].targets(),
+            )
+
+    def preview_action_frame(self, values):
+        self.stop_action_preview(quiet=True)
+        self._set_action_targets(values)
+        self.event_label.setText('正在预览选中关键帧，未控制真机')
+
+    def save_joint_action(self, raw_name, record):
+        try:
+            name = validate_action_name(raw_name)
+            record = normalize_action_record(record)
+        except ValueError as error:
+            QtWidgets.QMessageBox.warning(self, '无法保存动作', str(error))
+            return
+        if name in self._actions:
+            answer = QtWidgets.QMessageBox.question(
+                self,
+                '覆盖已有动作',
+                f'“{name}”已经存在，是否覆盖？',
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.No,
+            )
+            if answer != QtWidgets.QMessageBox.Yes:
+                return
+        previous = self._actions.get(name)
+        self._actions[name] = record
+        pickle_path = action_pickle_path(self._motion_library_dir, name)
+        baseline = self._action_pickle_baseline()
+        try:
+            save_action_library(self._action_file, self._actions)
+            export_result = export_action_pickle(
+                pickle_path,
+                record,
+                baseline,
+            )
+        except Exception as error:
+            if previous is None:
+                self._actions.pop(name, None)
+            else:
+                self._actions[name] = previous
+            try:
+                save_action_library(self._action_file, self._actions)
+            except Exception:
+                pass
+            QtWidgets.QMessageBox.critical(self, '保存动作失败', str(error))
+            return
+        self.action_page.set_actions(self._actions, self._action_file, name)
+        self.event_label.setText(
+            f'已保存动作“{name}”：{len(record["keyframes"])} 个关键帧，'
+            f'兼容PKL {export_result["sample_count"]} 点/'
+            f'{export_result["duration_sec"]:.1f}秒'
+        )
+
+    def _action_pickle_baseline(self):
+        current = self._current_joint_values()
+        if current is not None:
+            return current
+        return {
+            name: row.target()
+            for page in self.pages.values()
+            for name, row in page.rows.items()
+        }
+
+    def delete_joint_action(self, name):
+        if name not in self._actions:
+            return
+        answer = QtWidgets.QMessageBox.question(
+            self,
+            '删除动作',
+            f'确定删除动作“{name}”吗？此操作无法撤销。',
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        previous = self._actions.pop(name)
+        pickle_path = action_pickle_path(self._motion_library_dir, name)
+        try:
+            save_action_library(self._action_file, self._actions)
+            pickle_path.unlink(missing_ok=True)
+        except Exception as error:
+            self._actions[name] = previous
+            try:
+                save_action_library(self._action_file, self._actions)
+            except Exception:
+                pass
+            QtWidgets.QMessageBox.critical(self, '删除动作失败', str(error))
+            return
+        self.action_page.set_actions(self._actions, self._action_file)
+        self.event_label.setText(f'已删除动作“{name}”')
+
+    def preview_joint_action(self, name, record):
+        try:
+            record = normalize_action_record(record)
+            joints = action_joint_names(record['groups'])
+            current = self._current_joint_values()
+            if current is None:
+                raise ValueError('尚未收到完整关节反馈，无法建立虚影起点')
+            start = {joint: float(current[joint]) for joint in joints}
+        except ValueError as error:
+            QtWidgets.QMessageBox.warning(self, '无法预览动作', str(error))
+            return
+        maximum = self._maximum_action_change(record, start)
+        if maximum < 0.2:
+            labels = '、'.join(
+                GROUPS[group]['label'] for group in record['groups']
+            )
+            QtWidgets.QMessageBox.warning(
+                self,
+                '动作没有可见变化',
+                f'该动作记录的是“{labels}”，所有关键帧与当前实测姿态'
+                f'的最大差值只有 {maximum:.2f}°。\n\n'
+                '请新建动作，先调整需要运动的关节，再添加下一关键帧。',
+            )
+            return
+        self.stop_action_preview(quiet=True)
+        self.robot_view.set_action_preview_active(True)
+        self._set_action_targets(start)
+        now = time.monotonic()
+        self._action_preview = {
+            'name': str(name),
+            'record': record,
+            'joint_names': joints,
+            'frame_index': 0,
+            'loop_index': 0,
+            'stage': 'transition',
+            'started': now,
+            'start_values': start,
+        }
+        self.action_preview_timer.start()
+        self.event_label.setText(f'正在播放动作“{name}”三维虚影，不控制真机')
+
+    def advance_action_preview(self):
+        state = self._action_preview
+        if state is None:
+            self.action_preview_timer.stop()
+            return
+        now = time.monotonic()
+        frame = state['record']['keyframes'][state['frame_index']]
+        if state['stage'] == 'transition':
+            speed_scale = state['record'].get('speed_percent', 100) / 100.0
+            duration = float(frame['transition_sec']) / speed_scale
+            progress = min(
+                1.0,
+                (now - state['started']) / duration,
+            )
+            values = interpolate_joint_values(
+                state['start_values'],
+                frame['joints_deg'],
+                progress,
+                frame['easing'],
+            )
+            self._set_action_targets(values)
+            self.action_page.set_progress(
+                True,
+                state['name'],
+                state['frame_index'],
+                len(state['record']['keyframes']),
+                state['loop_index'],
+                state['record']['loop_count'],
+                progress,
+                '虚影预览',
+            )
+            if progress >= 1.0:
+                state['stage'] = 'hold'
+                state['hold_started'] = now
+            return
+        if now - state['hold_started'] < float(frame['hold_sec']):
+            return
+        state['frame_index'] += 1
+        if state['frame_index'] >= len(state['record']['keyframes']):
+            state['loop_index'] += 1
+            if state['loop_index'] >= state['record']['loop_count']:
+                name = state['name']
+                self.stop_action_preview(quiet=True)
+                self.event_label.setText(
+                    f'动作“{name}”三维虚影预览已完成，未控制真机'
+                )
+                return
+            state['frame_index'] = 0
+        state['stage'] = 'transition'
+        state['started'] = now
+        state['start_values'] = self._action_target_values(
+            state['joint_names']
+        )
+
+    def stop_action_preview(self, quiet=False):
+        was_running = self._action_preview is not None
+        self._action_preview = None
+        self.action_preview_timer.stop()
+        self.robot_view.set_action_preview_active(False)
+        self.action_page.set_progress(False)
+        if was_running and not quiet:
+            self.event_label.setText('已停止三维动作预览，未控制真机')
+
+    def execute_joint_action(self, name, record):
+        self.stop_action_preview(quiet=True)
+        try:
+            record = normalize_action_record(record)
+        except ValueError as error:
+            QtWidgets.QMessageBox.warning(self, '动作无效', str(error))
+            return
+        if not self._status.get('connected'):
+            QtWidgets.QMessageBox.warning(
+                self, '反馈断开', '无法安全执行关键帧动作。'
+            )
+            return
+        if not self._status.get('hardware_enabled'):
+            QtWidgets.QMessageBox.information(
+                self, '真机已锁定', '请先勾选“解锁真机控制”。'
+            )
+            return
+        if not self._status.get('hardware_ready'):
+            QtWidgets.QMessageBox.information(
+                self, '硬件准备中', '请等待厂家复位与使能完成。'
+            )
+            return
+        if (
+            'leg_waist' in record['groups']
+            and not self._status.get('leg_waist_enabled')
+        ):
+            QtWidgets.QMessageBox.warning(
+                self,
+                '腰腿未二次解锁',
+                '该动作包含腰腿关节，请先完成腰腿二次解锁。',
+            )
+            return
+        current = self._current_joint_values()
+        if current is None:
+            QtWidgets.QMessageBox.warning(
+                self, '状态不完整', '未取得全部关节实测值。'
+            )
+            return
+        start = {
+            joint: float(current[joint])
+            for joint in action_joint_names(record['groups'])
+        }
+        maximum = self._maximum_action_change(record, start)
+        if maximum < 0.2:
+            labels = '、'.join(
+                GROUPS[group]['label'] for group in record['groups']
+            )
+            QtWidgets.QMessageBox.warning(
+                self,
+                '动作没有关节变化',
+                f'该动作只记录了“{labels}”，各关键帧与当前姿态基本相同'
+                f'（最大差值 {maximum:.2f}°），因此不会让机器人运动。\n\n'
+                '请新建动作并重新记录正确的关节组。',
+            )
+            return
+        speed_percent = int(record.get('speed_percent', 100))
+        speed_scale = speed_percent / 100.0
+        total = sum(
+            frame['transition_sec'] / speed_scale + frame['hold_sec']
+            for frame in record['keyframes']
+        ) * record['loop_count']
+        answer = QtWidgets.QMessageBox.warning(
+            self,
+            '执行关键帧动作',
+            f'机器人将执行“{name}”。\n'
+            f'{len(record["keyframes"])} 个关键帧，循环 '
+            f'{record["loop_count"]} 次，预计至少 {total:.1f} 秒。\n'
+            f'真机执行速度：{speed_percent}%（实际到达优先，不会强制跳帧）。\n'
+            f'最大关节变化约 {maximum:.1f}°。\n\n'
+            '请先完整预览虚影，并确认周围无人、无碰撞风险。\n'
+            '是否开始？',
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        self.node.publish_action_command('start', name, record)
+        self.event_label.setText(
+            f'已请求以 {speed_percent}% 速度执行动作“{name}”'
+        )
+
+    @staticmethod
+    def _maximum_action_change(record, start_values):
+        """Maximum visible delta from the start and between adjacent frames."""
+        maximum = 0.0
+        previous = dict(start_values)
+        for frame in record['keyframes']:
+            values = frame['joints_deg']
+            maximum = max(
+                maximum,
+                max(abs(float(values[name]) - float(previous[name]))
+                    for name in values),
+            )
+            previous = values
+        return maximum
+
+    def _tab_changed(self, _index):
+        if self.tabs.currentWidget() is self.action_page:
+            self.action_page.suggest_groups([self._last_edited_group])
+
+    def cancel_joint_action(self):
+        self.stop_action_preview(quiet=True)
+        self.node.publish_action_command('cancel')
+        self.event_label.setText('已发送立即停止动作命令')
+
+    def _unlock_hardware(self, with_reset):
+        if self._status.get('hardware_enabled'):
+            QtWidgets.QMessageBox.information(
+                self, '真机已经解锁', '请先点击“立即锁定下发”，再切换解锁方式。'
+            )
+            return
+        if with_reset:
+            title = '解锁并复位'
+            message = (
+                '将执行厂家官方复位与使能流程，机器人可能自动移动到复位姿态。\n\n'
+                '复位完成后，拖动滑块或修改目标数值会让对应真机关节运动。\n\n'
+                '请确认机器人周围无人，双臂及腰腿运动范围内无障碍物。\n\n'
+                '继续复位并解锁吗？'
+            )
+            client = self.node.hardware_client
+        else:
+            title = '解锁但不复位'
+            message = (
+                '该方式不会发送厂家复位命令，也不会前往默认复位姿态。\n\n'
+                '系统会确认控制器处于位置模式、锁存当前实测姿态，然后同步使能；'
+                '准备期间请勿扶动机器人。完成后拖动实时跟随会直接控制真机。\n\n'
+                '请确认所有关节反馈在线、当前姿态稳定且周围无人。\n\n'
+                '确认保持当前姿态并解锁吗？'
+            )
+            client = self.node.hardware_without_reset_client
+        answer = QtWidgets.QMessageBox.warning(
+            self,
+            title,
+            message,
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No,
+        )
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        self._call_bool_service(
+            client,
+            True,
+            None,
+            '对应的真机解锁服务当前不可用',
+        )
+
+    def _leg_toggled(self, checked):
+        if checked:
+            answer = QtWidgets.QMessageBox.warning(
+                self,
+                '腰腿关节高风险确认',
+                '腰腿动作会改变机器人高度和重心。\n\n'
+                '仅在机器人稳定站立、周围清空且有人看护时使用。\n'
+                '确定解锁腰腿控制吗？',
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.No,
+            )
+            if answer != QtWidgets.QMessageBox.Yes:
+                self._set_checked_silently(self.leg_toggle, False)
+                return
+        self._call_bool_service(
+            self.node.leg_client, checked, self.leg_toggle,
+            '腰腿控制服务当前不可用',
+        )
+
+    def _force_lock(self):
+        self._set_checked_silently(self.leg_toggle, False)
+        self._call_bool_service(
+            self.node.hardware_client, False, None,
+            '锁定服务当前不可用',
+        )
+
+    def _call_bool_service(self, client, value, toggle, unavailable_text):
+        if not client.service_is_ready():
+            if toggle is not None:
+                self._set_checked_silently(toggle, not value)
+            QtWidgets.QMessageBox.warning(self, '服务不可用', unavailable_text)
+            return
+        request = SetBool.Request()
+        request.data = bool(value)
+        future = client.call_async(request)
+
+        def finished(done):
+            try:
+                result = done.result()
+                if not result.success:
+                    if toggle is not None:
+                        self._set_checked_silently(toggle, not value)
+                    QtWidgets.QMessageBox.warning(self, '操作被拒绝', result.message)
+            except Exception as error:
+                if toggle is not None:
+                    self._set_checked_silently(toggle, not value)
+                QtWidgets.QMessageBox.warning(self, '操作失败', str(error))
+
+        future.add_done_callback(finished)
+
+    def _filter_rows(self, text):
+        for page in self.pages.values():
+            page.set_filter(text)
+
+    def closeEvent(self, event):
+        if self.node.hardware_client.service_is_ready():
+            request = SetBool.Request()
+            request.data = False
+            future = self.node.hardware_client.call_async(request)
+            end = QtCore.QElapsedTimer()
+            end.start()
+            while not future.done() and end.elapsed() < 300:
+                rclpy.spin_once(self.node, timeout_sec=0.01)
+        event.accept()
+
+
+def _number(value):
+    return '--' if value is None else f'{float(value):.2f}'
+
+
+def _milliseconds(seconds):
+    return '-- ms' if seconds is None else f'{float(seconds) * 1000.0:.0f} ms'
+
+
+STYLE = """
+QMainWindow, QWidget {
+  background: #20242b;
+  color: #e7eaf0;
+  font-size: 14px;
+}
+QFrame#jointRow {
+  background: #292e37;
+  border: 1px solid #343b46;
+  border-radius: 7px;
+}
+QFrame#bodyHeightCard {
+  background: #232e38;
+  border: 1px solid #3e6a82;
+  border-radius: 7px;
+}
+QLabel#bodyHeightTitle {
+  color: #8bd8ff;
+  font-size: 15px;
+  font-weight: 600;
+}
+QLabel#bodyHeightState { color: #ffbf69; font-weight: 600; }
+QLabel#bodyHeightNote { color: #aeb7c5; font-size: 12px; }
+QFrame#robotViewPanel {
+  background: #181c22;
+  border: 1px solid #343b46;
+  border-radius: 7px;
+}
+QLabel#viewTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f0f3f8;
+}
+QFrame#jointRow:hover { border-color: #50647e; }
+QFrame#jointRow[selectedFromModel="true"] {
+  border: 2px solid #e99a3a;
+  background: #34302c;
+}
+QFrame#jointAdjustCard {
+  background: #242a32;
+  border: 1px solid #3d4856;
+  border-radius: 6px;
+}
+QLabel#selectedJointLabel {
+  color: #ffb45c;
+  font-weight: 600;
+  min-width: 92px;
+}
+QLabel#jointDirectionGuide {
+  color: #d7deea;
+  background: #171c23;
+  border: 1px solid #465366;
+  border-radius: 10px;
+  padding: 3px 8px;
+}
+QToolButton {
+  background: #2b323c;
+  border: 1px solid #48515f;
+  border-radius: 4px;
+  padding: 5px 10px;
+}
+QToolButton:checked {
+  background: #2676bd;
+  border-color: #4ca7ef;
+  color: white;
+}
+QLabel#currentValue { color: #78d6ff; font-weight: 600; }
+QLabel#deltaValue { color: #8e98a8; }
+QLabel#deltaValue[changed="true"] { color: #ffbf69; font-weight: 600; }
+QLabel#healthGood, QLabel#connectionOn { color: #55d68b; }
+QLabel#healthBad, QLabel#connectionOff { color: #ff6b6b; }
+QLabel#healthUnknown { color: #7d8795; }
+QLabel#connectionLabel { font-size: 15px; font-weight: 600; }
+QLabel#columnHeader, QLabel#publisherHint { color: #8993a3; font-size: 12px; }
+QLabel#groupNote, QLabel#safetyHint { color: #aeb7c5; }
+QLabel#eventInfo { color: #8fbce6; }
+QLabel#eventWarn { color: #ffbf69; }
+QLineEdit, QDoubleSpinBox, QSpinBox, QComboBox {
+  background: #171a20;
+  border: 1px solid #3a4350;
+  border-radius: 5px;
+  padding: 5px 7px;
+  selection-background-color: #3888d8;
+}
+QLineEdit:focus, QDoubleSpinBox:focus, QSpinBox:focus, QComboBox:focus {
+  border-color: #51a7f9;
+}
+QListWidget#poseList {
+  background: #171a20;
+  alternate-background-color: #222832;
+  color: #e7eaf0;
+  border: 1px solid #3a4350;
+  border-radius: 6px;
+  outline: none;
+  padding: 4px;
+  selection-background-color: #2f7fbd;
+  selection-color: #ffffff;
+}
+QListWidget#poseList::item {
+  color: #e7eaf0;
+  min-height: 34px;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+QListWidget#poseList::item:hover {
+  background: #303947;
+  color: #ffffff;
+}
+QListWidget#poseList::item:selected {
+  background: #2f7fbd;
+  color: #ffffff;
+}
+QListWidget#poseList::item:selected:!active {
+  background: #355a78;
+  color: #ffffff;
+}
+QFrame#actionGroupSelector {
+  background: #242a32;
+  border: 1px solid #3d4856;
+  border-radius: 6px;
+}
+QListWidget#actionFrameList {
+  background: #171a20;
+  alternate-background-color: #222832;
+  color: #e7eaf0;
+  border: 1px solid #3a4350;
+  border-radius: 6px;
+  outline: none;
+  padding: 4px;
+}
+QListWidget#actionFrameList::item {
+  color: #e7eaf0;
+  min-height: 32px;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+QListWidget#actionFrameList::item:hover {
+  background: #303947;
+  color: white;
+}
+QListWidget#actionFrameList::item:selected {
+  background: #2f7fbd;
+  color: white;
+}
+QPushButton#actionStopButton {
+  color: #ff9a9a;
+  border-color: #934b50;
+}
+QProgressBar {
+  background: #15191f;
+  border: 1px solid #3a4350;
+  border-radius: 5px;
+  text-align: center;
+  min-height: 20px;
+}
+QProgressBar::chunk {
+  background: #2f8acb;
+  border-radius: 4px;
+}
+QPushButton {
+  background: #343b46;
+  border: 1px solid #48515f;
+  border-radius: 5px;
+  padding: 6px 13px;
+}
+QPushButton:hover { background: #3e4856; }
+QPushButton:pressed { background: #29303a; }
+QPushButton:disabled { color: #6d7580; background: #282d35; border-color: #333943; }
+QPushButton#applyButton:enabled { background: #2676bd; border-color: #3897e8; }
+QPushButton#applyButton:enabled:hover { background: #3187d0; }
+QPushButton#lockButton { color: #ff9a9a; border-color: #934b50; }
+QPushButton#unlockResetButton:enabled {
+  color: #ffd28a; border-color: #9a7138; background: #4a3b27;
+}
+QPushButton#unlockWithoutResetButton:enabled {
+  color: #bdebd4; border-color: #3c8367; background: #244638;
+}
+QFrame#safetyBar {
+  background: #2a3039;
+  border: 1px solid #424b58;
+  border-radius: 7px;
+}
+QTabWidget::pane { border: 1px solid #343b46; border-radius: 6px; }
+QTabBar::tab {
+  background: #292e37;
+  color: #aeb7c5;
+  padding: 8px 16px;
+  margin-right: 2px;
+}
+QTabBar::tab:selected { background: #3a4655; color: white; }
+QSlider::groove:horizontal {
+  height: 5px; background: #15191f; border-radius: 2px;
+}
+QSlider::sub-page:horizontal { background: #3f94df; border-radius: 2px; }
+QSlider::handle:horizontal {
+  background: #e8f2fb; border: 2px solid #3f94df;
+  width: 15px; margin: -6px 0; border-radius: 8px;
+}
+QToolTip {
+  background: #101318; color: #f0f2f5;
+  border: 1px solid #4c5665; padding: 5px;
+}
+"""
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = JointControlRosNode()
+    app = QtWidgets.QApplication(sys.argv)
+    app.setApplicationName('Whole Body Joint Control')
+    window = ControlPanel(node)
+    signal.signal(signal.SIGINT, lambda _signum, _frame: window.close())
+    window.show()
+    exit_code = app.exec_()
+    node.destroy_node()
+    if rclpy.ok():
+        rclpy.shutdown()
+    raise SystemExit(exit_code)
+
+
+if __name__ == '__main__':
+    main()

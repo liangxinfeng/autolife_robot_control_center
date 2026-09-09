@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=云蝶 Logo 胸屏
+Comment=一键启动云蝶科技机器人胸屏 Logo 页面
+Exec=/home/ubuntu/ros2_ws/src/autolife_robot_control_center/logo/start_logo_display.sh
+Icon=/home/ubuntu/ros2_ws/src/autolife_robot_control_center/logo/yundie.webp
+Terminal=false
+StartupNotify=true
+Categories=Utility;

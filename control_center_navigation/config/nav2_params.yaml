@@ -1,0 +1,302 @@
+amcl:
+  ros__parameters:
+    use_sim_time: false
+    # 306 is an omnidirectional base.  These values match the vendor's
+    # validated omni-localization baseline instead of treating lateral travel
+    # as differential-drive noise.
+    alpha1: 0.1
+    alpha2: 0.1
+    alpha3: 0.1
+    alpha4: 0.1
+    alpha5: 0.1
+    base_frame_id: base_link
+    beam_skip_distance: 0.5
+    beam_skip_error_threshold: 0.9
+    beam_skip_threshold: 0.3
+    do_beamskip: true
+    global_frame_id: map
+    lambda_short: 0.1
+    laser_likelihood_max_dist: 1.0
+    laser_max_range: 8.0
+    laser_min_range: 0.3
+    # Jazzy only applies do_beamskip in this model. Navigation costmaps still
+    # retain ALL obstacle observations; this changes localization only.
+    laser_model_type: likelihood_field_prob
+    max_beams: 60
+    max_particles: 2000
+    min_particles: 500
+    odom_frame_id: odom
+    pf_err: 0.05
+    pf_z: 0.99
+    recovery_alpha_fast: 0.05
+    recovery_alpha_slow: 0.05
+    resample_interval: 1
+    robot_model_type: nav2_amcl::OmniMotionModel
+    save_pose_rate: 0.5
+    sigma_hit: 0.1
+    tf_broadcast: true
+    transform_tolerance: 0.5
+    # Short-distance navigation resolves 5 cm errors, so AMCL must update well
+    # below that scale rather than waiting for 10 cm / 5.7 degrees.
+    update_min_a: 0.02
+    update_min_d: 0.01
+    z_hit: 0.8
+    z_max: 0.05
+    z_rand: 0.2
+    z_short: 0.05
+    set_initial_pose: false
+    scan_topic: /merged
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: false
+    global_frame: map
+    robot_base_frame: base_link
+    odom_topic: /odom
+    bt_loop_duration: 10
+    default_server_timeout: 20
+
+planner_server:
+  ros__parameters:
+    use_sim_time: false
+    expected_planner_frequency: 5.0
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_smac_planner::SmacPlanner2D"
+      # Do not let the global planner silently replace an exact waypoint with
+      # a point up to 50 cm away.  A small fallback remains for grid rounding.
+      tolerance: 0.10
+      downsample_costmap: false
+      downsampling_factor: 1
+      allow_unknown: true
+      max_iterations: 100000
+      max_planning_time: 2.0
+      smooth_path: true
+      motion_model_for_search: "BICYCLE"
+      minimum_turning_radius: 0.25
+      reverse_penalty: 10.0
+      change_penalty: 0.5
+      non_strict_goal: true
+      cost_travel_multiplier: 5.0  # 宽路口优先走中间，避免全局路径总贴着膨胀层边缘
+      use_quadratic_cost: true
+
+controller_server:
+  ros__parameters:
+    use_sim_time: false
+    controller_frequency: 15.0  # 恢复适中频率
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.0
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.5  # 恢复原值，避免频繁触发恢复
+    progress_checker_plugin: "progress_checker"
+    goal_checker_plugins: ["goal_checker"]
+    controller_plugins: ["FollowPath"]
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.05
+      movement_time_allowance: 20.0
+    goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      # Fine 版需要先在充电桩预备位精确对正，避免末段边倒车边大幅转向。
+      # waypoint_manager handles final refinement; the handoff radius is NOT arrival tolerance.
+      # The robot must satisfy position and heading at the same time.  With
+      # stateful=true, a final turn can move XY outside tolerance and still
+      # be reported as a success.
+      xy_goal_tolerance: 0.05
+      yaw_goal_tolerance: 0.06
+      stateful: false
+    FollowPath:
+      plugin: "nav2_mppi_controller::MPPIController"
+      # Holonomic chassis: allow conservative lateral corrections, retaining collision checks.
+      time_steps: 40
+      model_dt: 0.07
+      batch_size: 1600
+      open_loop: false
+      iteration_count: 1
+      vx_std: 0.18
+      vy_std: 0.08
+      wz_std: 0.35
+      vx_max: 0.45
+      # Allow a small reverse correction when the final position is behind the robot.
+      vx_min: -0.12
+      vy_max: 0.12
+      wz_max: 1.3
+      ax_max: 0.8
+      ax_min: -0.8
+      ay_max: 0.30
+      ay_min: -0.30
+      az_max: 1.8
+      temperature: 0.3
+      gamma: 0.015
+      motion_model: "Omni"
+      visualize: false
+      publish_optimal_trajectory: false
+      regenerate_noises: false
+      transform_tolerance: 0.2
+      prune_distance: 1.7
+      critics: ["ConstraintCritic", "CostCritic", "GoalCritic", "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic", "PathAngleCritic", "PreferForwardCritic"]
+      ConstraintCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 4.0
+      CostCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.81
+        near_collision_cost: 253
+        critical_cost: 300.0
+        consider_footprint: true
+        collision_cost: 1000000.0
+        near_goal_distance: 1.0
+        trajectory_point_step: 2
+      GoalCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 8.0
+        threshold_to_consider: 1.4
+      GoalAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.0
+        threshold_to_consider: 0.5
+      PathAlignCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 10.0
+        max_path_occupancy_ratio: 0.05
+        trajectory_point_step: 4
+        threshold_to_consider: 0.5
+        offset_from_furthest: 18
+        use_path_orientations: false
+      PathFollowCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 6.0
+        offset_from_furthest: 5
+        threshold_to_consider: 1.4
+      PathAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.0
+        offset_from_furthest: 4
+        threshold_to_consider: 0.5
+        max_angle_to_furthest: 0.9
+        mode: 0
+      PreferForwardCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 6.0
+        threshold_to_consider: 0.5
+
+behavior_server:
+  ros__parameters:
+    use_sim_time: false
+    global_frame: odom
+    robot_base_frame: base_link
+    transform_tolerance: 0.2
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 1.0  # 恢复原值
+    min_rotational_vel: 0.2
+    rotational_acc_lim: 1.5  # 恢复原值
+    cycle_frequency: 10.0
+    costmap_topic: local_costmap/costmap_raw
+    footprint_topic: local_costmap/published_footprint
+    behavior_plugins: ["spin", "backup", "wait", "drive_on_heading"]
+    spin:
+      plugin: "nav2_behaviors::Spin"
+    backup:
+      plugin: "nav2_behaviors::BackUp"
+    wait:
+      plugin: "nav2_behaviors::Wait"
+    drive_on_heading:
+      plugin: "nav2_behaviors::DriveOnHeading"
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: false
+      update_frequency: 10.0
+      publish_frequency: 5.0
+      global_frame: odom
+      robot_base_frame: base_link
+      rolling_window: true
+      width: 7  # 恢复原尺寸
+      height: 7
+      resolution: 0.05
+      # 307: 50 cm total width; original base length, no front extension.
+      footprint: "[[0.25, 0.25], [0.25, -0.25], [-0.25, -0.25], [-0.25, 0.25]]"
+      footprint_padding: 0.04
+      always_send_full_costmap: true
+      plugins: ["obstacle_layer", "inflation_layer"]
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: front_scan rear_scan
+        front_scan:
+          topic: /topic_gv_front_lidar_0_307
+          data_type: "LaserScan"
+          clearing: true
+          marking: true
+          inf_is_valid: true
+          raytrace_max_range: 12.0  # 介于10和18之间
+          obstacle_max_range: 10.0  # 介于8和16之间
+          max_obstacle_height: 2.0
+        rear_scan:
+          topic: /topic_gv_rear_lidar_0_307
+          data_type: "LaserScan"
+          clearing: true
+          marking: true
+          inf_is_valid: true
+          raytrace_max_range: 12.0
+          obstacle_max_range: 10.0
+          max_obstacle_height: 2.0
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 2.0
+        # Retain the inflation field; it covers the padded footprint radius.
+        inflation_radius: 0.65
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      use_sim_time: false
+      update_frequency: 2.0
+      publish_frequency: 1.0
+      global_frame: map
+      robot_base_frame: base_link
+      resolution: 0.05
+      # Same symmetric envelope as local costmap and final pose servo.
+      footprint: "[[0.25, 0.25], [0.25, -0.25], [-0.25, -0.25], [-0.25, 0.25]]"
+      footprint_padding: 0.04
+      track_unknown_space: true
+      always_send_full_costmap: true
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: front_scan rear_scan
+        front_scan:
+          topic: /topic_gv_front_lidar_0_307
+          data_type: "LaserScan"
+          clearing: true
+          marking: true
+          inf_is_valid: true
+          raytrace_max_range: 12.0
+          obstacle_max_range: 10.0
+          max_obstacle_height: 2.0
+        rear_scan:
+          topic: /topic_gv_rear_lidar_0_307
+          data_type: "LaserScan"
+          clearing: true
+          marking: true
+          inf_is_valid: true
+          raytrace_max_range: 12.0
+          obstacle_max_range: 10.0
+          max_obstacle_height: 2.0
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 1.8
+        inflation_radius: 0.65

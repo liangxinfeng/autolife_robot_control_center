@@ -1,0 +1,126 @@
+version: 1
+actions:
+  打招呼:
+    saved_at: '2026-07-30T18:22:51+08:00'
+    groups:
+    - left_arm
+    loop_count: 1
+    speed_percent: 150
+    keyframes:
+    - transition_sec: 1.5
+      hold_sec: 0.0
+      easing: smooth
+      joints_deg:
+        Joint_Left_Shoulder_Inner: -40.4
+        Joint_Left_Shoulder_Outer: 0.0
+        Joint_Left_UpperArm: -0.0
+        Joint_Left_Elbow: 138.0
+        Joint_Left_Forearm: 0.0
+        Joint_Left_Wrist_Upper: -0.0
+        Joint_Left_Wrist_Lower: -0.0
+    - transition_sec: 1.5
+      hold_sec: 0.0
+      easing: smooth
+      joints_deg:
+        Joint_Left_Shoulder_Inner: -40.4
+        Joint_Left_Shoulder_Outer: 0.0
+        Joint_Left_UpperArm: 25.0
+        Joint_Left_Elbow: 138.0
+        Joint_Left_Forearm: 0.0
+        Joint_Left_Wrist_Upper: 0.0
+        Joint_Left_Wrist_Lower: 0.0
+    - transition_sec: 1.5
+      hold_sec: 0.0
+      easing: smooth
+      joints_deg:
+        Joint_Left_Shoulder_Inner: -40.4
+        Joint_Left_Shoulder_Outer: 0.0
+        Joint_Left_UpperArm: -25.0
+        Joint_Left_Elbow: 138.0
+        Joint_Left_Forearm: 0.0
+        Joint_Left_Wrist_Upper: 0.0
+        Joint_Left_Wrist_Lower: 0.0
+    - transition_sec: 1.5
+      hold_sec: 0.0
+      easing: smooth
+      joints_deg:
+        Joint_Left_Shoulder_Inner: -40.4
+        Joint_Left_Shoulder_Outer: 0.0
+        Joint_Left_UpperArm: 25.0
+        Joint_Left_Elbow: 138.0
+        Joint_Left_Forearm: 0.0
+        Joint_Left_Wrist_Upper: 0.0
+        Joint_Left_Wrist_Lower: 0.0
+    - transition_sec: 1.5
+      hold_sec: 0.0
+      easing: smooth
+      joints_deg:
+        Joint_Left_Shoulder_Inner: -40.4
+        Joint_Left_Shoulder_Outer: 0.0
+        Joint_Left_UpperArm: -0.0
+        Joint_Left_Elbow: 138.0
+        Joint_Left_Forearm: 0.0
+        Joint_Left_Wrist_Upper: -0.0
+        Joint_Left_Wrist_Lower: -0.0
+  比心:
+    saved_at: '2026-07-31T10:06:10+08:00'
+    groups:
+    - left_arm
+    - right_arm
+    loop_count: 1
+    speed_percent: 170
+    keyframes:
+    - transition_sec: 1.5
+      hold_sec: 0.0
+      easing: smooth
+      joints_deg:
+        Joint_Left_Shoulder_Inner: 15.0
+        Joint_Left_Shoulder_Outer: -145.0
+        Joint_Left_UpperArm: -95.0
+        Joint_Left_Elbow: 89.0
+        Joint_Left_Forearm: -0.0
+        Joint_Left_Wrist_Upper: -0.0
+        Joint_Left_Wrist_Lower: -65.0
+        Joint_Right_Shoulder_Inner: -15.0
+        Joint_Right_Shoulder_Outer: 145.0
+        Joint_Right_UpperArm: 95.0
+        Joint_Right_Elbow: -89.0
+        Joint_Right_Forearm: 0.0
+        Joint_Right_Wrist_Upper: 0.0
+        Joint_Right_Wrist_Lower: -65.0
+  爱心:
+    saved_at: '2026-07-30T18:49:59+08:00'
+    groups:
+    - right_arm
+    loop_count: 1
+    speed_percent: 100
+    keyframes:
+    - transition_sec: 1.5
+      hold_sec: 0.2
+      easing: smooth
+      joints_deg:
+        Joint_Right_Shoulder_Inner: -15.0
+        Joint_Right_Shoulder_Outer: 145.0
+        Joint_Right_UpperArm: 95.0
+        Joint_Right_Elbow: -89.0
+        Joint_Right_Forearm: -0.0
+        Joint_Right_Wrist_Upper: 0.0
+        Joint_Right_Wrist_Lower: -65.0
+  鞠躬:
+    saved_at: '2026-08-04T11:53:18+08:00'
+    groups:
+    - right_arm
+    loop_count: 1
+    speed_percent: 100
+    keyframes:
+    - transition_sec: 5.0
+      hold_sec: 0.0
+      easing: smooth
+      joints_deg:
+        Joint_Right_Shoulder_Inner: -12.3
+        Joint_Right_Shoulder_Outer: -0.4
+        Joint_Right_UpperArm: 3.0
+        Joint_Right_Elbow: -83.8
+        Joint_Right_Forearm: 0.3
+        Joint_Right_Wrist_Upper: 2.7
+        Joint_Right_Wrist_Lower: -0.0

@@ -1,0 +1,18 @@
+[Unit]
+Description=Autolife Yundie chest-screen Logo page
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStartPre=/home/ubuntu/ros2_ws/src/autolife_robot_control_center/logo/set_display_mode.sh portrait
+ExecStart=/home/ubuntu/ros2_ws/src/autolife_robot_control_center/logo/start_logo_display.sh
+ExecStopPost=/home/ubuntu/ros2_ws/src/autolife_robot_control_center/logo/set_display_mode.sh landscape
+KillMode=mixed
+TimeoutStopSec=8
+SuccessExitStatus=143 SIGTERM
+Restart=always
+RestartSec=1
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=default.target
