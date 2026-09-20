@@ -25,7 +25,7 @@ options = {
   num_point_clouds = 0,
 
   lookup_transform_timeout_sec = 0.3,
-  submap_publish_period_sec = 0.5,
+  submap_publish_period_sec = 0.2,
   pose_publish_period_sec = 2e-2,
   trajectory_publish_period_sec = 5e-2,
   rangefinder_sampling_ratio = 1.,
@@ -80,9 +80,10 @@ TRAJECTORY_BUILDER_2D.ceres_scan_matcher.rotation_weight = 35.0
 TRAJECTORY_BUILDER_2D.ceres_scan_matcher.ceres_solver_options.max_num_iterations = 35
 TRAJECTORY_BUILDER_2D.ceres_scan_matcher.ceres_solver_options.num_threads = 2
 
--- Preserve fine motion while avoiding a new noisy graph node every two seconds
--- when the robot is stationary for a long task.
-TRAJECTORY_BUILDER_2D.motion_filter.max_time_seconds = 5.0
+-- A map-building session needs fresh free-space evidence while stationary.
+-- One unified motion filter: bounded 2 Hz static insertion, no extra warmup
+-- states or alternative maps. Matching and quality guards stay independent.
+TRAJECTORY_BUILDER_2D.motion_filter.max_time_seconds = 0.5
 TRAJECTORY_BUILDER_2D.motion_filter.max_distance_meters = 0.04
 TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.4)
 

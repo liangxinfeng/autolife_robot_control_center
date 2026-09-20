@@ -35,7 +35,7 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'robot_id': ParameterValue(robot_id, value_type=int),
-            # Values such as 0_307 otherwise look numeric to the launch
+            # Values such as 0_306 otherwise look numeric to the launch
             # YAML parameter parser (and can become octal integer 198).
             'topic_suffix': ParameterValue(topic_suffix, value_type=str),
         }],
@@ -59,12 +59,12 @@ def generate_launch_description():
             '</Discovery></Domain></CycloneDDS>',
         ),
         DeclareLaunchArgument(
-            'robot_id', default_value='307',
+            'robot_id', default_value='306',
             description='Robot number used by vendor topic suffixes.',
         ),
         DeclareLaunchArgument(
             'topic_suffix', default_value='',
-            description='Explicit vendor suffix, e.g. 0_307. Empty uses ROS_DOMAIN_ID_robot_id.',
+            description='Explicit vendor suffix, e.g. 0_306. Empty uses ROS_DOMAIN_ID_robot_id.',
         ),
         DeclareLaunchArgument(
             'panel', default_value='true',

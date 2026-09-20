@@ -1,0 +1,46 @@
+{
+    "active_map": "map_20260918_093216",
+    "maps": {
+        "map_20260918_093216": {
+            "yaml_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/map_20260918_093216.yaml",
+            "png_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/map_20260918_093216.pgm",
+            "description": "",
+            "dock_pose": [],
+            "prepared_positions": [
+                {
+                    "name": "1",
+                    "description": "",
+                    "position": [
+                        [
+                            1.014265,
+                            -1.937547,
+                            -81.550617
+                        ]
+                    ]
+                },
+                {
+                    "name": "2",
+                    "description": "",
+                    "position": [
+                        [
+                            2.661016,
+                            0.036102,
+                            -94.66146
+                        ]
+                    ]
+                },
+                {
+                    "name": "3",
+                    "description": "",
+                    "position": [
+                        [
+                            0.26896,
+                            -0.261193,
+                            172.654459
+                        ]
+                    ]
+                }
+            ]
+        }
+    }
+}

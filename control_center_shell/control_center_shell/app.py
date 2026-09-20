@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import importlib.util
+import math
 import os
 from pathlib import Path
 import shutil
@@ -11,6 +12,7 @@ import time
 from ament_index_python.packages import get_package_prefix
 import rclpy
 from rclpy.node import Node
+from sensor_msgs.msg import BatteryState
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -19,6 +21,7 @@ VENDOR_SLAM_SERVICE = 'gv-slam-service.service'
 LEGACY_JOINT_PROCESS_PATTERN = (
     'whole_body_joint_control.*(joint_bridge|joint_control_panel)'
 )
+BATTERY_TIMEOUT_SECONDS = 3.5
 
 STYLE = """
 QMainWindow, QWidget { background: #242a33; color: #e6edf5; font-size: 14px; }
@@ -42,6 +45,10 @@ QLabel#stateRunning { background: #173e31; color: #69d59b; }
 QLabel#stateStopped { background: #303844; color: #aeb9c8; }
 QLabel#stateStarting { background: #49391e; color: #f2c46d; }
 QLabel#stateError { background: #48282b; color: #f19a9f; }
+QLabel#batteryState {
+  background: #303844; color: #dbe4ee; border-radius: 9px;
+  padding: 3px 9px; font-size: 12px; font-weight: 700;
+}
 QPushButton {
   background: #303946; color: #dce6f1; border: 1px solid #465363;
   border-radius: 5px; padding: 5px 12px;
@@ -122,11 +129,24 @@ def _process_matches(pattern):
         return []
 
 
-def _external_cartographer_processes():
-    """Find both SLAM workers that can overwrite /map or map->odom."""
-    # This is only called while the managed SLAM module is stopped. Therefore
-    # even a worker left by an earlier control-center run is an external orphan.
-    return _process_matches('cartographer_(node|occupancy_grid_node)')
+def _localization_processes(names=None, proc_root=Path('/proc')):
+    """Inspect actual executables, not arbitrary command-line substrings."""
+    names = names or {'amcl', 'map_server', 'cartographer_node',
+        'cartographer_multi_origin_node', 'cartographer_occupancy_grid_node',
+        'async_slam_toolbox_node', 'sync_slam_toolbox_node',
+        'localization_slam_toolbox_node'}
+    result = []
+    for directory in proc_root.iterdir():
+        if not directory.name.isdigit():
+            continue
+        try:
+            args = directory.joinpath('cmdline').read_bytes().split(b'\0')
+            command = [a.decode('utf-8', errors='replace') for a in args if a]
+            if command and Path(command[0]).name in names:
+                result.append(directory.name + ' ' + ' '.join(command))
+        except (FileNotFoundError, PermissionError, ProcessLookupError):
+            continue
+    return result
 
 
 def _legacy_joint_processes():
@@ -202,9 +222,13 @@ def _stop_legacy_joint_processes():
 class ControlCenterNode(Node):
     def __init__(self):
         super().__init__('control_center_shell')
-        self.declare_parameter('robot_id', 307)
-        self.declare_parameter('topic_suffix', '0_307')
+        self.declare_parameter('robot_id', 306)
+        self.declare_parameter('topic_suffix', '0_306')
         self.declare_parameter('start_navigation', False)
+        self.declare_parameter(
+            'battery_topic',
+            f"/topic_gv_battery_{self.get_parameter('topic_suffix').value}",
+        )
 
 
 class ManagedProcess(QtCore.QObject):
@@ -426,6 +450,10 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         self._slam_module = None
         self._slam_page = None
         self._service_panel = None
+        self._battery_percentage = None
+        self._battery_received_at = 0.0
+        self._battery_display_text = ''
+        self._battery_last_warning_at = 0.0
 
         self.processes = {
             key: ManagedProcess(key, self)
@@ -436,6 +464,21 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             process.state_changed.connect(self._process_state_changed)
 
         self._build_ui()
+        self._battery_subscription = self.node.create_subscription(
+            BatteryState,
+            str(self.node.get_parameter('battery_topic').value),
+            self._on_battery_state,
+            10,
+        )
+        self._shell_spin_timer = QtCore.QTimer(self)
+        self._shell_spin_timer.setInterval(200)
+        self._shell_spin_timer.timeout.connect(self._drain_shell_callbacks)
+        self._shell_spin_timer.start()
+        self._battery_timeout_timer = QtCore.QTimer(self)
+        self._battery_timeout_timer.setInterval(1000)
+        self._battery_timeout_timer.timeout.connect(self._refresh_battery_label)
+        self._battery_timeout_timer.start()
+        self._refresh_battery_label()
         self._load_navigation_ui()
         self.statusBar().showMessage(
             f'机器人 {self.robot_id} · 话题后缀 {self.topic_suffix}'
@@ -467,6 +510,8 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         self.tabs.currentChanged.connect(self._tab_changed)
         browser_layout.addWidget(self.tabs)
         browser_layout.addStretch(1)
+        self.battery_label = QtWidgets.QLabel('电量：--')
+        self.battery_label.setObjectName('batteryState')
         self.current_state_label = QtWidgets.QLabel('未启动')
         self.current_state_label.setObjectName('stateStopped')
         self.current_start_button = QtWidgets.QPushButton('启动')
@@ -475,6 +520,7 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         self.current_stop_button.setObjectName('stopButton')
         self.current_start_button.clicked.connect(self._start_current_module)
         self.current_stop_button.clicked.connect(self._stop_current_module)
+        browser_layout.addWidget(self.battery_label)
         browser_layout.addWidget(self.current_state_label)
         browser_layout.addWidget(self.current_start_button)
         browser_layout.addWidget(self.current_stop_button)
@@ -537,6 +583,44 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         self.stack.addWidget(self.service_page)
         self.stack.addWidget(self.log_view)
         self._refresh_compact_controls()
+
+    def _drain_shell_callbacks(self):
+        if self._closing or not rclpy.ok():
+            return
+        try:
+            rclpy.spin_once(self.node, timeout_sec=0.0)
+        except Exception as error:
+            self._shell_spin_timer.stop()
+            self._append_log('battery', f'电量 ROS 回调已停止：{error}')
+
+    def _on_battery_state(self, message):
+        try:
+            percentage = float(message.percentage)
+        except (TypeError, ValueError):
+            percentage = math.nan
+        if not math.isfinite(percentage) or not 0.0 <= percentage <= 100.0:
+            self._battery_percentage = None
+            self._battery_received_at = 0.0
+            now = time.monotonic()
+            if now - self._battery_last_warning_at >= 10.0:
+                self.node.get_logger().warning(
+                    f'Ignoring invalid battery percentage: {message.percentage!r}'
+                )
+                self._battery_last_warning_at = now
+        else:
+            self._battery_percentage = int(round(percentage))
+            self._battery_received_at = time.monotonic()
+        self._refresh_battery_label()
+
+    def _refresh_battery_label(self):
+        fresh = (
+            self._battery_percentage is not None
+            and time.monotonic() - self._battery_received_at <= BATTERY_TIMEOUT_SECONDS
+        )
+        text = f'电量：{self._battery_percentage}%' if fresh else '电量：--'
+        if text != self._battery_display_text:
+            self._battery_display_text = text
+            self.battery_label.setText(text)
 
     def _tab_changed(self, index):
         self.stack.setCurrentIndex(index)
@@ -704,11 +788,19 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             return False
 
     def _pause_vendor_stack(self):
-        service_active = _service_is_active(VENDOR_SLAM_SERVICE)
-        if self._vendor_paused and not service_active:
+        # An activating/deactivating service is not "inactive". Always let
+        # systemd complete the explicit stop, including its child cgroup.
+        status = subprocess.run(
+            ['systemctl', '--user', 'show', VENDOR_SLAM_SERVICE,
+             '--property=ActiveState', '--value'],
+            capture_output=True, text=True, timeout=3.0, check=False)
+        if status.returncode != 0:
+            QtWidgets.QMessageBox.critical(self, '无法确认定位服务状态', status.stderr)
+            return False
+        state = status.stdout.strip()
+        if state in ('inactive', 'failed'):
             return True
-        if not service_active:
-            return True
+        self._vendor_was_active = True
         self._append_log('system', f'停止 {VENDOR_SLAM_SERVICE}，由综合控制台接管。')
         result = _set_service_state('stop', VENDOR_SLAM_SERVICE)
         if isinstance(result, Exception) or result.returncode != 0:
@@ -737,8 +829,39 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         self._vendor_paused = True
         return True
 
+    def _claim_localization_backend(self, key):
+        """One startup handoff for navigation and mapping; never kill outsiders."""
+        host = self.slam_host if key == 'slam' else self.nav_host
+        try:
+            if not self._pause_vendor_stack():
+                host.set_state('error')
+                return False
+            # The managed previous module and vendor unit have been stopped.
+            # Give already-exiting workers a bounded chance to disappear.
+            deadline = time.monotonic() + 2.0
+            remaining = _localization_processes()
+            while remaining and time.monotonic() < deadline:
+                time.sleep(.05)
+                remaining = _localization_processes()
+        except Exception as error:
+            host.set_state('error')
+            QtWidgets.QMessageBox.warning(self, '定位接管检查失败', str(error))
+            return False
+        if remaining:
+            host.set_state('error')
+            QtWidgets.QMessageBox.warning(
+                self, '其他程序仍在使用定位或地图',
+                '后台定位已停止，但以下独立程序尚未退出。请关闭对应导航/建图窗口后重试；'
+                '本程序不会强制终止其他程序，也未启动第二套定位。\n\n'
+                + '\n'.join(remaining[:6]))
+            return False
+        return True
+
     def _restore_vendor_stack(self):
         if not (self._vendor_paused and self._vendor_was_active):
+            return
+        if _localization_processes():
+            self._append_log('system', '仍有独立导航/建图运行，暂不恢复后台定位，避免 map→odom 冲突。')
             return
         self._append_log('system', f'恢复 {VENDOR_SLAM_SERVICE}。')
         result = _set_service_state('start', VENDOR_SLAM_SERVICE)
@@ -845,27 +968,7 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             if answer != QtWidgets.QMessageBox.Yes:
                 return
             self.stop_slam()
-        external = _external_cartographer_processes()
-        if external:
-            self.nav_host.set_state('error')
-            QtWidgets.QMessageBox.warning(
-                self, '检测到其他建图进程',
-                '机器人上仍有其他 Cartographer 正在运行。请先退出原建图程序，'
-                '再启动综合控制台导航。\n\n' + '\n'.join(external[:4]),
-            )
-            return
-        if not self._pause_vendor_stack():
-            self.nav_host.set_state('error')
-            return
-        remaining_amcl = _process_matches('/nav2_amcl/amcl')
-        if remaining_amcl:
-            self.nav_host.set_state('error')
-            QtWidgets.QMessageBox.warning(
-                self, '检测到其他 AMCL',
-                '停止机器人后台服务后仍有其他 AMCL 进程。为了避免 map → odom '
-                '冲突，综合导航未启动。请先退出手动启动的旧导航功能包。\n\n'
-                + '\n'.join(remaining_amcl[:4]),
-            )
+        if not self._claim_localization_backend('navigation'):
             return
         self._load_navigation_ui()
         self._set_navigation_map_updates(False, drain=True)
@@ -937,33 +1040,14 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             if answer != QtWidgets.QMessageBox.Yes:
                 return
             self.stop_navigation()
-        external = _external_cartographer_processes()
-        if external:
-            self.slam_host.set_state('error')
-            QtWidgets.QMessageBox.warning(
-                self, '检测到其他建图进程',
-                '机器人上仍有其他 Cartographer 节点在运行。请先退出旧建图程序，'
-                '再启动综合控制台建图，避免地图和 TF 被重复发布。\n\n'
-                + '\n'.join(external[:4]),
-            )
-            return
-        if not self._pause_vendor_stack():
-            self.slam_host.set_state('error')
-            return
-        remaining_amcl = _process_matches('/nav2_amcl/amcl')
-        if remaining_amcl:
-            self.slam_host.set_state('error')
-            QtWidgets.QMessageBox.warning(
-                self, '仍有定位进程运行',
-                '检测到 AMCL 仍在运行，因此拒绝启动 Cartographer。请先退出其他'
-                '导航功能包，防止机器人 TF 大范围跳动。\n\n'
-                + '\n'.join(remaining_amcl[:4]),
-            )
+        if not self._claim_localization_backend('slam'):
             return
         if not self._load_slam_ui(resume_state=resume_state):
             return
         self._capture_navigation_map()
-        self._set_navigation_map_updates(True)
+        # Mapping has its own canvas. Do not rebuild the same large map in
+        # the inactive navigation page; keep that page's selected saved map.
+        self._set_navigation_map_updates(False, drain=True)
         launch_args = [
             'launch', 'control_center_slam',
             'multi_lidar_slam_optimized.launch.py',

@@ -40,7 +40,7 @@ ros2 launch control_center_joint_control control_center_joint_control.launch.py
 
 ```bash
 ros2 launch control_center_joint_control control_center_joint_control.launch.py \
-  robot_id:=307 topic_suffix:=0_307
+  robot_id:=306 topic_suffix:=0_306
 ```
 
 只启动后台监控（不打开操作和三维图形界面）：

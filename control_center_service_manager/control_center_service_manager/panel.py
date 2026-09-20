@@ -426,7 +426,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self,
         action_guard=None,
         auto_refresh=True,
-        topic_suffix='0_307',
+        topic_suffix='0_306',
         parent=None,
     ):
         super().__init__(parent)
@@ -935,7 +935,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         layout.addWidget(self.relay_ip_status)
 
         self.relay_ip_edit = QtWidgets.QLineEdit()
-        self.relay_ip_edit.setPlaceholderText('例如 192.168.8.68')
+        self.relay_ip_edit.setPlaceholderText('例如 192.168.50.138')
         self.relay_ip_edit.setClearButtonEnabled(True)
         self.relay_ip_edit.setMaximumWidth(190)
         self.relay_ip_edit.returnPressed.connect(self.save_relay_ip)

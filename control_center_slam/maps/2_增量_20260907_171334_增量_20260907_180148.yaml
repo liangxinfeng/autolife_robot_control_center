@@ -1,0 +1,7 @@
+image: 2_增量_20260907_171334_增量_20260907_180148.pgm
+mode: trinary
+resolution: 0.020
+origin: [-31.547, -27.835, 0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

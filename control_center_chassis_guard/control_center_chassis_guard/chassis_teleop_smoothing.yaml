@@ -1,0 +1,77 @@
+# 手动键盘底盘遥控平滑参数（控制中心「导航」「建图」两个界面共用）
+# Manual keyboard chassis teleop smoothing, shared by the navigation and
+# mapping pages of the control center.
+#
+# 原理 / How it works
+#   键盘只决定「目标速度」(target)；每个控制周期由速度斜坡把「实际下发速度」
+#   (output) 按下面的加速度限制逼近目标。普通松键只把目标置零，因此停车也是
+#   受限制的减速过程；X 键、失焦、切页、关窗、租约丢失、退出仍是立即停车。
+#   The keyboard only sets a target; a periodic slew-rate limiter moves the
+#   commanded velocity toward it.  A normal key release only zeroes the target,
+#   so stopping is rate limited too, while X key / focus loss / page switch /
+#   window close / lost lease / shutdown keep their instant-stop meaning.
+#
+# 单位 / Units: 平移 m/s^2, 旋转 rad/s^2
+#
+# 初始值依据 / Where the values come from
+#   厂商 Nav2 自动导航下发的同一底盘话题已被 velocity_smoother 整形，其配置为
+#   max_accel [0.5, 0.0, 1.0] / max_decel [-1.0, 0.0, -1.0] @20 Hz。
+#   平移（linear_*）沿用该已验证值（不会引起机身晃动）。
+#   停车减速度故意取与加速度相同，而不是厂商更硬的 1.0 m/s^2，因为本任务要减少的
+#   正是停车时的上身惯性摆动。
+#   转向加速度 angular_accel 2026-09-15 真机试驾后由 1.0 提到 1.3：用户反馈整体
+#   启停已经满意、只有 A/D 转向略不跟手，因此只加大转向的起步加速度；
+#   angular_decel 与全部 linear_* 未动（停车手感已认可）。
+#   The vendor Nav2 velocity_smoother that shapes automatic navigation on this
+#   chassis uses max_accel [0.5, 0.0, 1.0] and max_decel [-1.0, 0.0, -1.0] at
+#   20 Hz.  The translation limits reuse those proven values, and deceleration is
+#   deliberately kept equal to acceleration rather than the vendor's firmer
+#   1.0 m/s^2 because the sway to remove is on stop.  angular_accel was raised
+#   from 1.0 to 1.3 on 2026-09-15 after a real-robot test reported start/stop
+#   already good but A/D rotation slightly laggy; angular_decel and every
+#   linear limit were left untouched.  All four limits are independent: raise one
+#   for a snappier response, lower it for less body sway.
+#
+# 当前速度范围 / Current speed ranges (slider defaults on 306)
+#   导航页: 线速度 0.04~0.50 m/s (默认 0.20), 角速度 0.10~1.50 rad/s (默认 0.80)
+#   建图页: 线速度 0.03~0.60 m/s (默认 0.18), 角速度 0.10~1.50 rad/s (默认 0.45)
+#   按默认线速度 0.20 m/s 计：起步约 0.40 s 到目标；停车约 0.40 s 到零。
+#   按默认角速度 0.80 rad/s 计：起步约 0.62 s 到目标；停车约 0.80 s 到零。
+#   At the navigation page defaults (0.20 m/s, 0.80 rad/s): about 0.40 s to
+#   reach the target linear speed and about 0.62 s to reach the target angular
+#   speed; about 0.40 s / 0.80 s to stop.
+#
+# 控制周期 / Control loop
+#   导航页沿用其 ROS 参数 manual_cmd_vel_rate_hz（默认 50 Hz），建图页沿用本文件
+#   的 update_hz（默认 50 Hz），两个界面因此行为一致。斜坡按实际经过时间推进，
+#   周期不同只影响下发粒度，不影响速度曲线。
+#   The navigation page keeps using its own manual_cmd_vel_rate_hz ROS parameter
+#   (default 50 Hz) and the mapping page uses update_hz below (default 50 Hz),
+#   so the two pages behave the same.  The ramp integrates real elapsed time, so
+#   the tick rate changes publish granularity, not the velocity profile.
+#
+# 生效方式 / How a change takes effect
+#   控制中心启动时构造页面节点，此时读取本文件：**改完需重开控制中心**。
+#   建图页每次“启动建图”都会重建节点，所以建图页只需停掉再启动建图。
+#   The pages build their ramp when the page node is created, i.e. at control
+#   center start-up, so a change needs the control center restarted.  The
+#   mapping page rebuilds its node on every "启动建图", so restarting mapping is
+#   enough there.
+#
+# 本文件缺失或非法时会回退到代码内置值（velocity_ramp.py 的 DEFAULT_*，
+# 与出厂验证值一致），人工驾驶不会因此不可用。
+# If this file is missing or invalid the built-in DEFAULT_* limits in
+# velocity_ramp.py are used instead, so manual driving keeps working.
+manual_teleop_smoothing:
+  # 起步加速度（前后 W/S 与左右平移 Q/E）
+  linear_accel: 0.5
+  # 停车减速度（前后 W/S 与左右平移 Q/E）
+  linear_decel: 0.5
+  # 起步角加速度（转向 A/D）
+  # 2026-09-15 真机反馈转向略不跟手，由 1.0 提到 1.3；觉得仍迟钝可再提到 1.5，
+  # 觉得转向起步发晃则回 1.0~1.2。
+  angular_accel: 1.3
+  # 停车角减速度（转向 A/D）
+  angular_decel: 1.0
+  # 建图页平滑更新频率（Hz）
+  update_hz: 50.0

@@ -71,9 +71,10 @@ cmd_vel_arbiter:
     staging_final_heading_distance: 0.25
     staging_final_max_linear_speed: 0.05
     staging_final_max_angular_speed: 0.10
-    battery_topic: "/topic_gv_battery_0_307"
+    battery_topic: "/topic_gv_battery_0_306"
     charging_current_threshold: 0.10
     charging_use_current: false
     charging_confirm_samples: 1
     charging_stop_hold_sec: 8.0
     charging_stop_publish_hz: 20.0
+

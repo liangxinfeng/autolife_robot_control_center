@@ -9,7 +9,7 @@ class NavCmdVelRelayNode(Node):
         super().__init__('nav_cmd_vel_relay')
 
         self.declare_parameter('input_topic', '/nav_cmd_vel')
-        self.declare_parameter('output_topic', '/arm_cmd_vel_0_307')
+        self.declare_parameter('output_topic', '/arm_cmd_vel_0_306')
 
         input_topic = self.get_parameter('input_topic').get_parameter_value().string_value
         output_topic = self.get_parameter('output_topic').get_parameter_value().string_value

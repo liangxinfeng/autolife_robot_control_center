@@ -3,15 +3,27 @@ waypoints:
   充电桩:
     description: ''
     frame_id: map
-    x: 12.382581
-    y: -6.564728
-    yaw: -1.4820414823156642
+    x: 12.502763
+    y: -6.514609
+    yaw: -1.558030517406912
+  前台:
+    description: ''
+    frame_id: map
+    x: 13.691062
+    y: -7.520847
+    yaw: -3.049273183552873
   前台区:
     description: ''
     frame_id: map
-    x: 9.434919
-    y: -11.322637
-    yaw: 0.10007471839510954
+    x: 9.464046
+    y: -11.317994
+    yaw: 0.014480403391851275
+  机器人:
+    description: ''
+    frame_id: map
+    x: 8.689089
+    y: -12.260905
+    yaw: -3.0800065467249005
   毛巾区:
     description: ''
     frame_id: map
@@ -48,6 +60,12 @@ waypoints:
     x: 13.60736
     y: -14.525703
     yaw: 1.6596225028806577
+  货架:
+    description: ''
+    frame_id: map
+    x: 14.197163
+    y: -7.474498
+    yaw: 0.06260262152783894
   迎宾区:
     description: ''
     frame_id: map
@@ -57,9 +75,9 @@ waypoints:
   递水区:
     description: ''
     frame_id: map
-    x: 9.486266
-    y: -12.705543
-    yaw: -1.5073945539091544
+    x: 9.221455
+    y: -12.067202
+    yaw: -1.6137675372561808
   配送区:
     description: ''
     frame_id: map

@@ -1,0 +1,26 @@
+map_yaml: /home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/map_20260918_101512.yaml
+waypoints:
+  '1':
+    description: ''
+    frame_id: map
+    x: -2.314034
+    y: -0.804336
+    yaw: 1.7629756477427136
+  '2':
+    description: ''
+    frame_id: map
+    x: -0.759888
+    y: 1.47075
+    yaw: 1.8422517661339972
+  '3':
+    description: ''
+    frame_id: map
+    x: 0.118639
+    y: 0.316698
+    yaw: 0.181305710268382
+  '4':
+    description: ''
+    frame_id: map
+    x: 0.802925
+    y: 0.24067
+    yaw: -2.9697270278197205

@@ -22,7 +22,7 @@ amcl:
     # Jazzy only applies do_beamskip in this model. Navigation costmaps still
     # retain ALL obstacle observations; this changes localization only.
     laser_model_type: likelihood_field_prob
-    max_beams: 60
+    max_beams: 120  # retain more directions for furniture/partially obscured walls
     max_particles: 2000
     min_particles: 500
     odom_frame_id: odom
@@ -55,28 +55,38 @@ bt_navigator:
     odom_topic: /odom
     bt_loop_duration: 10
     default_server_timeout: 20
+    goal_reached_tol: 0.05
 
 planner_server:
   ros__parameters:
     use_sim_time: false
     expected_planner_frequency: 5.0
-    planner_plugins: ["GridBased"]
-    GridBased:
-      plugin: "nav2_smac_planner::SmacPlanner2D"
-      # Do not let the global planner silently replace an exact waypoint with
-      # a point up to 50 cm away.  A small fallback remains for grid rounding.
-      tolerance: 0.10
+    planner_plugins: ["GridBased", "ApproachGridBased"]
+    ApproachGridBased:
+      plugin: "control_center_navigation::ExactGoalSmacPlanner"
+      allow_occupied_approach: true
+      tolerance: 0.0
+      use_final_approach_orientation: false
       downsample_costmap: false
       downsampling_factor: 1
       allow_unknown: true
       max_iterations: 100000
       max_planning_time: 2.0
       smooth_path: true
-      motion_model_for_search: "BICYCLE"
-      minimum_turning_radius: 0.25
-      reverse_penalty: 10.0
-      change_penalty: 0.5
-      non_strict_goal: true
+      cost_travel_multiplier: 5.0
+      use_quadratic_cost: true
+    GridBased:
+      plugin: "control_center_navigation::ExactGoalSmacPlanner"
+      # A displaced fallback goal conflicts with the task's 5 cm accuracy.
+      # The adapter corrects grid quantization only, with a collision check.
+      tolerance: 0.0
+      use_final_approach_orientation: false
+      downsample_costmap: false
+      downsampling_factor: 1
+      allow_unknown: true
+      max_iterations: 100000
+      max_planning_time: 2.0
+      smooth_path: true
       cost_travel_multiplier: 5.0  # 宽路口优先走中间，避免全局路径总贴着膨胀层边缘
       use_quadratic_cost: true
 
@@ -88,25 +98,25 @@ controller_server:
     min_y_velocity_threshold: 0.0
     min_theta_velocity_threshold: 0.001
     failure_tolerance: 0.5  # 恢复原值，避免频繁触发恢复
-    progress_checker_plugin: "progress_checker"
+    progress_checker_plugins: ["progress_checker"]
+    publish_zero_velocity: true
     goal_checker_plugins: ["goal_checker"]
     controller_plugins: ["FollowPath"]
     progress_checker:
-      plugin: "nav2_controller::SimpleProgressChecker"
+      plugin: "nav2_controller::PoseProgressChecker"
       required_movement_radius: 0.05
+      required_movement_angle: 0.10
       movement_time_allowance: 20.0
     goal_checker:
-      plugin: "nav2_controller::SimpleGoalChecker"
-      # Fine 版需要先在充电桩预备位精确对正，避免末段边倒车边大幅转向。
-      # waypoint_manager handles final refinement; the handoff radius is NOT arrival tolerance.
-      # The robot must satisfy position and heading at the same time.  With
-      # stateful=true, a final turn can move XY outside tolerance and still
-      # be reported as a success.
+      plugin: "control_center_navigation::SettledGoalChecker"
+      # One arrival decision after active braking and .35 s of stopped feedback.
       xy_goal_tolerance: 0.05
-      yaw_goal_tolerance: 0.06
+      yaw_goal_tolerance: 0.05
       stateful: false
+      trans_stopped_velocity: 0.015
+      rot_stopped_velocity: 0.025
     FollowPath:
-      plugin: "nav2_mppi_controller::MPPIController"
+      plugin: "control_center_navigation::SettledMPPIController"
       # Holonomic chassis: allow conservative lateral corrections, retaining collision checks.
       time_steps: 40
       model_dt: 0.07
@@ -121,8 +131,8 @@ controller_server:
       vx_min: -0.12
       vy_max: 0.12
       wz_max: 1.3
-      ax_max: 0.8
-      ax_min: -0.8
+      ax_max: 0.6
+      ax_min: -0.6
       ay_max: 0.30
       ay_min: -0.30
       az_max: 1.8
@@ -152,20 +162,20 @@ controller_server:
       GoalCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 8.0
-        threshold_to_consider: 1.4
+        cost_weight: 10.0
+        threshold_to_consider: 1.3  # approximately 40 * .07 * .45m horizon
       GoalAngleCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 3.0
-        threshold_to_consider: 0.5
+        cost_weight: 5.0
+        threshold_to_consider: 0.8  # begin alignment before the last few centimetres
       PathAlignCritic:
         enabled: true
         cost_power: 1
         cost_weight: 10.0
         max_path_occupancy_ratio: 0.05
         trajectory_point_step: 4
-        threshold_to_consider: 0.5
+        threshold_to_consider: 0.8
         offset_from_furthest: 18
         use_path_orientations: false
       PathFollowCritic:
@@ -173,20 +183,20 @@ controller_server:
         cost_power: 1
         cost_weight: 6.0
         offset_from_furthest: 5
-        threshold_to_consider: 1.4
+        threshold_to_consider: 1.3
       PathAngleCritic:
         enabled: true
         cost_power: 1
         cost_weight: 3.0
         offset_from_furthest: 4
-        threshold_to_consider: 0.5
+        threshold_to_consider: 0.8
         max_angle_to_furthest: 0.9
         mode: 0
       PreferForwardCritic:
         enabled: true
         cost_power: 1
         cost_weight: 6.0
-        threshold_to_consider: 0.5
+        threshold_to_consider: 0.8
 
 behavior_server:
   ros__parameters:
@@ -233,7 +243,7 @@ local_costmap:
         enabled: true
         observation_sources: front_scan rear_scan
         front_scan:
-          topic: /topic_gv_front_lidar_0_307
+          topic: /topic_gv_front_lidar_0_306
           data_type: "LaserScan"
           clearing: true
           marking: true
@@ -242,7 +252,7 @@ local_costmap:
           obstacle_max_range: 10.0  # 介于8和16之间
           max_obstacle_height: 2.0
         rear_scan:
-          topic: /topic_gv_rear_lidar_0_307
+          topic: /topic_gv_rear_lidar_0_306
           data_type: "LaserScan"
           clearing: true
           marking: true
@@ -279,7 +289,7 @@ global_costmap:
         enabled: true
         observation_sources: front_scan rear_scan
         front_scan:
-          topic: /topic_gv_front_lidar_0_307
+          topic: /topic_gv_front_lidar_0_306
           data_type: "LaserScan"
           clearing: true
           marking: true
@@ -288,7 +298,7 @@ global_costmap:
           obstacle_max_range: 10.0
           max_obstacle_height: 2.0
         rear_scan:
-          topic: /topic_gv_rear_lidar_0_307
+          topic: /topic_gv_rear_lidar_0_306
           data_type: "LaserScan"
           clearing: true
           marking: true

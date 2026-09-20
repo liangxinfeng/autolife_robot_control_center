@@ -21,8 +21,8 @@ class CmdVelArbiterNode(Node):
         super().__init__('cmd_vel_arbiter')
 
         self.declare_parameter('nav_input_topic', '/nav_cmd_vel')
-        self.declare_parameter('arm_input_topic', '/arm_cmd_vel_vr_0_307')
-        self.declare_parameter('output_topic', '/arm_cmd_vel_raw_0_307')
+        self.declare_parameter('arm_input_topic', '/arm_cmd_vel_vr_0_306')
+        self.declare_parameter('output_topic', '/arm_cmd_vel_raw_0_306')
         self.declare_parameter('nav_priority_timeout_sec', 0.5)
         self.declare_parameter('manual_override_topic', '/manual_cmd_vel_active')
         self.declare_parameter('manual_override_timeout_sec', 0.45)
@@ -42,7 +42,7 @@ class CmdVelArbiterNode(Node):
         self.declare_parameter('staging_final_heading_distance', 0.35)
         self.declare_parameter('staging_final_max_linear_speed', 0.05)
         self.declare_parameter('staging_final_max_angular_speed', 0.10)
-        self.declare_parameter('battery_topic', '/topic_gv_battery_0_307')
+        self.declare_parameter('battery_topic', '/topic_gv_battery_0_306')
         self.declare_parameter('charging_current_threshold', 0.10)
         self.declare_parameter('charging_use_current', False)
         self.declare_parameter('charging_confirm_samples', 2)
@@ -467,3 +467,4 @@ def main(args=None) -> None:
 
 if __name__ == '__main__':
     main()
+

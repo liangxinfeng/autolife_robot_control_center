@@ -29,7 +29,7 @@ Manager=extract('waypoint_manager_node.py',{
     '_navigation_target','_build_goal','_start_navigation','_battery_state_fresh',
     '_start_precise_docking','_complete_short_distance','_handle_docking_goal_response',
     '_complete_goal_by_tolerance','_handle_docking_result','_handle_battery_state',
-    '_check_docking_drift','_finish_dock_abort',
+    '_check_docking_drift','_finish_dock_abort','_clear_occupied_wait','_uses_mppi_only',
 })
 Arbiter=extract('cmd_vel_arbiter_node.py',{'_filter_nav_cmd_vel','_limit_staging_approach_cmd_vel'})
 

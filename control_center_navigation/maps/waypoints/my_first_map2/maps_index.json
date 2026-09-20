@@ -1,0 +1,12 @@
+{
+    "active_map": "my_first_map2",
+    "maps": {
+        "my_first_map2": {
+            "yaml_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/multi_lidar_slam/maps/my_first_map2.yaml",
+            "png_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/multi_lidar_slam/maps/my_first_map.pgm",
+            "description": "",
+            "dock_pose": [],
+            "prepared_positions": []
+        }
+    }
+}

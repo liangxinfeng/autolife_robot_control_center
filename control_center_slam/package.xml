@@ -28,6 +28,8 @@
   <exec_depend>python3-scipy</exec_depend>
   <exec_depend>python3-pyqt5</exec_depend>
   <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>control_center_chassis_guard</exec_depend>
+  <exec_depend>python3-redis</exec_depend>
   <exec_depend>rviz2</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

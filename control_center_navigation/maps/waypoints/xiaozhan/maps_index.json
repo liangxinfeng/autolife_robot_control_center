@@ -1,0 +1,35 @@
+{
+    "active_map": "xiaozhan",
+    "maps": {
+        "xiaozhan": {
+            "yaml_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/xiaozhan.yaml",
+            "png_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/xiaozhan.png",
+            "description": "",
+            "dock_pose": [],
+            "prepared_positions": [
+                {
+                    "name": "HUOJIA",
+                    "description": "",
+                    "position": [
+                        [
+                            -9.262546,
+                            -5.773146,
+                            178.941392
+                        ]
+                    ]
+                },
+                {
+                    "name": "前台",
+                    "description": "",
+                    "position": [
+                        [
+                            -8.773248,
+                            -5.435096,
+                            1.175124
+                        ]
+                    ]
+                }
+            ]
+        }
+    }
+}

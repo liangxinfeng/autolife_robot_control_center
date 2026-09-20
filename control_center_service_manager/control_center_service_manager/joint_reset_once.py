@@ -18,7 +18,7 @@ class JointResetOnce(Node):
             'control_center_joint_reset_once',
             parameter_overrides=parameter_overrides,
         )
-        self.declare_parameter('topic_suffix', '0_307')
+        self.declare_parameter('topic_suffix', '0_306')
         self.declare_parameter('discovery_timeout_sec', 5.0)
         suffix = str(self.get_parameter('topic_suffix').value).strip()
         if not SAFE_SUFFIX_RE.fullmatch(suffix):

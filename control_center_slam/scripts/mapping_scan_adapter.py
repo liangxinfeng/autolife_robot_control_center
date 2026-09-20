@@ -82,10 +82,10 @@ class SnapshotGate:
 class MappingScanAdapter(Node):
     def __init__(self):
         super().__init__('mapping_scan_adapter')
-        self.declare_parameter('front_scan_topic', '/topic_gv_front_lidar_0_307')
-        self.declare_parameter('rear_scan_topic', '/topic_gv_rear_lidar_0_307')
+        self.declare_parameter('front_scan_topic', '/topic_gv_front_lidar_0_306')
+        self.declare_parameter('rear_scan_topic', '/topic_gv_rear_lidar_0_306')
         self.declare_parameter('max_age_sec', 0.5)
-        self.declare_parameter('odom_topic', '/topic_gv_wheel_odom_0_307')
+        self.declare_parameter('odom_topic', '/topic_gv_wheel_odom_0_306')
         self.declare_parameter('stationary_denoise_enabled', True)
         self.denoisers = {side: StationaryScanDenoiser() for side in ('front', 'rear')}
         self.last_odom = None

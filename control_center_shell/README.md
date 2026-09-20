@@ -29,5 +29,5 @@ Cartographer 重复发布 `map -> odom`。退出控制台时会恢复启动前�
 ```bash
 ros2 launch control_center_navigation bringup_all.launch.py
 ros2 launch control_center_slam multi_lidar_slam_optimized.launch.py
-ros2 launch control_center_joint_control whole_body_joint_control.launch.py topic_suffix:=0_307
+ros2 launch control_center_joint_control whole_body_joint_control.launch.py topic_suffix:=0_306
 ```

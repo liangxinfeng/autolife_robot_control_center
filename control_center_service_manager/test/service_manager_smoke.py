@@ -144,7 +144,7 @@ def main():
     assert panel.logo_display_start_button.text() == '开启 Logo 网页'
     assert panel.logo_display_stop_button.text() == '关闭 Logo 网页'
     assert module.LOGO_SERVICE_UNIT == 'autolife-logo-display.service'
-    assert '/control_reset_0_307' in panel.joint_reset_button.toolTip()
+    assert '/control_reset_0_306' in panel.joint_reset_button.toolTip()
     for card in panel._core_cards.values():
         card.apply_state({
             'active': 'active', 'sub': 'running', 'enabled': 'enabled'

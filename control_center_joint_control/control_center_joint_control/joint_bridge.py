@@ -41,7 +41,7 @@ from .joint_definitions import (
 class JointBridge(Node):
     def __init__(self):
         super().__init__('whole_body_joint_bridge')
-        self.declare_parameter('robot_id', 307)
+        self.declare_parameter('robot_id', 306)
         self.declare_parameter('topic_suffix', '')
         self.declare_parameter('feedback_timeout_sec', 0.6)
         self.declare_parameter('hardware_unlock_timeout_sec', 180.0)

@@ -53,10 +53,12 @@ install(PROGRAMS
 
 # This private executable is statically linked against the patched SLAM core.
 # Never replace /opt/ros or globally overlay cartographer for other applications.
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/cartographer_multi_origin_node")
-  message(FATAL_ERROR "Run scripts/build_multi_origin_cartographer.sh first; private mapping engine is missing.")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/cartographer_multi_origin_node" OR
+   NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/cartographer_occupancy_grid_node")
+  message(FATAL_ERROR "Run scripts/build_multi_origin_cartographer.sh first; private mapping executables are missing.")
 endif()
 install(PROGRAMS runtime/cartographer_multi_origin_node
+  runtime/cartographer_occupancy_grid_node
   DESTINATION lib/${PROJECT_NAME})
 
 ament_export_dependencies(rviz_common)

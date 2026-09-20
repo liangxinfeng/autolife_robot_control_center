@@ -1,0 +1,14 @@
+map_yaml: /home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/xiaozhan.yaml
+waypoints:
+  HUOJIA:
+    description: ''
+    frame_id: map
+    x: -9.262546
+    y: -5.773146
+    yaw: 3.1231164585018414
+  前台:
+    description: ''
+    frame_id: map
+    x: -8.773248
+    y: -5.435096
+    yaw: 0.020509782919205848
