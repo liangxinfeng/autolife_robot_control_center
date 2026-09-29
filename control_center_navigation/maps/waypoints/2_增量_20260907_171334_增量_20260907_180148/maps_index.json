@@ -1,0 +1,12 @@
+{
+    "active_map": "2_增量_20260907_171334_增量_20260907_180148",
+    "maps": {
+        "2_增量_20260907_171334_增量_20260907_180148": {
+            "yaml_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/2_增量_20260907_171334_增量_20260907_180148.yaml",
+            "png_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/2_增量_20260907_171334_增量_20260907_180148.pgm",
+            "description": "",
+            "dock_pose": [],
+            "prepared_positions": []
+        }
+    }
+}

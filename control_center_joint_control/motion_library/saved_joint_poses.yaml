@@ -26,6 +26,32 @@ poses:
       Joint_Waist_Yaw: -0.0011803493026859503
       Joint_Left_Gripper: 10.0
       Joint_Right_Gripper: 10.0
+  laundry_down:
+    saved_at: '2026-09-21T10:09:52+08:00'
+    joints_deg:
+      Joint_Neck_Roll: -0.6229227573521173
+      Joint_Neck_Pitch: -34.39189328749342
+      Joint_Neck_Yaw: -2.0873376606009546
+      Joint_Left_Shoulder_Inner: -0.20873726317029548
+      Joint_Left_Shoulder_Outer: -4.800957052917203
+      Joint_Left_UpperArm: 7.305804210960953
+      Joint_Left_Elbow: 111.69640813960896
+      Joint_Left_Forearm: -4.294888484901441
+      Joint_Left_Wrist_Upper: 3.508038686140871
+      Joint_Left_Wrist_Lower: 0.7977782681877994
+      Joint_Right_Shoulder_Inner: 0.29662663713677856
+      Joint_Right_Shoulder_Outer: 4.71306767895072
+      Joint_Right_UpperArm: -7.195942493502849
+      Joint_Right_Elbow: -110.20228878217947
+      Joint_Right_Forearm: 1.1256323510047033
+      Joint_Right_Wrist_Upper: -1.8031974554929713
+      Joint_Right_Wrist_Lower: 0.6884935739154981
+      Joint_Ankle: 75.99996771694215
+      Joint_Knee: 155.0
+      Joint_Waist_Pitch: 81.00001815922005
+      Joint_Waist_Yaw: 0.024378752905475205
+      Joint_Left_Gripper: 180.8443120818049
+      Joint_Right_Gripper: 180.90988289836815
   hold the basket:
     saved_at: '2026-08-10T11:05:10+08:00'
     joints_deg:
@@ -182,6 +208,7 @@ poses:
       Joint_Waist_Yaw: -0.0008625629519628099
       Joint_Left_Gripper: 182.22129922963586
       Joint_Right_Gripper: 181.41259249202085
+  
   鞠躬:
     saved_at: '2026-07-30T11:33:28+08:00'
     joints_deg:
@@ -234,3 +261,4 @@ poses:
       Joint_Waist_Yaw: -0.0005447766012396695
       Joint_Left_Gripper: 181.08473840920394
       Joint_Right_Gripper: 180.80059820409596
+

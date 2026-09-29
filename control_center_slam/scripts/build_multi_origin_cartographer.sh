@@ -36,15 +36,21 @@ cmake -S "$build_dir/src/cartographer_ros" -B "$build_dir/ros" \
   -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=OFF \
   -Dcartographer_DIR="$build_dir/install/share/cartographer" \
   -DCMAKE_INSTALL_PREFIX="$build_dir/install"
-nice -n 12 cmake --build "$build_dir/ros" --target cartographer_node -j"$jobs"
-if ldd "$build_dir/ros/cartographer_node" | grep 'not found'; then
-  echo 'Runtime dependencies are missing; not publishing the executable.' >&2
-  exit 1
-fi
+nice -n 12 cmake --build "$build_dir/ros" --target cartographer_node cartographer_occupancy_grid_node -j"$jobs"
+for executable in cartographer_node cartographer_occupancy_grid_node; do
+  if ldd "$build_dir/ros/$executable" | grep 'not found'; then
+    echo 'Runtime dependencies are missing; not publishing the executables.' >&2
+    exit 1
+  fi
+done
 mkdir -p "$package_dir/runtime"
 install -m 755 "$build_dir/ros/cartographer_node" \
   "$package_dir/runtime/cartographer_multi_origin_node.new"
 mv -f "$package_dir/runtime/cartographer_multi_origin_node.new" \
   "$package_dir/runtime/cartographer_multi_origin_node"
+install -m 755 "$build_dir/ros/cartographer_occupancy_grid_node" \
+  "$package_dir/runtime/cartographer_occupancy_grid_node.new"
+mv -f "$package_dir/runtime/cartographer_occupancy_grid_node.new" \
+  "$package_dir/runtime/cartographer_occupancy_grid_node"
 echo 'Build and tests passed. Rebuild control_center_slam with colcon; restart mapping manually.'
 echo "Build logs and sources retained: $build_dir"

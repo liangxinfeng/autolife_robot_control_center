@@ -88,9 +88,9 @@ public:
   {
     map_topic_ = declare_parameter<std::string>("map_topic", "/map");
     scan_topic_ = declare_parameter<std::string>(
-      "scan_topic", "/topic_gv_front_lidar_0_307");
+      "scan_topic", "/topic_gv_front_lidar_0_306");
     rear_scan_topic_ = declare_parameter<std::string>(
-      "rear_scan_topic", "/topic_gv_rear_lidar_0_307");
+      "rear_scan_topic", "/topic_gv_rear_lidar_0_306");
     initialpose_topic_ = declare_parameter<std::string>("initialpose_topic", "/initialpose");
     result_pose_topic_ = declare_parameter<std::string>(
       "result_pose_topic", "/global_relocalization/result_pose");

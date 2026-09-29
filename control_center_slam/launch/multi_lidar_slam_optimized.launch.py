@@ -36,6 +36,9 @@ def generate_launch_description():
     open_rviz = LaunchConfiguration('open_rviz')
     publish_lidar_static_tf = LaunchConfiguration('publish_lidar_static_tf')
     enable_keyboard_control = LaunchConfiguration('enable_keyboard_control')
+    enable_motion_safety_watchdog = LaunchConfiguration(
+        'enable_motion_safety_watchdog'
+    )
     keyboard_cmd_vel_topic = LaunchConfiguration('keyboard_cmd_vel_topic')
     keyboard_linear_speed = LaunchConfiguration('keyboard_linear_speed')
     keyboard_angular_speed = LaunchConfiguration('keyboard_angular_speed')
@@ -110,14 +113,14 @@ def generate_launch_description():
     )
 
     occupancy_grid_node = Node(
-        package='cartographer_ros',
+        package=PACKAGE_NAME,
         executable='cartographer_occupancy_grid_node',
         name='cartographer_occupancy_grid_node_optimized',
         output='screen',
         parameters=[{'use_sim_time': use_sim_time}],
         arguments=[
             '-resolution', LaunchConfiguration('map_resolution'),
-            '-publish_period_sec', '0.5',
+            '-publish_period_sec', '0.2',
         ],
     )
 
@@ -154,6 +157,20 @@ def generate_launch_description():
         ],
     )
 
+    motion_safety_watchdog = Node(
+        package=PACKAGE_NAME,
+        executable='motion_safety_watchdog.py',
+        name='control_center_slam_motion_watchdog',
+        condition=IfCondition(enable_motion_safety_watchdog),
+        output='screen',
+        parameters=[{
+            'input_topic': '/control_center/chassis/slam_input',
+            'output_topic': '/topic_gv_target_cmd_vel_0_307',
+            'heartbeat_topic': '/control_center/operator_heartbeat',
+            'heartbeat_timeout_sec': 0.30,
+        }],
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument('load_state_filename', default_value=''),
         DeclareLaunchArgument('start_new_trajectory', default_value='true'),
@@ -165,6 +182,13 @@ def generate_launch_description():
         DeclareLaunchArgument('map_resolution', default_value='0.02'),
         DeclareLaunchArgument('use_sim_time', default_value='false'),
         DeclareLaunchArgument('open_rviz', default_value='true'),
+        DeclareLaunchArgument(
+            'enable_motion_safety_watchdog',
+            default_value='false',
+            description=(
+                'Gate control-center mapping teleop on the UI heartbeat.'
+            ),
+        ),
         DeclareLaunchArgument(
             'enable_keyboard_control',
             default_value='true',
@@ -201,6 +225,7 @@ def generate_launch_description():
         SetEnvironmentVariable('ROS_DOMAIN_ID', '0'),
         SetEnvironmentVariable('CYCLONEDDS_URI', cyclone_uri),
         OpaqueFunction(function=_validate_resume),
+        motion_safety_watchdog,
         front_static_tf,
         rear_static_tf,
         scan_adapter,

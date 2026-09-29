@@ -3,6 +3,7 @@
 
 from dataclasses import dataclass
 import ipaddress
+import json
 from pathlib import Path
 import re
 import signal
@@ -239,9 +240,9 @@ def speaker_mixer_command(volume, cards_content=None):
     if cards_content is None:
         cards_content = ALSA_CARDS_PATH.read_text(encoding='utf-8')
     card = parse_pch_card_index(cards_content)
-    switch = 'mute' if level == 0 else 'unmute'
-    return 'amixer', [
-        '-M', '-c', str(card), 'sset', 'Master', f'{level}%', switch,
+    return sys.executable, [
+        str(Path(__file__).with_name('speaker_volume.py')),
+        '--card', str(card), '--volume', str(level),
     ], card
 
 
@@ -421,6 +422,8 @@ class ServiceCard(QtWidgets.QFrame):
 class ServiceManagerPanel(QtWidgets.QWidget):
     log_message = QtCore.pyqtSignal(str)
     service_state_changed = QtCore.pyqtSignal(str, str, str)
+    repair_requested = QtCore.pyqtSignal()
+    status_check_requested = QtCore.pyqtSignal()
 
     def __init__(
         self,
@@ -444,6 +447,8 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._voice_feedback_busy = False
         self._voice_volume_busy = False
         self._logo_busy = False
+        self._repair_busy = False
+        self._status_check_busy = False
         self._build_ui()
 
         self.refresh_timer = QtCore.QTimer(self)
@@ -503,8 +508,10 @@ class ServiceManagerPanel(QtWidgets.QWidget):
             self._core_cards[service.unit] = card
             cards_layout.addWidget(card, index // 2, index % 2)
         layout.addWidget(cards_group)
+        layout.addWidget(self._build_service_repair_card())
         layout.addWidget(self._build_navigation_mode_card())
         layout.addWidget(self._build_voice_feedback_card())
+        layout.addWidget(self._build_system_volume_card())
         layout.addWidget(self._build_logo_display_card())
         layout.addWidget(self._build_relay_ip_card())
         layout.addWidget(self._build_joint_reset_card())
@@ -521,6 +528,144 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         layout.addWidget(self.event_label)
         scroll.setWidget(content)
         outer.addWidget(scroll, 1)
+
+    def _build_service_repair_card(self):
+        card = QtWidgets.QFrame()
+        card.setObjectName('modeCard')
+        layout = QtWidgets.QHBoxLayout(card)
+        layout.setContentsMargins(13, 10, 13, 10)
+        layout.setSpacing(12)
+
+        text_box = QtWidgets.QVBoxLayout()
+        title = QtWidgets.QLabel('服务状态修复')
+        title.setObjectName('cardTitle')
+        hint = QtWidgets.QLabel(
+            '“状态自检”只检查控制进程、服务和双雷达；“修复服务状态”按检查结果恢复已知问题。'
+            '修复不会驱动机器人，也不会终止归属不明的进程。'
+        )
+        hint.setObjectName('muted')
+        hint.setWordWrap(True)
+        self.service_repair_detail = QtWidgets.QLabel(
+            '可随时运行状态自检；如发现可恢复问题，可点击“修复服务状态”。'
+        )
+        self.service_repair_detail.setWordWrap(True)
+        self.service_repair_detail.setObjectName('muted')
+        text_box.addWidget(title)
+        text_box.addWidget(hint)
+        text_box.addWidget(self.service_repair_detail)
+        layout.addLayout(text_box, 1)
+
+        actions = QtWidgets.QVBoxLayout()
+        repair_row = QtWidgets.QHBoxLayout()
+        self.service_repair_status = QtWidgets.QLabel('待命')
+        self.service_repair_status.setObjectName('stateIdle')
+        repair_row.addWidget(self.service_repair_status)
+        self.service_repair_button = QtWidgets.QPushButton('修复服务状态')
+        self.service_repair_button.setObjectName('successButton')
+        self.service_repair_button.setEnabled(True)
+        self.service_repair_button.clicked.connect(self._request_service_repair)
+        repair_row.addWidget(self.service_repair_button)
+        actions.addLayout(repair_row)
+
+        check_row = QtWidgets.QHBoxLayout()
+        self.status_check_status = QtWidgets.QLabel('待自检')
+        self.status_check_status.setObjectName('stateIdle')
+        check_row.addWidget(self.status_check_status)
+        self.status_check_button = QtWidgets.QPushButton('状态自检')
+        self.status_check_button.clicked.connect(self._request_status_check)
+        check_row.addWidget(self.status_check_button)
+        actions.addLayout(check_row)
+        layout.addLayout(actions)
+        return card
+
+    def _set_service_repair_status(self, text, object_name):
+        self.service_repair_status.setText(text)
+        self.service_repair_status.setObjectName(object_name)
+        self.service_repair_status.style().unpolish(self.service_repair_status)
+        self.service_repair_status.style().polish(self.service_repair_status)
+
+    def set_service_repair_context(self, detail, button_text='修复服务状态'):
+        if self._repair_busy or self._status_check_busy:
+            return
+        message = str(detail or '').strip()
+        self.service_repair_button.setText('修复服务状态')
+        self.service_repair_button.setEnabled(True)
+        if message:
+            self.service_repair_detail.setText('待处理问题：' + message)
+            self._set_service_repair_status('可修复', 'stateWarn')
+        else:
+            self.service_repair_detail.setText(
+                '可随时运行状态自检；如发现可恢复问题，可点击“修复服务状态”。'
+            )
+            self._set_service_repair_status('待命', 'stateIdle')
+
+    def _request_service_repair(self):
+        if self._repair_busy or self._status_check_busy:
+            return
+        self._repair_busy = True
+        self.service_repair_button.setEnabled(False)
+        self.status_check_button.setEnabled(False)
+        self.service_repair_detail.setText(
+            '正在执行安全检查和一次性恢复，请勿关闭控制中心。'
+        )
+        self._set_service_repair_status('修复中', 'stateWarn')
+        self.repair_requested.emit()
+
+    def _request_status_check(self):
+        if self._repair_busy or self._status_check_busy:
+            return
+        self._status_check_busy = True
+        self.service_repair_button.setEnabled(False)
+        self.status_check_button.setEnabled(False)
+        self.status_check_status.setText('检查中')
+        self.status_check_status.setObjectName('stateWarn')
+        self.status_check_status.style().unpolish(self.status_check_status)
+        self.status_check_status.style().polish(self.status_check_status)
+        self.service_repair_detail.setText('正在只读检查服务、进程和双雷达状态……')
+        self.status_check_requested.emit()
+
+    def set_service_repair_progress(self, detail):
+        self._repair_busy = True
+        self.service_repair_button.setEnabled(False)
+        self.status_check_button.setEnabled(False)
+        self.service_repair_detail.setText(str(detail))
+        self._set_service_repair_status('修复中', 'stateWarn')
+
+    def set_status_check_progress(self, detail):
+        self._status_check_busy = True
+        self.service_repair_button.setEnabled(False)
+        self.status_check_button.setEnabled(False)
+        self.status_check_status.setText('检查中')
+        self.status_check_status.setObjectName('stateWarn')
+        self.status_check_status.style().unpolish(self.status_check_status)
+        self.status_check_status.style().polish(self.status_check_status)
+        self.service_repair_detail.setText(str(detail))
+
+    def finish_service_repair(self, result, detail):
+        self._repair_busy = False
+        self.service_repair_button.setEnabled(True)
+        self.status_check_button.setEnabled(True)
+        if result in ('PASS', 'AUTO_RECOVERED'):
+            self.service_repair_detail.setText(str(detail))
+            self._set_service_repair_status('修复完成', 'stateGood')
+            return
+        self.service_repair_detail.setText('服务状态修复未完成：' + str(detail))
+        self._set_service_repair_status('修复失败', 'stateBad')
+
+    def finish_status_check(self, result, detail):
+        self._status_check_busy = False
+        self.service_repair_button.setEnabled(True)
+        self.status_check_button.setEnabled(True)
+        if result == 'PASS':
+            self.status_check_status.setText('检查通过')
+            self.status_check_status.setObjectName('stateGood')
+            self.service_repair_detail.setText(str(detail))
+        else:
+            self.status_check_status.setText('发现异常')
+            self.status_check_status.setObjectName('stateBad')
+            self.service_repair_detail.setText('自检发现问题：' + str(detail))
+        self.status_check_status.style().unpolish(self.status_check_status)
+        self.status_check_status.style().polish(self.status_check_status)
 
     def _build_navigation_mode_card(self):
         card = QtWidgets.QFrame()
@@ -602,6 +747,22 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         )
         layout.addWidget(self.voice_feedback_on_button)
         layout.addWidget(self.voice_feedback_off_button)
+        return card
+
+    def _build_system_volume_card(self):
+        card = QtWidgets.QFrame()
+        card.setObjectName('modeCard')
+        layout = QtWidgets.QHBoxLayout(card)
+        layout.setContentsMargins(13, 10, 13, 10)
+        layout.setSpacing(10)
+        text_box = QtWidgets.QVBoxLayout()
+        title = QtWidgets.QLabel('系统音量调节')
+        title.setObjectName('cardTitle')
+        hint = QtWidgets.QLabel('调节本机扬声器音量；松开滑块后保存并播放短试听音，关闭控制中心后仍生效')
+        hint.setObjectName('muted')
+        text_box.addWidget(title)
+        text_box.addWidget(hint)
+        layout.addLayout(text_box, 1)
         volume_box = QtWidgets.QVBoxLayout()
         self.voice_volume_value = QtWidgets.QLabel('70%')
         self.voice_volume_value.setAlignment(QtCore.Qt.AlignCenter)
@@ -612,14 +773,15 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self.voice_volume_slider.setSingleStep(5)
         self.voice_volume_slider.setPageStep(10)
         self.voice_volume_slider.setMinimumWidth(170)
-        self.voice_volume_slider.setToolTip('拖动选择导航 TTS 音量，然后点击应用音量')
+        self.voice_volume_slider.setToolTip('拖动后松开即应用系统音量并试听；也可以点击应用并试听')
         self.voice_volume_slider.valueChanged.connect(
             lambda value: self.voice_volume_value.setText(f'{value}%')
         )
+        self.voice_volume_slider.sliderReleased.connect(self.apply_voice_volume)
         volume_box.addWidget(self.voice_volume_value)
         volume_box.addWidget(self.voice_volume_slider)
         layout.addLayout(volume_box)
-        self.voice_volume_apply_button = QtWidgets.QPushButton('应用音量')
+        self.voice_volume_apply_button = QtWidgets.QPushButton('应用并试听')
         self.voice_volume_apply_button.setObjectName('primaryButton')
         self.voice_volume_apply_button.clicked.connect(self.apply_voice_volume)
         layout.addWidget(self.voice_volume_apply_button)
@@ -684,6 +846,8 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self.voice_feedback_off_button.setEnabled(not busy)
 
     def refresh_voice_volume(self):
+        if self._voice_volume_busy or getattr(self, '_voice_volume_read_pending', False):
+            return None
         try:
             content = VISION_ROBOT_CONFIG_PATH.read_text(encoding='utf-8')
             volume = parse_speaker_volume(content)
@@ -691,18 +855,34 @@ class ServiceManagerPanel(QtWidgets.QWidget):
             self.voice_volume_value.setText('读取失败')
             self.voice_volume_value.setToolTip(str(error))
             return None
-        self.voice_volume_slider.blockSignals(True)
-        self.voice_volume_slider.setValue(volume)
-        self.voice_volume_slider.blockSignals(False)
-        self.voice_volume_value.setText(f'{volume}%')
-        self.voice_volume_value.setToolTip(str(VISION_ROBOT_CONFIG_PATH))
+        self._voice_volume_read_pending = True
+        def received(success, text, _code):
+            self._voice_volume_read_pending = False
+            if self._voice_volume_busy:
+                return
+            try:
+                if not success:raise RuntimeError(text)
+                actual=json.loads(text)
+                measured=int(actual['volume'])
+                if not self.voice_volume_slider.isSliderDown() and not self.voice_volume_slider.hasFocus():
+                    self.voice_volume_slider.blockSignals(True)
+                    self.voice_volume_slider.setValue(measured)
+                    self.voice_volume_slider.blockSignals(False)
+                self.voice_volume_value.setText(f'{measured}%')
+                self.voice_volume_value.setToolTip(
+                    f"实际Master {actual['master']['percent']}%，PCM {actual['pcm']['percent']}%；保存值{volume}%")
+            except Exception as error:
+                self.voice_volume_value.setText(f'保存{volume}% / 实际未知')
+                self.voice_volume_value.setToolTip(str(error))
+        self._run_command(sys.executable,[str(Path(__file__).with_name('speaker_volume.py')),'--read'],
+                          received,label='读取扬声器实际音量')
         return volume
 
     def _set_voice_volume_busy(self, busy):
         self._voice_volume_busy = bool(busy)
         self.voice_volume_slider.setEnabled(not busy)
         self.voice_volume_apply_button.setEnabled(not busy)
-        self.voice_volume_apply_button.setText('应用中…' if busy else '应用音量')
+        self.voice_volume_apply_button.setText('应用中…' if busy else '应用并试听')
 
     def apply_voice_volume(self):
         if self._voice_volume_busy:
@@ -723,25 +903,12 @@ class ServiceManagerPanel(QtWidgets.QWidget):
                 requested
             )
         except Exception as error:
-            self._show_error(f'修改导航语音音量失败：{error}')
+            self._show_error(f'修改系统音量失败：{error}')
             self.refresh_voice_volume()
             return
 
         self._set_voice_volume_busy(True)
-        self.event_label.setText(f'正在应用导航语音音量 {requested}%……')
-
-        def restarted(success):
-            self._set_voice_volume_busy(False)
-            self.refresh_voice_volume()
-            if success:
-                self.event_label.setText(
-                    f'导航语音音量已调整为 {requested}% 并立即生效'
-                    f'（PCH 声卡 {mixer_card}）'
-                )
-            else:
-                self._show_error(
-                    f'音量已保存为 {requested}%，但视觉语音服务重启失败'
-                )
+        self.event_label.setText(f'正在应用系统音量 {requested}%……')
 
         def mixer_applied(success, text, code):
             if not success:
@@ -754,8 +921,29 @@ class ServiceManagerPanel(QtWidgets.QWidget):
                 detail = text or f'amixer 退出码 {code}'
                 self._show_error(f'设置实际扬声器音量失败：{detail}')
                 return
-            self._execute_action(
-                'restart', 'vision-service.service', restarted
+            self._set_voice_volume_busy(False)
+            self.refresh_voice_volume()
+            if requested == 0:
+                self.event_label.setText('系统音量已保存为静音；试听音不会响')
+                return
+            self.event_label.setText(f'系统音量已保存为 {requested}%，正在播放试听音……')
+
+            def preview_finished(played, output, preview_code):
+                if played:
+                    self.event_label.setText(
+                        f'系统音量 {requested}% 已生效并保存；试听音已播放（PCH {mixer_card}）')
+                else:
+                    detail = output or f'播放进程退出码 {preview_code}'
+                    self.event_label.setText(
+                        f'系统音量 {requested}% 已生效并保存，但试听音播放失败：{detail}')
+                    self.log_message.emit(f'系统音量试听失败：{detail}')
+
+            self._run_command(
+                sys.executable,
+                [str(Path(__file__).with_name('speaker_volume.py')),
+                 '--card', str(mixer_card), '--preview'],
+                preview_finished,
+                label='播放系统音量试听音',
             )
 
         self._run_command(
@@ -935,7 +1123,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         layout.addWidget(self.relay_ip_status)
 
         self.relay_ip_edit = QtWidgets.QLineEdit()
-        self.relay_ip_edit.setPlaceholderText('例如 192.168.8.68')
+        self.relay_ip_edit.setPlaceholderText('例如 192.168.8.186')
         self.relay_ip_edit.setClearButtonEnabled(True)
         self.relay_ip_edit.setMaximumWidth(190)
         self.relay_ip_edit.returnPressed.connect(self.save_relay_ip)

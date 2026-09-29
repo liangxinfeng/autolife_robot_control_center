@@ -4,8 +4,9 @@ include "multi_lidar_optimized.lua"
 TRAJECTORY_BUILDER_2D.submaps.grid_options_2d.resolution = 0.02
 TRAJECTORY_BUILDER_2D.voxel_filter_size = 0.02
 
--- Thin objects are easily missed between distant beams. Keep near clearing
--- unchanged and weaken (not disable) distant free-space evidence.
+-- Protect existing occupied cells from distant missed returns. The private
+-- inserter keeps normal clearing for unknown/already-free cells, so this
+-- does not slow exploration. Obstacles still clear after repeated evidence.
 TRAJECTORY_BUILDER_2D.submaps.range_data_inserter.probability_grid_range_data_inserter.distance_weighted_free_space = {
   near_range = 1.5,
   far_range = 4.0,
@@ -34,7 +35,7 @@ POSE_GRAPH.optimization_problem.odometry_translation_weight = 5e3
 -- initial pose. Do not silently recover across the entire old submap.
 -- This does not disable the navigation module's deliberate global relocation.
 POSE_GRAPH.global_sampling_ratio = 0.0
-POSE_GRAPH.constraint_builder.log_matches = true
+POSE_GRAPH.constraint_builder.log_matches = false
 -- Full optimized trajectories grow over time; 2 Hz is sufficient for the
 -- history overlay. Robot TF remains at the independent 50 Hz pose rate.
 options.trajectory_publish_period_sec = 0.5

@@ -32,8 +32,8 @@ public:
     {
         RCLCPP_INFO(this->get_logger(), "Lidar fusion node started");
 
-        this->declare_parameter("front_topic", "/topic_gv_front_lidar_0_283");
-        this->declare_parameter("rear_topic", "/topic_gv_rear_lidar_0_283");
+        this->declare_parameter("front_topic", "/topic_gv_front_lidar_0_307");
+        this->declare_parameter("rear_topic", "/topic_gv_rear_lidar_0_307");
         this->declare_parameter("output_topic", "/fusioned_cloud");
         this->declare_parameter("output_frame", "base_link");
         this->declare_parameter("range_min", 0.1);

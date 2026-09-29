@@ -1,0 +1,2 @@
+map_yaml: /home/ubuntu/ros2_ws/src/autolife_robot_control_center/multi_lidar_slam/maps/my_first_map.yaml
+waypoints: {}

@@ -6,9 +6,9 @@
             "png_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/multi_lidar_slam/maps/yundie_2f.png",
             "description": "",
             "dock_pose": [
-                12.382581,
-                -6.564728,
-                -84.914722
+                9.936833,
+                -17.407131,
+                92.22849
             ],
             "prepared_positions": [
                 {
@@ -16,9 +16,9 @@
                     "description": "",
                     "position": [
                         [
-                            12.382581,
-                            -6.564728,
-                            -84.914722
+                            9.936833,
+                            -17.407131,
+                            92.22849
                         ]
                     ]
                 },
@@ -27,9 +27,9 @@
                     "description": "",
                     "position": [
                         [
-                            9.434919,
-                            -11.322637,
-                            5.733859
+                            9.295155,
+                            -11.31057,
+                            3.262946
                         ]
                     ]
                 },
@@ -115,9 +115,9 @@
                     "description": "",
                     "position": [
                         [
-                            9.486266,
-                            -12.705543,
-                            -86.367346
+                            9.117735,
+                            -11.884588,
+                            -88.930181
                         ]
                     ]
                 },

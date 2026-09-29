@@ -22,3 +22,9 @@ Thumbs.db
 *.pem
 *.key
 # Keep functional runtime/, vendor/ archives, maps and motion resources tracked.
+
+# Local-only files excluded from the robot307 publication
+.map_trash/
+.map_backups/
+.zcode_backups/
+*.pre-*

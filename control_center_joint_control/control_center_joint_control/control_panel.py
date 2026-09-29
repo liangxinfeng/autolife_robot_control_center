@@ -27,6 +27,7 @@ from .action_library import (
 from .body_height import (
     BODY_HEIGHT_JOINTS,
     MAX_BODY_LOWERING_M,
+    MAX_REVERSE_BODY_LOWERING_M,
     body_height_targets,
     estimate_body_lowering,
 )
@@ -207,6 +208,7 @@ class BodyHeightControl(QtWidgets.QFrame):
         super().__init__(parent)
         self._changing = False
         self._target_lowering_m = 0.0
+        self._reverse_squat = False
         self._target_residual_deg = 0.0
         self._current_lowering_m = None
         self._current_residual_deg = 0.0
@@ -228,6 +230,11 @@ class BodyHeightControl(QtWidgets.QFrame):
         self.state_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         layout.addWidget(title, 0, 0, 1, 2)
         layout.addWidget(self.state_label, 0, 2, 1, 3)
+        self.direction_box = QtWidgets.QComboBox()
+        self.direction_box.addItems(['正向下蹲', '反向下蹲'])
+        self.direction_box.setEnabled(False)
+        self.direction_box.setToolTip('反向最多53cm；仍需腰腿二次解锁与实时调整确认')
+        layout.addWidget(self.direction_box, 0, 5)
 
         high_label = QtWidgets.QLabel('标准高度')
         high_label.setObjectName('columnHeader')
@@ -237,6 +244,7 @@ class BodyHeightControl(QtWidgets.QFrame):
         self.slider.setPageStep(20)
         self.slider.setEnabled(False)
         low_label = QtWidgets.QLabel('降低 56 cm')
+        self.low_label = low_label
         low_label.setObjectName('columnHeader')
         self.target_box = NoWheelSpinBox()
         self.target_box.setDecimals(1)
@@ -268,6 +276,15 @@ class BodyHeightControl(QtWidgets.QFrame):
         self.slider.valueChanged.connect(self._slider_changed)
         self.target_box.valueChanged.connect(self._spin_changed)
         self.straight_button.clicked.connect(lambda: self._set_from_user(0.0))
+        self.direction_box.currentIndexChanged.connect(self._direction_changed)
+
+    def _direction_changed(self, index):
+        if self._changing:
+            return
+        self._reverse_squat = index == 1
+        maximum = MAX_REVERSE_BODY_LOWERING_M if self._reverse_squat else MAX_BODY_LOWERING_M
+        value = min(maximum, abs(self._target_lowering_m))
+        self._set_from_user(-value if self._reverse_squat else value)
 
     def _slider_changed(self, value):
         if self._changing:
@@ -276,7 +293,7 @@ class BodyHeightControl(QtWidgets.QFrame):
         self._changing = True
         self.target_box.setValue(lowering_m * 100.0)
         self._changing = False
-        self.height_changed.emit(lowering_m)
+        self.height_changed.emit(-lowering_m if self._reverse_squat else lowering_m)
 
     def _spin_changed(self, value):
         if self._changing:
@@ -285,19 +302,26 @@ class BodyHeightControl(QtWidgets.QFrame):
         self._changing = True
         self.slider.setValue(round(lowering_m * 1000.0))
         self._changing = False
-        self.height_changed.emit(lowering_m)
+        self.height_changed.emit(-lowering_m if self._reverse_squat else lowering_m)
 
     def _set_from_user(self, lowering_m):
         self.set_target(lowering_m, 0.0)
         self.height_changed.emit(float(lowering_m))
 
     def set_target(self, lowering_m, residual_deg=0.0):
-        lowering_m = min(MAX_BODY_LOWERING_M, max(0.0, float(lowering_m)))
+        lowering_m = min(MAX_BODY_LOWERING_M, max(-MAX_REVERSE_BODY_LOWERING_M, float(lowering_m)))
         self._target_lowering_m = lowering_m
         self._target_residual_deg = float(residual_deg)
         self._changing = True
-        self.slider.setValue(round(lowering_m * 1000.0))
-        self.target_box.setValue(lowering_m * 100.0)
+        if abs(lowering_m) > 1e-6:
+            self._reverse_squat = lowering_m < 0
+        self.direction_box.setCurrentIndex(1 if self._reverse_squat else 0)
+        maximum = MAX_REVERSE_BODY_LOWERING_M if self._reverse_squat else MAX_BODY_LOWERING_M
+        self.slider.setMaximum(round(maximum * 1000))
+        self.target_box.setMaximum(maximum * 100)
+        self.low_label.setText(f'降低 {maximum * 100:g} cm')
+        self.slider.setValue(round(abs(lowering_m) * 1000.0))
+        self.target_box.setValue(abs(lowering_m) * 100.0)
         self._changing = False
         self._refresh_state()
 
@@ -311,19 +335,19 @@ class BodyHeightControl(QtWidgets.QFrame):
         self._current_residual_deg = float(residual_deg)
         qualifier = '约' if self._current_residual_deg > 2.0 else ''
         self.state_label.setToolTip(
-            f'当前{qualifier}降低 {self._current_lowering_m * 100.0:.1f} cm'
+            f"当前{'反向' if self._current_lowering_m < 0 else '正向'}{qualifier}降低 {abs(self._current_lowering_m) * 100.0:.1f} cm"
         )
         self._refresh_state()
 
     def _refresh_state(self):
         target_qualifier = '约' if self._target_residual_deg > 2.0 else ''
-        target = f'目标{target_qualifier}降低 {self._target_lowering_m * 100.0:.1f} cm'
+        target = f"目标{'反向' if self._reverse_squat else '正向'}{target_qualifier}降低 {abs(self._target_lowering_m) * 100.0:.1f} cm"
         if self._current_lowering_m is None:
             self.state_label.setText(target)
             return
         current_qualifier = '约' if self._current_residual_deg > 2.0 else ''
         self.state_label.setText(
-            f'当前{current_qualifier} {self._current_lowering_m * 100.0:.1f} cm'
+            f"当前{'反向' if self._current_lowering_m < 0 else '正向'}{current_qualifier} {abs(self._current_lowering_m) * 100.0:.1f} cm"
             f' · {target}'
         )
 
@@ -331,6 +355,7 @@ class BodyHeightControl(QtWidgets.QFrame):
         self.slider.setEnabled(bool(available))
         self.target_box.setEnabled(bool(available))
         self.straight_button.setEnabled(bool(available))
+        self.direction_box.setEnabled(bool(available))
 
 
 class JointControlRosNode(Node):
@@ -369,9 +394,13 @@ class JointControlRosNode(Node):
             self.get_logger().warn(f'Invalid panel status: {error}')
 
     def publish_targets(
-        self, topic, group_name, targets, speed_scale=None, motion_profile=''
+        self, topic, group_name, targets, speed_scale=None, motion_profile='',
+        single_joint=None,
     ):
         data = {'group': group_name, 'targets_deg': targets}
+        if single_joint is not None:
+            data['single_joint'] = single_joint
+            data['targets_deg'] = {single_joint: targets[single_joint]}
         if speed_scale is not None:
             data['speed_scale'] = float(speed_scale)
         if motion_profile:
@@ -407,6 +436,7 @@ class GroupPage(QtWidgets.QWidget):
         self.rows = {}
         self.body_height_control = None
         self._motion_profile = ''
+        self._edited_joint = None
         group = GROUPS[group_name]
 
         outer = QtWidgets.QVBoxLayout(self)
@@ -414,7 +444,7 @@ class GroupPage(QtWidgets.QWidget):
 
         heading = QtWidgets.QHBoxLayout()
         note = QtWidgets.QLabel(
-            '锁定时滑块只预览；解锁并开启实时跟随后，拖动会控制真机。'
+            '实时拖动只调整所选关节；“发送本组”才执行整组目标。'
             if group_name != 'leg_waist'
             else '高风险：腰腿运动可能改变重心，必须另行二次解锁。'
         )
@@ -482,6 +512,7 @@ class GroupPage(QtWidgets.QWidget):
 
     def sync_to_current(self):
         self._motion_profile = ''
+        self._edited_joint = None
         for row in self.rows.values():
             if row.current is not None:
                 row.set_target(row.current)
@@ -489,18 +520,20 @@ class GroupPage(QtWidgets.QWidget):
 
     def _row_target_changed(self, _name):
         self._motion_profile = ''
+        self._edited_joint = _name
         self.sync_body_height_target()
         self.preview_requested.emit(self.group_name)
 
     def _body_height_changed(self, lowering_m):
         self._motion_profile = 'body_height'
+        self._edited_joint = None
         # Height adjustment does not own waist yaw. Latch it to fresh feedback
         # so an old yaw preview cannot be carried into the height command.
         if self.rows['Joint_Waist_Yaw'].current is not None:
             self.rows['Joint_Waist_Yaw'].set_target(
                 self.rows['Joint_Waist_Yaw'].current
             )
-        for name, value in body_height_targets(lowering_m).items():
+        for name, value in body_height_targets(lowering_m, allow_reverse=True).items():
             self.rows[name].set_target(value)
         self.sync_body_height_target()
         self.preview_requested.emit(self.group_name)
@@ -514,7 +547,7 @@ class GroupPage(QtWidgets.QWidget):
     def sync_body_height_target(self):
         if self.body_height_control is None:
             return
-        lowering_m, residual = estimate_body_lowering(self.targets())
+        lowering_m, residual = estimate_body_lowering(self.targets(), signed=True)
         self.body_height_control.set_target(lowering_m, residual)
 
     def update_body_height_current(self):
@@ -527,7 +560,7 @@ class GroupPage(QtWidgets.QWidget):
         available = all(value is not None for value in current.values())
         self.body_height_control.set_available(available)
         if available:
-            lowering_m, residual = estimate_body_lowering(current)
+            lowering_m, residual = estimate_body_lowering(current, signed=True)
             self.body_height_control.set_current(lowering_m, residual)
 
     def set_filter(self, text):
@@ -689,6 +722,7 @@ class ControlPanel(QtWidgets.QMainWindow):
         self._status = {}
         self._pending_preview_groups = set()
         self._pending_live_groups = set()
+        self._pending_live_joint_names = {}
         self._last_edited_group = 'right_arm'
         package_share = Path(
             get_package_share_directory('control_center_joint_control')
@@ -1087,11 +1121,17 @@ class ControlPanel(QtWidgets.QMainWindow):
     def schedule_preview(self, group_name):
         self._last_edited_group = group_name
         self.action_page.suggest_groups([group_name])
+        page = self.pages[group_name]
+        if self._live_apply_allowed(group_name) and page._edited_joint is not None:
+            for name, row in page.rows.items():
+                if name != page._edited_joint and row.current is not None:
+                    row.set_target(row.current)
         for name, value in self.pages[group_name].targets().items():
             self.robot_view.view.set_target_joint(name, value)
         self._pending_preview_groups.add(group_name)
         if self._live_apply_allowed(group_name):
             self._pending_live_groups.add(group_name)
+            self._pending_live_joint_names[group_name] = page._edited_joint
         # Throttle continuous slider/model drags instead of debouncing until
         # the user stops. This keeps both the ghost and unlocked hardware
         # following at a bounded ~8 Hz command rate.
@@ -1113,9 +1153,11 @@ class ControlPanel(QtWidgets.QMainWindow):
                     group_name,
                     self.pages[group_name].targets(),
                     motion_profile=self.pages[group_name].motion_profile(),
+                    single_joint=self._pending_live_joint_names.get(group_name),
                 )
         self._pending_preview_groups.clear()
         self._pending_live_groups.clear()
+        self._pending_live_joint_names.clear()
 
     def _live_apply_allowed(self, group_name):
         if not self.live_toggle.isChecked():

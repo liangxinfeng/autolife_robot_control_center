@@ -1,46 +1,37 @@
 waypoint_manager:
   ros__parameters:
-    # 从充电桩附近前往其它航点时，先使用 Nav2 DriveOnHeading 低速前移离桩。
+    normal_navigation_mppi_only: true
+    arrival_xy_tolerance: 0.05
+    nav2_settled_arrival_authoritative: true
+    occupied_goal_wait_enabled: true
+    occupied_goal_wait_timeout: 60.0
+    occupied_goal_probe_interval: 3.0
+    arrival_yaw_tolerance: 0.06
     auto_undock_enabled: true
-    charger_waypoint_name: "充电桩"
-    undock_action_name: "drive_on_heading"
+    charger_waypoint_name: 充电桩
+    undock_action_name: drive_on_heading
     undock_trigger_distance: 0.35
     undock_yaw_tolerance: 0.35
     undock_distance: 0.45
     undock_speed: 0.15
     undock_timeout: 15.0
-
-    # “充电桩”航点使用 DockRobot 专用流程，不使用普通航点的 0.12 m 到达容差。
     precise_docking_enabled: true
-    dock_action_name: "dock_robot"
-    dock_type: "fine_charging_dock"
-    # 保存的是机器人最终朝向；OpenNav 的倒车 Dock frame 需要反向 pi。
+    dock_action_name: dock_robot
+    dock_type: fine_charging_dock
     dock_pose_yaw_offset: 3.141592653589793
     dock_max_staging_time: 120.0
     dock_navigate_to_staging_pose: true
-    # Saved charger waypoint is the robot pose when electrically docked.
-    # Nav2 -> existing odom/map refinement -> DockRobot (skip its coarse staging).
     dock_prealign_enabled: true
-    dock_staging_distance: 0.55
+    dock_staging_distance: 0.35
     dock_max_lateral_drift: 0.06
     dock_max_heading_drift: 0.14
-
-    # Docking Server 成功后，再使用 map -> base_link 位姿复核位置和方向。
     dock_verify_xy_tolerance: 0.05
-    battery_topic: "/topic_gv_battery_0_307"
+    battery_topic: /topic_gv_battery_0_307
     charging_status_confirm_samples: 2
     dock_verify_yaw_tolerance: 0.06
-    dock_cmd_vel_topic: "/nav_cmd_vel"
+    dock_cmd_vel_topic: /nav_cmd_vel
     dock_telemetry_period: 0.5
-
-    # 是否启用航点导航语音提示。
-    # true: 出发和到达航点时向 /text_voice_command 发布文本，由 text_voice_control 负责播报。
-    # false: 完全关闭语音提示。
     voice_feedback_enabled: true
-
-    # text_voice_control 默认订阅的话题。
-    voice_command_topic: "/text_voice_command"
-
-    # 提示词模板，支持 {waypoint} 或 {name} 占位符，内容会替换为航点名称。
-    voice_departure_template: "我现在前往{waypoint}"
-    voice_arrival_template: "我已到达{waypoint}"
+    voice_command_topic: /text_voice_command
+    voice_departure_template: 我现在前往{waypoint}
+    voice_arrival_template: 我已到达{waypoint}

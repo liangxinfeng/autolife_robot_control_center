@@ -27,6 +27,9 @@ def generate_launch_description():
     robot_id = LaunchConfiguration('robot_id')
     topic_suffix = LaunchConfiguration('topic_suffix')
     start_panel = LaunchConfiguration('panel')
+    require_operator_heartbeat = LaunchConfiguration(
+        'require_operator_heartbeat'
+    )
 
     bridge_node = Node(
         package='control_center_joint_control',
@@ -38,6 +41,9 @@ def generate_launch_description():
             # Values such as 0_307 otherwise look numeric to the launch
             # YAML parameter parser (and can become octal integer 198).
             'topic_suffix': ParameterValue(topic_suffix, value_type=str),
+            'require_operator_heartbeat': ParameterValue(
+                require_operator_heartbeat, value_type=bool
+            ),
         }],
     )
 
@@ -69,6 +75,12 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'panel', default_value='true',
             description='Open the joint monitor/control panel with embedded 3D view.',
+        ),
+        DeclareLaunchArgument(
+            'require_operator_heartbeat', default_value='false',
+            description=(
+                'Lock joint output when the embedding control-center UI heartbeat expires.'
+            ),
         ),
         bridge_node,
         RegisterEventHandler(

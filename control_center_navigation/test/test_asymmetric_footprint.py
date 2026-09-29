@@ -59,4 +59,5 @@ def test_both_costmap_footprints_match():
     for name in ('local_costmap', 'global_costmap'):
         params = config[name][name]['ros__parameters']
         assert yaml.safe_load(params['footprint']) == expected
-        assert params['footprint_padding'] == 0.04
+        assert params['footprint_padding'] == 0.025
+        assert 0.50 + 2 * params['footprint_padding'] == pytest.approx(0.55)

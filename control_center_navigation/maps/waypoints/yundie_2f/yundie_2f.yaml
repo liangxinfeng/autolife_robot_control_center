@@ -3,15 +3,15 @@ waypoints:
   充电桩:
     description: ''
     frame_id: map
-    x: 12.382581
-    y: -6.564728
-    yaw: -1.4820414823156642
+    x: 9.936833
+    y: -17.407131
+    yaw: 1.609690814642665
   前台区:
     description: ''
     frame_id: map
-    x: 9.434919
-    y: -11.322637
-    yaw: 0.10007471839510954
+    x: 9.295155
+    y: -11.31057
+    yaw: 0.0569491510147789
   毛巾区:
     description: ''
     frame_id: map
@@ -57,9 +57,9 @@ waypoints:
   递水区:
     description: ''
     frame_id: map
-    x: 9.486266
-    y: -12.705543
-    yaw: -1.5073945539091544
+    x: 9.117735
+    y: -11.884588
+    yaw: -1.5521244628445034
   配送区:
     description: ''
     frame_id: map

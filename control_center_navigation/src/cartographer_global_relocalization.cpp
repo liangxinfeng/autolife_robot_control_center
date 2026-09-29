@@ -398,6 +398,59 @@ private:
     return false;
   }
 
+  std::string scan_wait_detail()
+  {
+    std::lock_guard<std::mutex> lock(scan_mutex_);
+    if (front_scans_.empty() && use_rear_scan_ && rear_scans_.empty()) {
+      return "前后雷达均无有效数据，请检查雷达采集服务；数据恢复后自动继续";
+    }
+    if (front_scans_.empty()) {
+      return "前雷达无有效数据，请检查前雷达及采集服务；数据恢复后自动继续";
+    }
+    if (use_rear_scan_ && require_rear_scan_ && rear_scans_.empty()) {
+      return "后雷达无有效数据，请检查后雷达及采集服务；数据恢复后自动继续";
+    }
+    const double now_sec = this->now().seconds();
+    const auto age = [&](const auto & scans) {
+        return now_sec - rclcpp::Time(scans.back()->header.stamp).seconds();
+      };
+    const double front_age = age(front_scans_);
+    const bool rear_required = use_rear_scan_ && require_rear_scan_;
+    const double rear_age = rear_required ? age(rear_scans_) : 0.0;
+    std::ostringstream detail;
+    detail.precision(3);
+    detail << std::fixed;
+    if (front_age < -0.05 || (rear_required && rear_age < -0.05)) {
+      detail << "雷达时间戳超前，请检查系统校时";
+    } else if (front_age > scan_max_age_sec_ ||
+      (rear_required && rear_age > scan_max_age_sec_)) {
+      detail << "雷达数据已过期，请检查采集是否中断";
+    } else {
+      double closest = std::numeric_limits<double>::infinity();
+      for (const auto & f : front_scans_) {
+        const auto ft = rclcpp::Time(f->header.stamp);
+        if (now_sec-ft.seconds() < -0.05 || now_sec-ft.seconds() > scan_max_age_sec_) {
+          continue;
+        }
+        for (const auto & r : rear_scans_) {
+          const auto rt = rclcpp::Time(r->header.stamp);
+          if (now_sec-rt.seconds() < -0.05 || now_sec-rt.seconds() > scan_max_age_sec_) {
+            continue;
+          }
+          closest = std::min(closest, std::abs((ft-rt).seconds()));
+        }
+      }
+      if (rear_required && closest > scan_pair_max_age_sec_) {
+        detail << "前后雷达采集时间差过大，最小差=" << closest << "秒";
+      } else {
+        detail << "等待下一组新鲜雷达数据";
+      }
+    }
+    detail << "；前雷达数据龄=" << front_age << "秒";
+    if (rear_required) {detail << "，后雷达数据龄=" << rear_age << "秒";}
+    return detail.str();
+  }
+
   void search_latest_pair()
   {
     if (!enabled_ || completed_ || !map_ready_) {return;}
@@ -409,7 +462,9 @@ private:
     if (!select_scan_pair(front, rear)) {
       have_consistency_candidate_ = false;
       consistent_match_count_ = 0;
-      publish_status("waiting_scans", "waiting for fresh acquisition-time paired laser scans");
+      const auto detail = scan_wait_detail();
+      publish_status("waiting_scans", detail);
+      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 5000, "%s", detail.c_str());
       return;
     }
     const rclcpp::Time reference(front->header.stamp);

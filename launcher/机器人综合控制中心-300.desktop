@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=机器人综合控制中心（300）
+Comment=启动307机器人导航、建图、全身关节与系统服务综合界面
+Exec=/home/ubuntu/.local/bin/autolife-control-center-307
+Icon=preferences-system
+Terminal=false
+StartupNotify=true
+Categories=Utility;Robotics;
+Keywords=ROS;Robot;Autolife;300;

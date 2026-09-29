@@ -1,0 +1,2919 @@
+{
+  "robot": "307",
+  "source_package": "autolife_robot_control_center",
+  "snapshot_date": "2026-09-29",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da2343752649ef08fdbf6559255772442fdbf974",
+      "size": 315
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8bd05bad3dd2169831006475484ea3a01f8f4ef1",
+      "size": 376
+    },
+    {
+      "path": "AI_MIGRATION_GUIDE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1e09df57715fd206a206b49e52799d8bec5e22c",
+      "size": 13293
+    },
+    {
+      "path": "HANDOFF_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0aed8bdb467dc4f354025c8d793a17542a263239",
+      "size": 5840
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "159091b6274a65a2e4b42c68d91d3d380ca6fc50",
+      "size": 1364
+    },
+    {
+      "path": "control_center_chassis_guard/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77bcc0627a5bd4075ffc29650b24b8c77c301491",
+      "size": 5706
+    },
+    {
+      "path": "control_center_chassis_guard/conftest.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f567ab0d38b9124971a67e94762a6281313ecd25",
+      "size": 622
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/__init__.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da8cf4cf6c74076a67c9e97bf1399399e45aa301",
+      "size": 689
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/chassis_control_lease.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8ea2bdc42d63ffa81df7ef0b354d799ebf99e1d7",
+      "size": 12833
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/chassis_teleop_smoothing.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d231b8e78663d463db538919bc65f43bd35be19",
+      "size": 4922
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/manual_key_filter.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6e54060e2d313ff541fdf3f6e4b7ef95ccd329f1",
+      "size": 6044
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/velocity_ramp.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c041aa2031f79ab6067e57ec63520bc2db98b123",
+      "size": 12818
+    },
+    {
+      "path": "control_center_chassis_guard/package.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c6ea6036344dc430e73cac65014e2795daaeb18",
+      "size": 635
+    },
+    {
+      "path": "control_center_chassis_guard/resource/control_center_chassis_guard",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "size": 0
+    },
+    {
+      "path": "control_center_chassis_guard/setup.cfg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a20df57e00f65380a82fb2a751fdd95fbdba34e",
+      "size": 125
+    },
+    {
+      "path": "control_center_chassis_guard/setup.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb669356e7b51103f834c0135297520d324c1a25",
+      "size": 871
+    },
+    {
+      "path": "control_center_chassis_guard/test/fake_redis.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1eb76ef00a639759f7fb0479effdcaa60908c1ec",
+      "size": 3483
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_chassis_control_lease.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6dad8ac927baa90a3cb1ed2eda94a459c561220e",
+      "size": 6726
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_identity.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a90cfa2112ef6975b0ff2b0dda803c5c2656d042",
+      "size": 1850
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_manual_key_filter.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4270d5ae90970602b8482d7f5a3746ad89867350",
+      "size": 7014
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_redis_integration.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58b83b09b34aec4164fbd32d6ddcf6b6d27ad49b",
+      "size": 2323
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_ui_gating_integration.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c61ca8c79e76a0042093a3235354e5b4bc75dec6",
+      "size": 8547
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_ui_key_debounce_integration.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63a2fa702dcadf06e64fddb41602de23a1bc1a41",
+      "size": 11607
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_ui_ramp_integration.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91ee88b98c950b4ba5b7e98027b929d6669a1d59",
+      "size": 22990
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_velocity_ramp.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d78c8a2c2d41a43f38eb89e77ec18d6462d1cba",
+      "size": 14437
+    },
+    {
+      "path": "control_center_joint_control/AI_MIGRATION_GUIDE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4387142eac3419e5bfba8188cafd7b2568b325e0",
+      "size": 3927
+    },
+    {
+      "path": "control_center_joint_control/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8688d65bd2b8fd5dedddfc8f0dd110559113ac1a",
+      "size": 11925
+    },
+    {
+      "path": "control_center_joint_control/config/saved_joint_actions.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b249396d3b8fe8eb2d6c14f70304679b429cc90",
+      "size": 23
+    },
+    {
+      "path": "control_center_joint_control/config/saved_joint_poses.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8df7bd88fe6dacff6d8d8c2e7900b8cf50283225",
+      "size": 3407
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/__init__.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7df040923cae6352cbdb7cbcfbcb048dae0b2fd",
+      "size": 55
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/action_editor.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77ca683cd0ea61ba14c1b5ff41af0a89802e68f2",
+      "size": 20685
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/action_library.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "34333f368f2d80b5636bc16a170f28475728cb71",
+      "size": 5742
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/body_height.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b47baf4819e2751504845f4c6ae028d522a97121",
+      "size": 2216
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/control_panel.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "add55fd34278a27d39ff277b0dead61233fe0ddc",
+      "size": 92330
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/joint_bridge.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "f00b99d08267521e5fb5e76881c5498e9e479902",
+      "size": 73336
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/joint_definitions.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a6b1b65356edd103607a7b42e527bd4f7e38a72",
+      "size": 4526
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/motion_storage.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8dca847ff69b7af1fe31bb4ca9466cdcce7d4b59",
+      "size": 2156
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/operator_targets.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cb7be8ba3d7ac2d90a03abb13e49aaf3202945d8",
+      "size": 1093
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/pose_library.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "69452eb0ad6b72a9d9c952493967164808f65acd",
+      "size": 2431
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/robot_view.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52759a48c70dfeab5f5f9271ac3f9fd5c7e5e371",
+      "size": 35445
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/trajectory_pickle.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b5fd61879fa694126ef33bf940b09bd67a7a735",
+      "size": 6255
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/vr_reset_pose.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ade198520bdab4ab22d50c5bf6dbeeac9711684f",
+      "size": 11466
+    },
+    {
+      "path": "control_center_joint_control/launch/whole_body_joint_control.launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe8b06363e3fc7645b3b9ca2a813801315eaa890",
+      "size": 5452
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Ankle_to_Knee.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eaae11b8a3720d436277b529e7025147c8e17f16",
+      "size": 277984
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Left.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "12650210445af94ac733daec5f16dad17b18345d",
+      "size": 8484
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Right.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "360c54c7a114e172a69332e7b3c8f5f92c1bb3d3",
+      "size": 8484
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Back.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2eeac520d43e324bfc5bfdd9dd66575a25bfecac",
+      "size": 61884
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Forehead.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e97f9da4dd4a7f29019d6fa378ebb3276acdbc9",
+      "size": 65784
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Left_Eye.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "abff9585848455c2da620da72a0f9e373838e987",
+      "size": 60984
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Right_Eye.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "421d44abf724cec8f06101447f3a3ecf9d77a54b",
+      "size": 60984
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Ground_Vehicle.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1452cac8446bed1817d58e96df6aa63a7bbb884",
+      "size": 1140134
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_IMU.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d48e5836a863f2b11f34ebe6ff16716d5072857",
+      "size": 24284
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Knee_to_Waist_Pitch.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6b4c7ce7cee9deb54411404f853eed761344116c",
+      "size": 475584
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Elbow_to_Forearm.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cc99dd7aa6c1ab6634a92be481fb20522b69de8",
+      "size": 511484
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Forearm_to_Wrist_Upper.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4631be8346c1ccb8f626e760e76acb2fa3817bf8",
+      "size": 594334
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "092bc2dbdb39e096d7f0556fc33a22f5fb358270",
+      "size": 393084
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Finger.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef94c0d2bdac088f415bbcc2e277fc59ce1f9ffd",
+      "size": 196084
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Inner_Knuckle.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6add2d5fdba26c16bcdfcdfd3179966ecaf53ec2",
+      "size": 97184
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Finger.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "34a142b803198d8cc6c22e6bd6d0e9be98cf0ad8",
+      "size": 195984
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Inner_Knuckle.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "745b952a426e053ad96416359acc5a07293fc99e",
+      "size": 94984
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Outer_Knuckle.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b0b4cf62519cb370a0afa315a23a40fd42ea3ee",
+      "size": 395484
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Inner_to_Shoulder_Outer.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b7db471722b35fe47c2f170fa98d85f4e7edc86",
+      "size": 428534
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Outer_to_UpperArm.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b0b940656c1fe24e9bbaaf0b24d0b678ba2e9026",
+      "size": 537784
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_UpperArm_to_Elbow.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78663010f2f38b1693726b7c3dfe85a793a12912",
+      "size": 378384
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_Single_Gripper.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e7295f3472725a7809bc5aa05f19232241833607",
+      "size": 442334
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_to_Gripper.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b5153fc2d36f0c61b7590aa9f763f5408c5fb6e4",
+      "size": 407934
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Upper_to_Wrist_Lower.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f0562b3fa60408a556a8df0f7a72a8254e9ac4f",
+      "size": 477434
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Back.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c0855b02fa83fb67b9e5e41318f8ec092852c81",
+      "size": 429684
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Front.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a89650f1256ab2b24e626cbc0d073d86518e8c0",
+      "size": 430284
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Pitch_to_Neck_Yaw.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "96930a97a191fe3b95e389f6c9e28aa34b419b06",
+      "size": 350084
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Roll_to_Neck_Pitch.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10e3e38f73e5a0ae6d2ec0e7f7f0a0bc946b6329",
+      "size": 540284
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Yaw_to_Head.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fbadc371ecc67180f625f5480b21630a273fe2af",
+      "size": 355784
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Elbow_to_Forearm.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e813b2d61e7470e6dead6592d9217291ff6f4d8",
+      "size": 256384
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Forearm_to_Wrist_Upper.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "431ab8f74df11c1c94c4945d4a081196cc5c5e37",
+      "size": 297084
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "82ff156c54a2e405479786d3afc23be76fefffa7",
+      "size": 393084
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Finger.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9e8da62b6642efc4ab80b8503851f62d5380d40",
+      "size": 196084
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Inner_Knuckle.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02d72a7e2d7f67d1f132857b8a1faefc131e72cc",
+      "size": 97184
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Finger.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "010b9c4fd3431907bfe5b786001078cae79bdad1",
+      "size": 195984
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Inner_Knuckle.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "417bbc565eec75b75c15558ba719aff64bbaec57",
+      "size": 94984
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Outer_Knuckle.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c55847255fb1e82820f708be6474e746e54ce231",
+      "size": 395484
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Inner_to_Shoulder_Outer.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f1f434c6e35eeebfe72d348ce49f661de8cdd08",
+      "size": 433284
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Outer_to_UpperArm.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "052ea81aca3d994b9e770dff9f8c04cea1ee720f",
+      "size": 539934
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_UpperArm_to_Elbow.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed9d87ed6b02f364a8e3724a5284fc2d48c0e984",
+      "size": 380084
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_Single_Gripper.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4df671a99cb7139ad77ce4d244bb44e8c47c864",
+      "size": 442334
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_to_Gripper.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a41c6aa41acb8ee65c3860997c2ef9c5f34b3449",
+      "size": 407934
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Upper_to_Wrist_Lower.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41310f55d150be0884280cf3d415e02fa46f1a89",
+      "size": 477134
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Waist_Pitch_to_Waist_Yaw.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5f67db8252788a7098af7c888c80f400b469cf32",
+      "size": 300784
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Waist_Yaw_to_Shoulder_Inner.STL",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d60bc2f12c0ace335368bdd1ea94d7ed9dcabcc8",
+      "size": 709734
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/shake_hand_example.pkl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b1d5021d0c0d71332c516edbbff8e105b266f20",
+      "size": 4793179
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/打招呼.pkl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc77ddbcbb46845fadee0f3f8c8daf05e6232257",
+      "size": 1071387
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/比心.pkl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c1e7012ae3b3bb556158aa570893e75dce3add7",
+      "size": 217154
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/爱心.pkl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f09d1e8b7390f188b5f32149cd83ef85e140c19",
+      "size": 396075
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/鞠躬.pkl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b051c24ecf05bf3db30acc134cb18085e0554e0",
+      "size": 1160362
+    },
+    {
+      "path": "control_center_joint_control/motion_library/saved_joint_actions.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f93a1967174afb7ad4a0c19378d24abf55490928",
+      "size": 3553
+    },
+    {
+      "path": "control_center_joint_control/motion_library/saved_joint_poses.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28fc50c9e6159564055f8318fb7bbfbbd7096c3e",
+      "size": 11366
+    },
+    {
+      "path": "control_center_joint_control/package.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce909a661b2ed410516dc050c02925211abd4444",
+      "size": 1084
+    },
+    {
+      "path": "control_center_joint_control/resource/control_center_joint_control",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1
+    },
+    {
+      "path": "control_center_joint_control/setup.cfg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bd9ad5224796a92de03cf67fc76e3b8f6895af9b",
+      "size": 125
+    },
+    {
+      "path": "control_center_joint_control/setup.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "580e1cbf48bd229111dc800bcaa542fce5667812",
+      "size": 1495
+    },
+    {
+      "path": "control_center_joint_control/shake_hand_example.pkl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b1d5021d0c0d71332c516edbbff8e105b266f20",
+      "size": 4793179
+    },
+    {
+      "path": "control_center_joint_control/test/action_bridge_integration.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9bc51abdbe42aab20a03bbce312b94e1f54b38ef",
+      "size": 8327
+    },
+    {
+      "path": "control_center_joint_control/test/progressive_bridge_integration.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b36af18f546604add4fcbaeb52aee4bb82c97fb7",
+      "size": 10307
+    },
+    {
+      "path": "control_center_joint_control/test/render_action_editor_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b355995aed384799433a5f5d11092a2c65edc6c8",
+      "size": 4264
+    },
+    {
+      "path": "control_center_joint_control/test/render_control_panel_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6c323a1a13979c6fd94e9a10903137c61ee5dc0",
+      "size": 3587
+    },
+    {
+      "path": "control_center_joint_control/test/render_pose_library_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44707f747f93388836436009876f38f0e0cd5348",
+      "size": 1833
+    },
+    {
+      "path": "control_center_joint_control/test/render_robot_view_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ffc3680821eabec7c59a7a560a9ee1bf0ed01693",
+      "size": 3075
+    },
+    {
+      "path": "control_center_joint_control/test/test_action_library.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d54abd6ec0fb6054ba28e34bce300a12da9eb4f9",
+      "size": 3444
+    },
+    {
+      "path": "control_center_joint_control/test/test_body_height.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3b94a192c8625193565547c136d541287bef8d4",
+      "size": 2130
+    },
+    {
+      "path": "control_center_joint_control/test/test_joint_definitions.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4da9e8bac91908bd491a97743d0cb9bb38e5a66",
+      "size": 1297
+    },
+    {
+      "path": "control_center_joint_control/test/test_pose_library.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d27672058fd00a904c955c1e18e7fe30fb244064",
+      "size": 954
+    },
+    {
+      "path": "control_center_joint_control/test/test_robot_view_model.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c1cd72450030ca94ca791cf8d0ace13bb3e28650",
+      "size": 2529
+    },
+    {
+      "path": "control_center_joint_control/test/test_single_joint_operator.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1284fba191f502c41f3dcb598085ed30dde44af4",
+      "size": 5804
+    },
+    {
+      "path": "control_center_joint_control/test/test_stable_progressive_target.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88638e7cc317ebcfe63e71e8250e3af733f67931",
+      "size": 4294
+    },
+    {
+      "path": "control_center_joint_control/test/test_trajectory_pickle.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47bfdcc7e9eb6a73aa5e38983d2ccb1bb739de28",
+      "size": 3433
+    },
+    {
+      "path": "control_center_joint_control/test/test_vr_reset_pose.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c49bc776c885d355292bb8392a01cafb53c67a62",
+      "size": 3084
+    },
+    {
+      "path": "control_center_joint_control/test/test_water_pose_coordination.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a731cf48b33af1b2f23ee1fa91857e2595bf835",
+      "size": 2232
+    },
+    {
+      "path": "control_center_joint_control/test/verify_reference_pickle.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd58cdb3592ebd47913076db9899352b847418d5",
+      "size": 2153
+    },
+    {
+      "path": "control_center_joint_control/urdf/robot_v2_2.urdf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b75bee326472c5e80e838c052e60677730f2ff46",
+      "size": 58773
+    },
+    {
+      "path": "control_center_navigation/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8ee7e9b09f31c9d2d1a7f2cbe269762977e1484",
+      "size": 179
+    },
+    {
+      "path": "control_center_navigation/AI_MIGRATION_GUIDE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e5ad926e8d5348f7d8094ac1cd0c3a3b08c4235",
+      "size": 19832
+    },
+    {
+      "path": "control_center_navigation/ARRIVAL_CONVERGENCE_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44651c80ce555f7b3666039e5dede9fa2549309c",
+      "size": 2868
+    },
+    {
+      "path": "control_center_navigation/CMakeLists.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "25ee9b23f68d0eca1ed5d1447d32dd0e3efc025d",
+      "size": 10634
+    },
+    {
+      "path": "control_center_navigation/DOCKING_SYNC_20260909.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c45bf1e9c78bcee981c4112ddb5c474eb1a891a2",
+      "size": 1159
+    },
+    {
+      "path": "control_center_navigation/DOCKING_UPDATE_20260909.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "caaa9fcf739624cb6ccc9ce0083094c76325cd40",
+      "size": 1593
+    },
+    {
+      "path": "control_center_navigation/FINAL_REFINE_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "22df087b989413275c4061f82bc943bc449911ab",
+      "size": 1155
+    },
+    {
+      "path": "control_center_navigation/FIX_NOT_EXECUTABLE_20260914.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f01cd9db1cb2f46415514dbc831c64c6c30f2a80",
+      "size": 1226
+    },
+    {
+      "path": "control_center_navigation/FOOTPRINT_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf591cef26718c526257e32649df2ad0ee01d9f9",
+      "size": 1367
+    },
+    {
+      "path": "control_center_navigation/FOOTPRINT_CURRENT_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e2045804c2b0f69a4050d6b382425ae4d05ad77a",
+      "size": 877
+    },
+    {
+      "path": "control_center_navigation/GIT_USAGE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "175af4720587309e31dc1a7ceaad5c80169cfb73",
+      "size": 1486
+    },
+    {
+      "path": "control_center_navigation/MAP_EDITOR_MIGRATION.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60c0fae3c3dbd58f5dec9d089875b11dd3897aa3",
+      "size": 1176
+    },
+    {
+      "path": "control_center_navigation/MAP_EDITOR_UPDATE_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a992fdb9a5f06eface2bebb597e0196f3c4863a",
+      "size": 1588
+    },
+    {
+      "path": "control_center_navigation/MPPI_ONLY_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f472a447a33a65540e2e5d267331c7fdf7625d6d",
+      "size": 3646
+    },
+    {
+      "path": "control_center_navigation/NAVIGATION_CROWD_REFINEMENT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07bd148ac62b1b673448b0b473f271c18547434b",
+      "size": 3928
+    },
+    {
+      "path": "control_center_navigation/NAV_RGB.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "009402b59ee2dd964f78c4ea5e6f1417710d8d49",
+      "size": 1491
+    },
+    {
+      "path": "control_center_navigation/NAV_SYNC_20260914.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa22f0b1df3a7f5146cf7d404e21ff800d8b2d78",
+      "size": 1804
+    },
+    {
+      "path": "control_center_navigation/NAV_SYNC_FROM307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4248f325e270fd33ee85b344b06221852b291256",
+      "size": 2497
+    },
+    {
+      "path": "control_center_navigation/NAV_SYNC_LATEST_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c0e2bcdc5aa92654b18abf2aba77339862b20c14",
+      "size": 1608
+    },
+    {
+      "path": "control_center_navigation/OCCUPIED_APPROACH_306.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50a92797146dc1b24c9d9fe5b36e96555782f631",
+      "size": 2194
+    },
+    {
+      "path": "control_center_navigation/OCCUPIED_GOAL_WAIT_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bfff2867de18a9a45ae0af2901a6e3ea8cea4c4f",
+      "size": 1473
+    },
+    {
+      "path": "control_center_navigation/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "629424598895a544df23800509593256ca02aa60",
+      "size": 4003
+    },
+    {
+      "path": "control_center_navigation/RELOCALIZATION_NEAR_WALL_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f1ef489d511d5db183dc0712799fd96ea5f09af",
+      "size": 2969
+    },
+    {
+      "path": "control_center_navigation/RELOCALIZATION_ROBUST_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d9528d4ce17982426d00912572ac30af9370934e",
+      "size": 4510
+    },
+    {
+      "path": "control_center_navigation/RELOCALIZATION_VISIBILITY_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39492ee1e4c4655b0d8a3043f4299746c1a9b31c",
+      "size": 3573
+    },
+    {
+      "path": "control_center_navigation/SYNC_APPROACH_FROM306.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fbf79afd61b31c3dd857f5d8084a9b4cacaa0fa7",
+      "size": 1020
+    },
+    {
+      "path": "control_center_navigation/UNIFIED_ARRIVAL_307.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd5a5766893da9c97dd30d0a8a00d0da8ce27b2c",
+      "size": 2000
+    },
+    {
+      "path": "control_center_navigation/USAGE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "17efc449d049f00cdc988af51c6d851f74a031f7",
+      "size": 2437
+    },
+    {
+      "path": "control_center_navigation/config/active_map.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4a10d5b699bb3ffc82f49a7da0dd54315023295",
+      "size": 171
+    },
+    {
+      "path": "control_center_navigation/config/docking_params.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "34fb840b616ef45a54aa27435417d18b6be942b6",
+      "size": 2183
+    },
+    {
+      "path": "control_center_navigation/config/global_relocalization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55274ab4f48f4f49bf5c2fd3b20b19e3ca21d67e",
+      "size": 1793
+    },
+    {
+      "path": "control_center_navigation/config/laser_filter.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e2250bf3b83d63cb56bbf6bad9b254c5ee9272c",
+      "size": 289
+    },
+    {
+      "path": "control_center_navigation/config/nav2_params.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a4bae80d9bada99cc6220ea954d33539b185d5b",
+      "size": 8725
+    },
+    {
+      "path": "control_center_navigation/config/nav2_tuning_notes.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2062c9fd9bcc0d9ce4d076615d54eb38b49fa2c7",
+      "size": 14125
+    },
+    {
+      "path": "control_center_navigation/config/navigation_self_filter.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e49b24571827c705bd2e27bd1a5d016868275a7a",
+      "size": 763
+    },
+    {
+      "path": "control_center_navigation/config/occupied_approach.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4794d225ad9254f3b5d9f6e41c0128a6f54f6481",
+      "size": 3295
+    },
+    {
+      "path": "control_center_navigation/config/proximity_voice_alert.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e2a0d5583749588def8b4f98b14a334ae6402951",
+      "size": 915
+    },
+    {
+      "path": "control_center_navigation/config/voice_feedback.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3b242b660fa2d367de0e9aca689409f78fde50a",
+      "size": 1296
+    },
+    {
+      "path": "control_center_navigation/config/waypoints.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de87f8737395ea4c355f3b2b7c9517db5f1f6034",
+      "size": 560
+    },
+    {
+      "path": "control_center_navigation/docs/NEAR_GOAL_FIX.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "099c04b2a96582f53080a9866673e8140ba79621",
+      "size": 1704
+    },
+    {
+      "path": "control_center_navigation/docs/WALL_TAIL_FILTER.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35bbfacaef0175cd56bbac4fac4e4962b865ab74",
+      "size": 2578
+    },
+    {
+      "path": "control_center_navigation/launch/bringup_all.launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f5c27d45e743654abf1e09e17cd6b936a92ade02",
+      "size": 19960
+    },
+    {
+      "path": "control_center_navigation/launch/bringup_localization.launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e534d110c254df14f32c5582c4a344402acc087",
+      "size": 6973
+    },
+    {
+      "path": "control_center_navigation/launch/bringup_navigation.launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d6c115b2e1ab9f2725259f7ff534014dd6f8c14",
+      "size": 4504
+    },
+    {
+      "path": "control_center_navigation/maps/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1
+    },
+    {
+      "path": "control_center_navigation/maps/1.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67a7135496a466d72433eec4b42d2f17e7dc836f",
+      "size": 920889
+    },
+    {
+      "path": "control_center_navigation/maps/1.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44ec805578aa67ebf8bdee4740d080c85dbcae73",
+      "size": 724679
+    },
+    {
+      "path": "control_center_navigation/maps/1.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "38c83811b25057f1150fee360b92bb13c8d66648",
+      "size": 124
+    },
+    {
+      "path": "control_center_navigation/maps/2.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94774002fb8a2766d103a951e8769df8da58dd03",
+      "size": 1557519
+    },
+    {
+      "path": "control_center_navigation/maps/2.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "041911279eb307314c06068e1e26eb821f272fb9",
+      "size": 850050
+    },
+    {
+      "path": "control_center_navigation/maps/2.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "244c59e675eabdd2a232ba9efdeeb7ede8eb2ab7",
+      "size": 124
+    },
+    {
+      "path": "control_center_navigation/maps/2_增量_20260907_171334.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5803a65721ca5e92ce62f07e54bbefc2addbcdc",
+      "size": 7428079
+    },
+    {
+      "path": "control_center_navigation/maps/2_增量_20260907_171334.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de2f0c489bb9b3b1fae9d7cc60af752db7de62ee",
+      "size": 4177872
+    },
+    {
+      "path": "control_center_navigation/maps/2_增量_20260907_171334.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9cbef8a06c607d688483619be1a0c80bc5b85ad",
+      "size": 148
+    },
+    {
+      "path": "control_center_navigation/maps/2_增量_20260907_171334_增量_20260907_180148.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8203acdd508477ec9ca8493d8396a053d2f2880",
+      "size": 10190822
+    },
+    {
+      "path": "control_center_navigation/maps/2_增量_20260907_171334_增量_20260907_180148.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a8f60811edaaa0925ddd28b22c575bb3f3a4276",
+      "size": 5326217
+    },
+    {
+      "path": "control_center_navigation/maps/2_增量_20260907_171334_增量_20260907_180148.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31e30776350d7bf3c69420a482fcb4acdf703fd5",
+      "size": 171
+    },
+    {
+      "path": "control_center_navigation/maps/map_20260902_142425.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d4a963e4ae2ac112c467c7f51135053dd088a73d",
+      "size": 2182953
+    },
+    {
+      "path": "control_center_navigation/maps/map_20260902_142425.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1ddcce975a6f23ac35efdb891765cef00df8b89",
+      "size": 514951
+    },
+    {
+      "path": "control_center_navigation/maps/map_20260902_142425.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9e696995b67d89f24ae4197627fc27053b00200",
+      "size": 142
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/1/1.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52478cfe09dda833ffab354374e498f492aa3d00",
+      "size": 117
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/1/maps_index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebaea9f49f924e397e6f0aa173aa2de91bd34228",
+      "size": 409
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/2_增量_20260907_171334_增量_20260907_180148/2_增量_20260907_171334_增量_20260907_180148.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c30926a3b1ae5dbfa21d858a429a60025e54c88c",
+      "size": 163
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/2_增量_20260907_171334_增量_20260907_180148/maps_index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dcbd40fe5d414105325385b7c2a95bb1dd92676e",
+      "size": 593
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/my_first_map/maps_index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f0b728bdea35d3cedb8fe3e8dee189a8a35e7fa1",
+      "size": 435
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/my_first_map/my_first_map.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c001a31abc90524271467a3350274f4502bc30b",
+      "size": 119
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/my_first_map2/maps_index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7ede169070a62cc93185f45ebc56d57130dcd884",
+      "size": 438
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/my_first_map2/my_first_map2.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3da5e8f89284202df01ab7fe53f028426733949f",
+      "size": 120
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/xiaozhan/maps_index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "439498fc5d84220d62d618d0f377e7ae9d376f2b",
+      "size": 1125
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/xiaozhan/xiaozhan.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b5c790d6971ce57bcea67d46e8d8730c02ee4cad",
+      "size": 343
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundie_2f/maps_index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8bb3880bf6e1adc7589e570d6ef7b2424bde9ed6",
+      "size": 4284
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundie_2f/yundie_2f.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d9ff9456aabd79fcedf0a873bb73b7599ec8126f",
+      "size": 1359
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundie_2f_01/maps_index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "603d4577de4e6732244f872c3b2d15a3158fafa8",
+      "size": 453
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundie_2f_01/yundie_2f_01.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0dcf738c37836d0caa5c6c31c0685b03446bb56e",
+      "size": 128
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundiezhanting/maps_index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c667fee018af3c3e8e97d4ba003d674145ce7a0",
+      "size": 1843
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundiezhanting/yundiezhanting.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "74dfe398e560ca8446ae6d1f8486a1f71160b64b",
+      "size": 579
+    },
+    {
+      "path": "control_center_navigation/maps/xiaozhan.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d5cdba4ea6e9bf59dc08e65e9193373d27861453",
+      "size": 957
+    },
+    {
+      "path": "control_center_navigation/maps/xiaozhan.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c0e176accfcd4aabb4998b86090fd7ba825c7b00",
+      "size": 131
+    },
+    {
+      "path": "control_center_navigation/maps/yundie_2f_01.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f84102c70517456ae97f55a2309ff2ddf6792ae",
+      "size": 502409
+    },
+    {
+      "path": "control_center_navigation/maps/yundie_2f_01.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a68772b5cc3c7e4b38945d169c516e1ae93de3e",
+      "size": 154
+    },
+    {
+      "path": "control_center_navigation/maps/yundiezhanting.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "144f115b953f49ccd20f04db7283ed1875cb703d",
+      "size": 6294
+    },
+    {
+      "path": "control_center_navigation/maps/yundiezhanting.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a4b1754eeb290de4b364149e7b3f68566328e19",
+      "size": 136
+    },
+    {
+      "path": "control_center_navigation/navigation_plugins.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b83a407d2128671a6d06c956957f0e752f33569",
+      "size": 312
+    },
+    {
+      "path": "control_center_navigation/package.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b4acbcace6d6241c08ae7893bae2988d4be88b0",
+      "size": 2764
+    },
+    {
+      "path": "control_center_navigation/scripts/arm_control_service_wrapper.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "72977f5e6abfe20d44576ebd25f4b91444e0ce42",
+      "size": 332
+    },
+    {
+      "path": "control_center_navigation/scripts/charger_waypoints.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "05d7325a9453f3eed46bab34f10e3c3b0ede1b79",
+      "size": 456
+    },
+    {
+      "path": "control_center_navigation/scripts/cmd_vel_arbiter_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "229e35ceead112a0b19b3eab9437bfe0bc1c7176",
+      "size": 26533
+    },
+    {
+      "path": "control_center_navigation/scripts/head_rgb_panel.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26ed7ad11ca863983f012590f9de7194a5d2c2c0",
+      "size": 9698
+    },
+    {
+      "path": "control_center_navigation/scripts/keyboard_waypoint_control_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "61bb88acd506a3a4344d949c34ef10e9fe5a76a7",
+      "size": 32420
+    },
+    {
+      "path": "control_center_navigation/scripts/nav_cmd_vel_relay_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "33b8525bd15ac4a051c9b1ae5e92a64545d1f644",
+      "size": 1252
+    },
+    {
+      "path": "control_center_navigation/scripts/navigation_startup_on_initialpose_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "16b8e903a401cd25a7b326c84823e47f213e35ba",
+      "size": 9272
+    },
+    {
+      "path": "control_center_navigation/scripts/navigation_status_overlay_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "e8526cfc374fb7f9584b12f090dadc711b672968",
+      "size": 5439
+    },
+    {
+      "path": "control_center_navigation/scripts/navigation_ui_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "7ec5d05b54262772f678dfd7dfeb5298d5791b4a",
+      "size": 130921
+    },
+    {
+      "path": "control_center_navigation/scripts/odom_topic_relay_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "76f81fb1d7998891b29a39c4026437ccd86ccf03",
+      "size": 1242
+    },
+    {
+      "path": "control_center_navigation/scripts/pose_continuity.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47c1a6af8fb46ffa83d977e91ac6ed634c01150b",
+      "size": 4852
+    },
+    {
+      "path": "control_center_navigation/scripts/proximity_voice_alert_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "3e43d7a7996c0afd0656a1384f6e3830df5294aa",
+      "size": 8148
+    },
+    {
+      "path": "control_center_navigation/scripts/short_distance_servo.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "b42a2589066bdec1bfa9cef34d04a42c69665cef",
+      "size": 7771
+    },
+    {
+      "path": "control_center_navigation/scripts/waypoint_manager_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "ee74bbb390a51f87e44e8c70546a21f1cb5d2e61",
+      "size": 158422
+    },
+    {
+      "path": "control_center_navigation/settled_plugins.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "680237b5cf7e7b417d1012d5fa1042b7a5e148c2",
+      "size": 518
+    },
+    {
+      "path": "control_center_navigation/src/amcl_startup_compat.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8db36a5486862cdc0564a4cf2cddbb05f86f135a",
+      "size": 964
+    },
+    {
+      "path": "control_center_navigation/src/arrival_settle_policy.hpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3938d57cfc2eba1814f2bf7cbcc12b79aabab769",
+      "size": 977
+    },
+    {
+      "path": "control_center_navigation/src/cartographer_global_relocalization.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3c8e10036db0a0a8cd023ca950af29ddec91bb06",
+      "size": 60701
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+      "size": 11358
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db19ee93e5065c1296b7f0c3a55580da721a6ffd",
+      "size": 1427
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/dock_database.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b6a1f8888177f418125370b658a3c0d00fdc0de2",
+      "size": 7121
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/dock_projection.hpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e31a0d97ffd499255ce9abddb3c4d5c1e0c75f4f",
+      "size": 735
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/docking_server.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ab0d1d83659e1e2345085e9f299860e33e2adcb4",
+      "size": 27332
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/main.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e453f10ff091438aae923993cf09c1081b2413c2",
+      "size": 911
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/navigator.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ff76c5eecd79d533c282129fdf5a5f0b6fa9cf7b",
+      "size": 3957
+    },
+    {
+      "path": "control_center_navigation/src/exact_goal_endpoint.hpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c5ce53df3b45aaf2aa205d7f1eef7aaeed830d7",
+      "size": 1382
+    },
+    {
+      "path": "control_center_navigation/src/exact_goal_planner.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "081ea966df9908714147a0db8dec61b55a30f767",
+      "size": 9139
+    },
+    {
+      "path": "control_center_navigation/src/exact_near_goal.hpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a15042524b45c42578df96d1fdd182f0bd3bc09d",
+      "size": 2119
+    },
+    {
+      "path": "control_center_navigation/src/settled_mppi.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "05498431fdb6fa9f4708181343442c1a3173917d",
+      "size": 5472
+    },
+    {
+      "path": "control_center_navigation/src/terminal_approach.hpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d772b4c952740f11960ae87890debdab4bc08453",
+      "size": 3166
+    },
+    {
+      "path": "control_center_navigation/src/wall_tail_filter.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc565a1a92e670cf7dca413516ede0ea8a829da6",
+      "size": 923
+    },
+    {
+      "path": "control_center_navigation/src/wall_tail_filter_core.hpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "adb30357818e8fa403a13cabc7014c02db4b2b84",
+      "size": 4805
+    },
+    {
+      "path": "control_center_navigation/srv/DeleteWaypoint.srv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fa6a16fbb3c5c3ddf8cc22c8908b89890825a2f",
+      "size": 44
+    },
+    {
+      "path": "control_center_navigation/srv/ListWaypoints.srv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e4dcc9cb14dffcb046165e6d62e566123ef6eaa",
+      "size": 47
+    },
+    {
+      "path": "control_center_navigation/srv/NavigateToPoseRefined.srv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e95eb12001483e11dd2c9a793dcc2a316ab6add4",
+      "size": 80
+    },
+    {
+      "path": "control_center_navigation/srv/NavigateToWaypoint.srv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fa6a16fbb3c5c3ddf8cc22c8908b89890825a2f",
+      "size": 44
+    },
+    {
+      "path": "control_center_navigation/srv/NavigateWaypointSequence.srv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eebe0e97bfb27d61da5ea8d461f56a48143b34c6",
+      "size": 79
+    },
+    {
+      "path": "control_center_navigation/srv/RenameWaypoint.srv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "06d5a2d2d1bc07055a497767c9111f2449d6b717",
+      "size": 64
+    },
+    {
+      "path": "control_center_navigation/srv/SaveWaypoint.srv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fa6a16fbb3c5c3ddf8cc22c8908b89890825a2f",
+      "size": 44
+    },
+    {
+      "path": "control_center_navigation/srv/SwitchWaypointMap.srv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eec570abb0e82acf8cf309a373f9254a15a80baa",
+      "size": 85
+    },
+    {
+      "path": "control_center_navigation/support/lidar_startup_283/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19b5b9bab4e8335a3ad1750cb3fbad3f6d5b3fd6",
+      "size": 1925
+    },
+    {
+      "path": "control_center_navigation/support/lidar_startup_283/lidar_startup.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55f4c00d3d24f6978d0f9cd91624359a59f92bfd",
+      "size": 3246
+    },
+    {
+      "path": "control_center_navigation/support/lidar_startup_283/main.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18e7a0e522da6ada91638ec0462ceefe29751882",
+      "size": 697
+    },
+    {
+      "path": "control_center_navigation/support/lidar_startup_283/test_lidar_startup.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7eabe06993aa9c6c1ccbbfedc2a2396cfbad22d7",
+      "size": 2315
+    },
+    {
+      "path": "control_center_navigation/test/amcl_configure_probe.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4c353d2ebdcf74d1c1a4fc47dec6942a0481565",
+      "size": 1505
+    },
+    {
+      "path": "control_center_navigation/test/amcl_startup_regression.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6e2ee4b1e46de00d10fc7f6a6b6b346711dd9aa",
+      "size": 549
+    },
+    {
+      "path": "control_center_navigation/test/arrival_settle_regression.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "913317888c03e7a160457657b2133713caeeef1b",
+      "size": 904
+    },
+    {
+      "path": "control_center_navigation/test/baseline_relocalization.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e026c1f3c126fc8c1c9eca62d52a1b749aee919d",
+      "size": 33903
+    },
+    {
+      "path": "control_center_navigation/test/docking_lifecycle_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e8e9889a5ce3a719046ae65e134a613e83b5dfc3",
+      "size": 1620
+    },
+    {
+      "path": "control_center_navigation/test/docking_projection_regression.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "adebd4f1c0695fd6e1f0af2aa7ebf93420f3d1f4",
+      "size": 2856
+    },
+    {
+      "path": "control_center_navigation/test/entrypoint_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7e5af7748c8ece2743d0ba31d01a9838c7dc5b0c",
+      "size": 1823
+    },
+    {
+      "path": "control_center_navigation/test/exact_goal_endpoint_regression.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16ab10d3726fb31dbdf53cbaa9cb1629da64e06b",
+      "size": 1377
+    },
+    {
+      "path": "control_center_navigation/test/exact_near_goal_regression.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d118c0613cbf35724541a642c0c3c720d86148c9",
+      "size": 1578
+    },
+    {
+      "path": "control_center_navigation/test/export_bag_fixture.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b7989b72e2a9df165bcccd1b526422ce0ad8f45",
+      "size": 2882
+    },
+    {
+      "path": "control_center_navigation/test/map_server_load_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0d583764f962ba10a37f46332f72e63874a976cd",
+      "size": 3929
+    },
+    {
+      "path": "control_center_navigation/test/navigation_ui_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f88f3269df0e8037b5c03b202f002012b419d992",
+      "size": 6623
+    },
+    {
+      "path": "control_center_navigation/test/navigation_window_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cadeb9d19b25aad390b655ca79731922bdeeefad",
+      "size": 6665
+    },
+    {
+      "path": "control_center_navigation/test/occupied_approach_bt_test.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2840821643551b0f26d9914084810d01ef7b3e5a",
+      "size": 4187
+    },
+    {
+      "path": "control_center_navigation/test/occupied_approach_planner_test.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d6e483220a120e19b155b72867845f50f9e8ad9f",
+      "size": 2792
+    },
+    {
+      "path": "control_center_navigation/test/offline_benchmark.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6df1ea249d612a52183bb742e19d89eee25875e7",
+      "size": 2004
+    },
+    {
+      "path": "control_center_navigation/test/proximity_voice_alert_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9e2f2a3befef9e9b4dd09e99b2358d6568a0fdd",
+      "size": 2911
+    },
+    {
+      "path": "control_center_navigation/test/relocalization_regression.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4ff484513460b4cc83b5bece98ee30e07508f5c",
+      "size": 12169
+    },
+    {
+      "path": "control_center_navigation/test/rgb_full.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c121fde19687f8b85a21fa0e6a5a7efa4b8c5957",
+      "size": 125379
+    },
+    {
+      "path": "control_center_navigation/test/rgb_split.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56c586efd67a012bcc1ad7336492679795fdb7bd",
+      "size": 130227
+    },
+    {
+      "path": "control_center_navigation/test/settled_checker_regression.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6af9bac660592fa7b77f0f9f3f9f8b17bf2c80e",
+      "size": 1640
+    },
+    {
+      "path": "control_center_navigation/test/terminal_approach_regression.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23d36f457ab620db03da549ae643819a14d47d7b",
+      "size": 1703
+    },
+    {
+      "path": "control_center_navigation/test/test_arrival_configuration.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83d551bbdd46c8934e37a4082298efb29198555c",
+      "size": 1570
+    },
+    {
+      "path": "control_center_navigation/test/test_asymmetric_footprint.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a966aa62408296f67c6cd15bc78ff7d4d34a409",
+      "size": 2130
+    },
+    {
+      "path": "control_center_navigation/test/test_cmd_vel_arbiter_manual_override.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "969ba64a869bff5ba24c1f96108120597b91091f",
+      "size": 3074
+    },
+    {
+      "path": "control_center_navigation/test/test_crisp_refinement.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9cdd59ce7fdb72555dab321bcf9b3ba506581854",
+      "size": 2393
+    },
+    {
+      "path": "control_center_navigation/test/test_crowd_refinement.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10ac6daa0d2c08f5e289ce11fb646d966a8c6091",
+      "size": 5743
+    },
+    {
+      "path": "control_center_navigation/test/test_dock_prealignment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d45448e59b67944c745148a3289292381faf3d3a",
+      "size": 11173
+    },
+    {
+      "path": "control_center_navigation/test/test_laser_display_timestamp.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8a2d76038ef317f70e06eb0e7a601fdea1746d9d",
+      "size": 2039
+    },
+    {
+      "path": "control_center_navigation/test/test_manual_goal_refinement.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8cc9929df79c299b71ddb2e4272f77063e6620b7",
+      "size": 3746
+    },
+    {
+      "path": "control_center_navigation/test/test_map_editor_storage.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e048a8ed6cdd9e202daee1b1fe4f474b7238be5",
+      "size": 6670
+    },
+    {
+      "path": "control_center_navigation/test/test_mppi_only_navigation.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d334620b8d623c39464dd1d56348a09b35f45d0b",
+      "size": 3999
+    },
+    {
+      "path": "control_center_navigation/test/test_nav_rgb.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d92b2079b9ddb1f9707bbc0dd16cc95b30db12f",
+      "size": 6876
+    },
+    {
+      "path": "control_center_navigation/test/test_no_direct_short_distance_default.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4dc429caafa44243b0ad3c09d2597b89f7358b6f",
+      "size": 716
+    },
+    {
+      "path": "control_center_navigation/test/test_numbered_docks.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c68ac82e84c3688ac44ed73693dad75269b9dfc3",
+      "size": 2508
+    },
+    {
+      "path": "control_center_navigation/test/test_occupied_approach_config.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3efbc2b98a8ceb7453064adab02a7af226d49a5f",
+      "size": 1672
+    },
+    {
+      "path": "control_center_navigation/test/test_occupied_wait.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "063fa301264a3b025cafdfed70e1e9869e92a28a",
+      "size": 4120
+    },
+    {
+      "path": "control_center_navigation/test/test_short_distance_servo.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9945ea70e32ac20b71bbb5fefcf847d36f262371",
+      "size": 4074
+    },
+    {
+      "path": "control_center_navigation/test/test_smooth_arrival.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4118e4a3ab1e13b25a7d4718908740291c3b5b3b",
+      "size": 703
+    },
+    {
+      "path": "control_center_navigation/test/test_source_map_catalog.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0488dbe1e41b76e176f78e351ea92c89959184cc",
+      "size": 1219
+    },
+    {
+      "path": "control_center_navigation/test/test_staged_short_servo_logic.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c39a340a6f164999b1a225cb7e0abb33ac5d3fb",
+      "size": 5102
+    },
+    {
+      "path": "control_center_navigation/test/wall_tail_regression.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2bb52b1b5b5d641a1642ef942c900bb2a9c2919b",
+      "size": 2417
+    },
+    {
+      "path": "control_center_navigation/test/waypoint_sequence_dwell_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24c843365d1792e7499d96adf25dca8ac6cbbc15",
+      "size": 1431
+    },
+    {
+      "path": "control_center_navigation/wall_tail_plugins.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2b199627eb86beb83bec8b1d3c033c78d98916f",
+      "size": 396
+    },
+    {
+      "path": "control_center_service_manager/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2630bbb56b018664dcdedfaae491bed05e2e20e9",
+      "size": 1075
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/__init__.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77ee446922ab935369e6459f988924be6e2f3004",
+      "size": 52
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/joint_reset_once.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c96bcc37c3c72badc95d547508f57cadab76306",
+      "size": 2463
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/panel.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "531be2cf1a4571fd4fc1334ffc54df2511b044fc",
+      "size": 76863
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/speaker_volume.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da107c004dac429fb1db57aaa4f95de584bf8451",
+      "size": 5180
+    },
+    {
+      "path": "control_center_service_manager/package.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb93c5303ed0427428b845654daa75820a661269",
+      "size": 605
+    },
+    {
+      "path": "control_center_service_manager/resource/control_center_service_manager",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1
+    },
+    {
+      "path": "control_center_service_manager/setup.cfg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8ed3d561ba71081c433fc02d6fc8e4d120e2751",
+      "size": 129
+    },
+    {
+      "path": "control_center_service_manager/setup.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8640bc2bd8f909e447fb58c429443fcd10246a05",
+      "size": 831
+    },
+    {
+      "path": "control_center_service_manager/test/joint_reset_once_integration.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e1b827625e0e4c66ba54c8d5c37db6ff05908c7",
+      "size": 1392
+    },
+    {
+      "path": "control_center_service_manager/test/service_manager_smoke.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "55075a185ac3b101603d331187913100dc0cd76b",
+      "size": 6780
+    },
+    {
+      "path": "control_center_service_manager/test/test_speaker_volume.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c16808b96cd35331d5ed5b6cd8cfe86b905d43b4",
+      "size": 1964
+    },
+    {
+      "path": "control_center_shell/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ffc868142a395c5cd2e77aa66a2b487eb0c0ae7",
+      "size": 1304
+    },
+    {
+      "path": "control_center_shell/control_center_shell/__init__.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a7c0cefec9fc52105b1c6f06d60eb0fb6f55848",
+      "size": 48
+    },
+    {
+      "path": "control_center_shell/control_center_shell/app.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6392b35a0668022497cb2c21dbbcdd727c12d4ec",
+      "size": 75721
+    },
+    {
+      "path": "control_center_shell/control_center_shell/preflight.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db34af212d084923ce13e5c3c68d6a58afa8d074",
+      "size": 26752
+    },
+    {
+      "path": "control_center_shell/launch/control_center.launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "57ecba906a20c8ada44133479a85461525d2e22b",
+      "size": 1678
+    },
+    {
+      "path": "control_center_shell/package.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6fc228ebd3d14a1e412883b4fedfab03f1e32bbe",
+      "size": 870
+    },
+    {
+      "path": "control_center_shell/resource/control_center_shell",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a8ad9ff10ab965a145aa12390f368ec406de4164",
+      "size": 21
+    },
+    {
+      "path": "control_center_shell/setup.cfg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a463060cc64dc5e15121e4f2752d18685b5cde15",
+      "size": 109
+    },
+    {
+      "path": "control_center_shell/setup.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "df9f48ef8666f0ef26431809f73b8698e3b7fce2",
+      "size": 791
+    },
+    {
+      "path": "control_center_shell/test/service_manager_integration_smoke.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b119c54b9edc5eedd55a00284873992dfed84f1b",
+      "size": 2861
+    },
+    {
+      "path": "control_center_slam/20260920建图大地图性能优化.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa0f80738ec25be5622157d99fdc0cda148d7434",
+      "size": 4644
+    },
+    {
+      "path": "control_center_slam/20260920建图实时性优化.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8627cd8018973ac4c1f4f923ee648ca526d3df11",
+      "size": 3103
+    },
+    {
+      "path": "control_center_slam/20260920建图局部更新性能优化.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "976ca5793628340113a9aecc216224b3396df978",
+      "size": 3072
+    },
+    {
+      "path": "control_center_slam/328增量建图使用说明.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "014d00482e268a5727fffde5003b22e0d473cf80",
+      "size": 5587
+    },
+    {
+      "path": "control_center_slam/AI_MIGRATION_GUIDE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a2874e3b0e03a7671899819ce11c17128b22069",
+      "size": 16457
+    },
+    {
+      "path": "control_center_slam/CMakeLists.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7943f9a50d4acea92670a7935c7db24fd8fccea0",
+      "size": 2117
+    },
+    {
+      "path": "control_center_slam/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a47dc73687e46ba1cd6d210aef48804ea667f46",
+      "size": 10341
+    },
+    {
+      "path": "control_center_slam/SYNC_FROM_328_20260907.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bdfe38fd7181af29ba6eac6c9a4763cb114dadff",
+      "size": 1663
+    },
+    {
+      "path": "control_center_slam/config/multi_lidar_incremental.lua",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f3e999925d9b2b00a632b58041d4cb6835c11ea",
+      "size": 412
+    },
+    {
+      "path": "control_center_slam/config/multi_lidar_optimized.lua",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11f156bd90748433b6b791f26c2b8f900beb50e1",
+      "size": 6202
+    },
+    {
+      "path": "control_center_slam/config/multi_lidar_quality.lua",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "653daeb7c38180785c882a4f9c899f2960453fb4",
+      "size": 2143
+    },
+    {
+      "path": "control_center_slam/include/control_center_slam/map_save_panel.hpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8a296d1b4dcfbaeba51968bdd7c475bdc0d29523",
+      "size": 1778
+    },
+    {
+      "path": "control_center_slam/launch/multi_lidar_slam_optimized.launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f991e956e0d95e1564f14c7383628ac39a9da4fc",
+      "size": 9482
+    },
+    {
+      "path": "control_center_slam/maps/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1
+    },
+    {
+      "path": "control_center_slam/maps/1.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67a7135496a466d72433eec4b42d2f17e7dc836f",
+      "size": 920889
+    },
+    {
+      "path": "control_center_slam/maps/1.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44ec805578aa67ebf8bdee4740d080c85dbcae73",
+      "size": 724679
+    },
+    {
+      "path": "control_center_slam/maps/1.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "38c83811b25057f1150fee360b92bb13c8d66648",
+      "size": 124
+    },
+    {
+      "path": "control_center_slam/maps/2.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94774002fb8a2766d103a951e8769df8da58dd03",
+      "size": 1557519
+    },
+    {
+      "path": "control_center_slam/maps/2.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "041911279eb307314c06068e1e26eb821f272fb9",
+      "size": 850050
+    },
+    {
+      "path": "control_center_slam/maps/2.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "244c59e675eabdd2a232ba9efdeeb7ede8eb2ab7",
+      "size": 124
+    },
+    {
+      "path": "control_center_slam/maps/2_增量_20260907_171334.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5803a65721ca5e92ce62f07e54bbefc2addbcdc",
+      "size": 7428079
+    },
+    {
+      "path": "control_center_slam/maps/2_增量_20260907_171334.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de2f0c489bb9b3b1fae9d7cc60af752db7de62ee",
+      "size": 4177872
+    },
+    {
+      "path": "control_center_slam/maps/2_增量_20260907_171334.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9cbef8a06c607d688483619be1a0c80bc5b85ad",
+      "size": 148
+    },
+    {
+      "path": "control_center_slam/maps/2_增量_20260907_171334_增量_20260907_180148.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8203acdd508477ec9ca8493d8396a053d2f2880",
+      "size": 10190822
+    },
+    {
+      "path": "control_center_slam/maps/2_增量_20260907_171334_增量_20260907_180148.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a8f60811edaaa0925ddd28b22c575bb3f3a4276",
+      "size": 5326217
+    },
+    {
+      "path": "control_center_slam/maps/2_增量_20260907_171334_增量_20260907_180148.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31e30776350d7bf3c69420a482fcb4acdf703fd5",
+      "size": 171
+    },
+    {
+      "path": "control_center_slam/maps/map_20260803_191825.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6868b1279bb6e7e8c595fbf695319d0fbaf5c523",
+      "size": 1035774
+    },
+    {
+      "path": "control_center_slam/maps/map_20260803_191825.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d08c1d0eac0ba2b3cdcb967ca205bf696b069d5",
+      "size": 221367
+    },
+    {
+      "path": "control_center_slam/maps/map_20260803_191825.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad91c7f6326a44c62033da807f43bdc3da73081c",
+      "size": 142
+    },
+    {
+      "path": "control_center_slam/maps/map_20260902_142425.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d4a963e4ae2ac112c467c7f51135053dd088a73d",
+      "size": 2182953
+    },
+    {
+      "path": "control_center_slam/maps/map_20260902_142425.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1ddcce975a6f23ac35efdb891765cef00df8b89",
+      "size": 514951
+    },
+    {
+      "path": "control_center_slam/maps/map_20260902_142425.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9e696995b67d89f24ae4197627fc27053b00200",
+      "size": 142
+    },
+    {
+      "path": "control_center_slam/maps/optimized_map.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2da04bc6f318285a210ff0a129dfe0f5ac245e78",
+      "size": 412196
+    },
+    {
+      "path": "control_center_slam/maps/optimized_map.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "61719395ca0919058386d10fe5f6a9eba9885d9c",
+      "size": 137
+    },
+    {
+      "path": "control_center_slam/maps/test1.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "96b338cc26811c4f43d7fa4cb6a1e2fba076fb24",
+      "size": 1397203
+    },
+    {
+      "path": "control_center_slam/maps/test1.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "270e7dd3d3207966c15efba0b94400b0d7c9de4c",
+      "size": 556820
+    },
+    {
+      "path": "control_center_slam/maps/test1.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e0463924b8705f9f2fdfbe11afea87eb221e246",
+      "size": 127
+    },
+    {
+      "path": "control_center_slam/package.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c1599657d24f3ba62eb6ded0f8ac723d2a19ee1",
+      "size": 1476
+    },
+    {
+      "path": "control_center_slam/runtime/cartographer_multi_origin_node",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "08967dd70f8e3716f0cd2fddbd20543a8cfc2768",
+      "size": 8640600
+    },
+    {
+      "path": "control_center_slam/runtime/cartographer_occupancy_grid_node",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16a110b48e6e7a8f8327a036aee1aebd2992eb75",
+      "size": 2674960
+    },
+    {
+      "path": "control_center_slam/rviz/slam.rviz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16eafafd47c6ca52dfefd4ed53da3249567a8e84",
+      "size": 3958
+    },
+    {
+      "path": "control_center_slam/rviz_plugins.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ceb88e2b88f150748db89f3075ff243445b98b23",
+      "size": 278
+    },
+    {
+      "path": "control_center_slam/scripts/build_multi_origin_cartographer.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "acaacf7571d37b4b8a06668ec3ad34433f2c554b",
+      "size": 3058
+    },
+    {
+      "path": "control_center_slam/scripts/incremental_mapping.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "66a2f5915e01ad67c1931a3bd62585cda232a04d",
+      "size": 9929
+    },
+    {
+      "path": "control_center_slam/scripts/mapping_keyboard_teleop.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "1099c1bc1ec9565945aa20337a6e5b13831ee7a7",
+      "size": 13024
+    },
+    {
+      "path": "control_center_slam/scripts/mapping_scan_adapter.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "1967ecd680e3cce055d963a9102e16517990fc66",
+      "size": 7155
+    },
+    {
+      "path": "control_center_slam/scripts/motion_safety_watchdog.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "61f391c247197257558ac0f4ade697b2722b27c7",
+      "size": 5725
+    },
+    {
+      "path": "control_center_slam/scripts/slam_ui_node.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "3ab600fbb8da6780b595f07a18fa22a28051929c",
+      "size": 81144
+    },
+    {
+      "path": "control_center_slam/src/map_save_panel.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a96937d93fbc7a72d72d0545196446f3c4d65a4",
+      "size": 11668
+    },
+    {
+      "path": "control_center_slam/test/test_incremental_mapping.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9334f59d202523785c33a8a198d26873d1504b9f",
+      "size": 4556
+    },
+    {
+      "path": "control_center_slam/test/test_initial_alignment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78de99971d6eea45884be26715e54b11fefa986e",
+      "size": 4275
+    },
+    {
+      "path": "control_center_slam/test/test_stationary_denoise.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11a88e4488a6cc41677e055a1e6b77234d45b1fb",
+      "size": 2109
+    },
+    {
+      "path": "control_center_slam/vendor/328建图架构分析与第二轮优化.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f0fe70efafcbcb35ffbea2bd54430e1bedb6153",
+      "size": 5076
+    },
+    {
+      "path": "control_center_slam/vendor/328雷达外参与细障碍物保留优化.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "972305f9f9c912bd0be3ed19b3b3a4621c7e4967",
+      "size": 5976
+    },
+    {
+      "path": "control_center_slam/vendor/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "564e01709dcff266e83a289f0ba81d7c2387570b",
+      "size": 5910
+    },
+    {
+      "path": "control_center_slam/vendor/SOURCES.sha256",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58d805099ca8ccd67bcce71ed6c60da2308c4710",
+      "size": 207
+    },
+    {
+      "path": "control_center_slam/vendor/cartographer-multi-origin-2.0.9004.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e514643318059275ac6667ad445116af2aa13fb",
+      "size": 1499472
+    },
+    {
+      "path": "control_center_slam/vendor/cartographer-ros-2.0.9003.tar.gz",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2df6bf991f4d0f5dc5fba99ec76d918f2c0dbc0",
+      "size": 79212
+    },
+    {
+      "path": "control_center_slam/增量建图空状态修复说明.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6fa77fde8b16f864853cf144930fc6b5d6c546bf",
+      "size": 1569
+    },
+    {
+      "path": "control_center_slam/走廊定位连续性优化说明.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f951431bbc70bdc6776ad9015bacd17eae57f46e",
+      "size": 2014
+    },
+    {
+      "path": "launcher/start_autolife_control_center_300.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "26b4274df1e266d4f2a2ed215da2ea5d2dc4c80b",
+      "size": 2392
+    },
+    {
+      "path": "launcher/start_autolife_control_center_306.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "c85c4883c615fb9a9aaa73d9baa93002815b91d5",
+      "size": 2392
+    },
+    {
+      "path": "launcher/start_autolife_control_center_307.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "42826251f22c1c72e96f5ea429c40a5324c6eee2",
+      "size": 2393
+    },
+    {
+      "path": "launcher/机器人综合控制中心-300.desktop",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "41a71447103cfa0beb878bac9a55220f0c3e7be8",
+      "size": 348
+    },
+    {
+      "path": "launcher/机器人综合控制中心-306.desktop",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "dc8b966e9bbeffd9ea821719405e9685cc7968e1",
+      "size": 348
+    },
+    {
+      "path": "launcher/机器人综合控制中心-307.desktop",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23c4f940572a074a50606352b755ce3d5e49243c",
+      "size": 348
+    },
+    {
+      "path": "logo/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f78927e2e1405f1f0a688a60e2b984fb309efd23",
+      "size": 2416
+    },
+    {
+      "path": "logo/app.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2cf6d46647c32bdd36b28bae19e5fbbfa4d3bdf",
+      "size": 12021
+    },
+    {
+      "path": "logo/autolife-logo-display.service",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5586bbf88f9e66f469ee7efa01572ac0e610ae55",
+      "size": 557
+    },
+    {
+      "path": "logo/index.html",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "029ae7839832a5668a75db31516727039106f011",
+      "size": 2689
+    },
+    {
+      "path": "logo/install_logo_service.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "88384c7ec43b23681ee4df7626db3cfb72ae75a4",
+      "size": 435
+    },
+    {
+      "path": "logo/logo_server.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "5db3069d6414a4de0381d60d4a26d9a98855b072",
+      "size": 7049
+    },
+    {
+      "path": "logo/set_display_mode.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "be5847fa8a54e9f573658d196e0b91e1dfad8761",
+      "size": 1643
+    },
+    {
+      "path": "logo/start_logo_display.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "eff359063341cdc2a3f02a00404f381901309f8f",
+      "size": 4631
+    },
+    {
+      "path": "logo/styles.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cddb90bb901f550052134beb6fae665cc0d2fbda",
+      "size": 11271
+    },
+    {
+      "path": "logo/yundie.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b7ff1e3e9d9f23f734335450756cf8d45d898df",
+      "size": 22830
+    },
+    {
+      "path": "logo/启动云蝶Logo.desktop",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "935641baba02efb06da5fd6bee154a83aeabd8c4",
+      "size": 347
+    },
+    {
+      "path": "multi_lidar_slam/CMakeLists.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9d3d7b239154604df420ae985c50426160c5d87",
+      "size": 766
+    },
+    {
+      "path": "multi_lidar_slam/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8acaf1b918f272b3bc2dae77c55051409bc13a37",
+      "size": 4012
+    },
+    {
+      "path": "multi_lidar_slam/config/multi_lidar_cloud.lua",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e879429970167f914b28aafa5db74827cbab701",
+      "size": 3408
+    },
+    {
+      "path": "multi_lidar_slam/launch/multi_lidar_slam.launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b845ef1ea58b2a9cf3fb248b4c0f1189a85fa52",
+      "size": 3352
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3ea41818d797cf10ce3da40fc8ab4791a65fdaf",
+      "size": 186012
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76d092f8bf8ea7d8f36208909eb938ed436be9b3",
+      "size": 135
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map2.pbstream",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9fe43e5575ff7e907ff6cef3326ba8e720baed0",
+      "size": 195089
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map2.pgm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5bbfa9eaceb123e8c746959bbc8651d4b3ad6dab",
+      "size": 374144
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map2.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "839e730133cd745bfa0e0e738f56365a59c68939",
+      "size": 136
+    },
+    {
+      "path": "multi_lidar_slam/maps/yundie_2f.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "deff0cf212f841077f4b1d80ef68c4466f3f39e3",
+      "size": 7966
+    },
+    {
+      "path": "multi_lidar_slam/maps/yundie_2f.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c613e435b1c895fe069fc4f90d7b85bd375f82c5",
+      "size": 134
+    },
+    {
+      "path": "multi_lidar_slam/package.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fe50171eb63e83a0e95a2e678b10af821868283",
+      "size": 928
+    },
+    {
+      "path": "multi_lidar_slam/src/lidar_fusion_node.cpp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c0677b8f001de0ec4b1dcf8ea21c85433da079dc",
+      "size": 9582
+    },
+    {
+      "path": "text_voice_control/README_ZH.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2d5c498cea137bf68c9c943e6f6dcc3b965bd893",
+      "size": 5010
+    },
+    {
+      "path": "text_voice_control/config/text_voice_control.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "caac655aa9f4646ca08b54e0783baa223ade00c3",
+      "size": 387
+    },
+    {
+      "path": "text_voice_control/launch/bringup.launch.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d21b0b69759670b7134c8ab20e89754582517128",
+      "size": 1509
+    },
+    {
+      "path": "text_voice_control/package.xml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed1ff265f1b46847fabb85afdd7ac535dcbe785a",
+      "size": 816
+    },
+    {
+      "path": "text_voice_control/resource/text_voice_control",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bbd64873d5c25b2fe9e1c16c4370893ea1eb6ca3",
+      "size": 19
+    },
+    {
+      "path": "text_voice_control/setup.cfg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3c75935792844bf0e09d71901d72fea628eafd07",
+      "size": 105
+    },
+    {
+      "path": "text_voice_control/setup.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e01287e9babe315ea2e572df3ec8d142b3d8bbfd",
+      "size": 1080
+    },
+    {
+      "path": "text_voice_control/test/test_command_parser.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55d2121f4ce059f49f39dc24451dab03811f02d6",
+      "size": 926
+    },
+    {
+      "path": "text_voice_control/text_voice_control/__init__.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9cbe78b36dde464b4d78e214e7425ab5cc5e3aa2",
+      "size": 34
+    },
+    {
+      "path": "text_voice_control/text_voice_control/asr_tts_bridge_node.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d675d6f33385f607738adc3c7457bb97ad72a152",
+      "size": 2316
+    },
+    {
+      "path": "text_voice_control/text_voice_control/command_parser.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e76b800960ccaf47f52951ed029c9b09192303a",
+      "size": 1623
+    },
+    {
+      "path": "text_voice_control/text_voice_control/say_text.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a37bb241505cc6ac7d00bd820747da2bd94991d",
+      "size": 1655
+    },
+    {
+      "path": "text_voice_control/text_voice_control/text_voice_control_node.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8fa49dc1da849ea7e94f1bb8a624573c0fadeb78",
+      "size": 2067
+    },
+    {
+      "path": "text_voice_control/text_voice_control/topics.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b5b13aaf9b69d73b1c98debb85754c0e2d5177f",
+      "size": 340
+    }
+  ]
+}

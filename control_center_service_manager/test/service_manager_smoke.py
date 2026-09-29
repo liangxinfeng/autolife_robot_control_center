@@ -115,12 +115,11 @@ def main():
     )
     assert module.parse_pch_card_index(cards) == 4
     program, arguments, card = module.speaker_mixer_command(85, cards)
-    assert program == 'amixer' and card == 4
-    assert arguments == [
-        '-M', '-c', '4', 'sset', 'Master', '85%', 'unmute'
-    ]
+    assert program == sys.executable and card == 4
+    assert arguments[0].endswith('speaker_volume.py')
+    assert arguments[1:] == ['--card','4','--volume','85']
     _, zero_arguments, _ = module.speaker_mixer_command(0, cards)
-    assert zero_arguments[-1] == 'mute'
+    assert zero_arguments[-1] == '0'
     print('PASS: physical PCH speaker mixer command is safe and card-index independent')
 
     application = (

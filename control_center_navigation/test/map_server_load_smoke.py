@@ -43,6 +43,7 @@ def call(node, client, request, timeout=5.0):
 def main():
     with tempfile.TemporaryDirectory() as directory:
         grid = np.zeros((40, 60), dtype=np.int16)
+        grid[:5, :] = -1
         grid[5:35, 28:31] = 100
         metadata = {
             'resolution': 0.05,
@@ -91,6 +92,9 @@ def main():
             assert int(response.map.info.width) == 60
             assert int(response.map.info.height) == 40
             assert abs(float(response.map.info.resolution) - 0.05) < 1e-6
+            actual = np.asarray(response.map.data).reshape(grid.shape)
+            assert np.array_equal(actual, grid), 'Unknown/free/occupied states changed on Nav2 load'
+            print('PASS: Nav2 preserves all unknown, free and occupied cells')
         finally:
             node.destroy_node()
             rclpy.shutdown()

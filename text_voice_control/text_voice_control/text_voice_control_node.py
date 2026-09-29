@@ -11,7 +11,7 @@ class TextVoiceControlNode(Node):
         super().__init__("text_voice_control")
 
         self.declare_parameter("ros_domain_id", "")
-        self.declare_parameter("robot_id", "283")
+        self.declare_parameter("robot_id", "307")
         self.declare_parameter("input_topic", "/text_voice_command")
         self.declare_parameter("tts_topic", "")
         self.declare_parameter("publish_json", True)
