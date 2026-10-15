@@ -205,7 +205,7 @@ def generate_launch_description():
     )
     declare_text_voice_robot_id = DeclareLaunchArgument(
         'text_voice_robot_id',
-        default_value='307',
+        default_value='300',
     )
     declare_text_voice_ros_domain_id = DeclareLaunchArgument(
         'text_voice_ros_domain_id',
@@ -213,7 +213,7 @@ def generate_launch_description():
     )
     declare_proximity_front_scan_topic = DeclareLaunchArgument(
         'proximity_front_scan_topic',
-        default_value='/topic_gv_front_lidar_0_307',
+        default_value='/topic_gv_front_lidar_0_300',
     )
     declare_startup_navigation_on_initialpose = DeclareLaunchArgument(
         'startup_navigation_on_initialpose',
@@ -436,7 +436,7 @@ def generate_launch_description():
         parameters=[
             {
                 'use_sim_time': use_sim_time,
-                'input_topic': '/topic_gv_wheel_odom_0_307',
+                'input_topic': '/topic_gv_wheel_odom_0_300',
                 'output_topic': '/odom',
             }
         ],
@@ -454,8 +454,8 @@ def generate_launch_description():
             'amcl_pose_topic': '/amcl_pose',
             'global_path_topic': '/plan',
             'local_path_topic': '/local_plan',
-            'front_scan_topic': '/topic_gv_front_lidar_0_307',
-            'rear_scan_topic': '/topic_gv_rear_lidar_0_307',
+            'front_scan_topic': '/topic_gv_front_lidar_0_300',
+            'rear_scan_topic': '/topic_gv_rear_lidar_0_300',
             'manual_cmd_vel_topic': manual_cmd_vel_topic,
             'initial_map_yaml': map_yaml,
             'edited_maps_directory': edited_maps_directory,
@@ -470,7 +470,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        SetEnvironmentVariable('ROBOT_ID', '307'),
+        SetEnvironmentVariable('ROBOT_ID', '300'),
         SetEnvironmentVariable('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'),
         SetEnvironmentVariable('CYCLONEDDS_URI', vendor_cyclonedds_uri),
         declare_use_sim_time,

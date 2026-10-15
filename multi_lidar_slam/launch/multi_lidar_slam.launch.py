@@ -61,9 +61,9 @@ def generate_launch_description():
                 '-start_trajectory_with_default_topics'
             ],
             remappings=[
-                ('scan_1', '/topic_gv_front_lidar_0_283'),
-                ('scan_2', '/topic_gv_rear_lidar_0_283'),
-                ('odom', '/topic_gv_wheel_odom_0_283'),
+                ('scan_1', '/topic_gv_front_lidar_0_300'),
+                ('scan_2', '/topic_gv_rear_lidar_0_300'),
+                ('odom', '/topic_gv_wheel_odom_0_300'),
             ],
             output='screen'
         ),

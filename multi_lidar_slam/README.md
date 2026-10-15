@@ -4,9 +4,9 @@
 
 `multi_lidar_slam` 用于双雷达 Cartographer 建图，当前默认使用：
 
-- 前雷达话题：`/topic_gv_front_lidar_0_283`
-- 后雷达话题：`/topic_gv_rear_lidar_0_283`
-- 里程计话题：`/topic_gv_wheel_odom_0_283`
+- 前雷达话题：`/topic_gv_front_lidar_0_300`
+- 后雷达话题：`/topic_gv_rear_lidar_0_300`
+- 里程计话题：`/topic_gv_wheel_odom_0_300`
 
 启动后会拉起：
 
@@ -45,9 +45,9 @@ ros2 launch multi_lidar_slam multi_lidar_slam.launch.py open_rviz:=false
 
 ```bash
 ros2 topic list
-ros2 topic hz /topic_gv_front_lidar_0_283
-ros2 topic hz /topic_gv_rear_lidar_0_283
-ros2 topic hz /topic_gv_wheel_odom_0_283
+ros2 topic hz /topic_gv_front_lidar_0_300
+ros2 topic hz /topic_gv_rear_lidar_0_300
+ros2 topic hz /topic_gv_wheel_odom_0_300
 ```
 
 如果后雷达没有数据，Cartographer 通常会一直等待 `scan_2`，导致地图不更新。
@@ -127,7 +127,7 @@ ros2 run nav2_map_server map_saver_cli -f /home/ubuntu/ros2_ws/src/autolife_robo
 重点检查：
 
 ```bash
-ros2 topic echo /topic_gv_rear_lidar_0_283 --once
+ros2 topic echo /topic_gv_rear_lidar_0_300 --once
 ```
 
 ### 3. 保存地图失败
@@ -147,9 +147,9 @@ ros2 node list
 
 如果移植到新机器人后话题变成 `284`，需要同步修改 launch 文件中的：
 
-- `/topic_gv_front_lidar_0_283`
-- `/topic_gv_rear_lidar_0_283`
-- `/topic_gv_wheel_odom_0_283`
+- `/topic_gv_front_lidar_0_300`
+- `/topic_gv_rear_lidar_0_300`
+- `/topic_gv_wheel_odom_0_300`
 
 ## 最常用命令
 

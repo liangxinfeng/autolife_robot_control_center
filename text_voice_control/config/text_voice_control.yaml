@@ -1,7 +1,7 @@
 text_voice_control:
   ros__parameters:
     ros_domain_id: "0"
-    robot_id: "283"
+    robot_id: "300"
     input_topic: "/text_voice_command"
     tts_topic: ""
     publish_json: true
@@ -9,7 +9,7 @@ text_voice_control:
 asr_tts_bridge:
   ros__parameters:
     ros_domain_id: "0"
-    robot_id: "283"
+    robot_id: "300"
     asr_topic: ""
     tts_topic: ""
     trigger_prefixes:

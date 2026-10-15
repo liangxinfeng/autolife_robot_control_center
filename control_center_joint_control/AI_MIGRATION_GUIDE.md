@@ -28,7 +28,7 @@ systemctl --user status arm-control-service.service
 
 ## 2. 设置机器人编号和通信域
 
-假设目标机器人编号为 `283`、ROS Domain 为 `0`，则话题后缀为 `0_283`。迁移到 300 时相应改成 `0_300`。
+假设目标机器人编号为 `283`、ROS Domain 为 `0`，则话题后缀为 `0_300`。迁移到 300 时相应改成 `0_300`。
 
 检查厂家服务：
 
@@ -42,7 +42,7 @@ systemctl --user cat arm-control-service.service | \
 ```ini
 TimeoutStopSec=30s
 Environment="ROS_DOMAIN_ID=0"
-Environment="ROBOT_ID=283"
+Environment="ROBOT_ID=300"
 Environment="RMW_IMPLEMENTATION=rmw_cyclonedds_cpp"
 Environment="CYCLONEDDS_URI=<CycloneDDS><Domain><General><Interfaces><NetworkInterface name=\"lo\"/></Interfaces></General><Discovery><ParticipantIndex>auto</ParticipantIndex><MaxAutoParticipantIndex>200</MaxAutoParticipantIndex></Discovery></Domain></CycloneDDS>"
 ```
@@ -74,7 +74,7 @@ source install/setup.bash
 export ROS_DOMAIN_ID=0
 ros2 launch control_center_joint_control \
   control_center_joint_control.launch.py \
-  robot_id:=283 topic_suffix:=0_283
+  robot_id:=300 topic_suffix:=0_300
 ```
 
 300号机器人只需把两处 `283` 改为 `300`。`topic_suffix` 是最终使用的话题编号，必须与厂家服务实际话题完全一致。
@@ -82,13 +82,13 @@ ros2 launch control_center_joint_control \
 ## 5. 首次运行检查
 
 ```bash
-ros2 topic info /topic_arm_whole_body_and_gripper_current_joints_status_0_283
-ros2 topic info /control_reset_0_283
+ros2 topic info /topic_arm_whole_body_and_gripper_current_joints_status_0_300
+ros2 topic info /control_reset_0_300
 ros2 topic echo --once \
-  /topic_arm_whole_body_and_gripper_current_joints_status_0_283
+  /topic_arm_whole_body_and_gripper_current_joints_status_0_300
 ```
 
-应能收到关节反馈，且 `/control_reset_0_283` 有厂家订阅者。点击“解锁并复位”后机器人可能先移动到厂家复位姿态；必须等到提示“厂家复位与使能已完成，可以控制真机关节”后再操作。“解锁（不复位）”仅用于厂家硬件已经正常使能、需要保持当前姿态的场景。
+应能收到关节反馈，且 `/control_reset_0_300` 有厂家订阅者。点击“解锁并复位”后机器人可能先移动到厂家复位姿态；必须等到提示“厂家复位与使能已完成，可以控制真机关节”后再操作。“解锁（不复位）”仅用于厂家硬件已经正常使能、需要保持当前姿态的场景。
 
 测试时关闭 VR、抓取、动作播放等可能同时发布全身关节目标的程序，避免多控制源冲突。
 

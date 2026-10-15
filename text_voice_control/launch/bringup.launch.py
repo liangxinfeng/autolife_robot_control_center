@@ -35,7 +35,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        DeclareLaunchArgument("robot_id", default_value="283"),
+        DeclareLaunchArgument("robot_id", default_value="300"),
         DeclareLaunchArgument("ros_domain_id", default_value="0"),
         DeclareLaunchArgument("enable_asr_bridge", default_value="false"),
         text_node,

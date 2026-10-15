@@ -74,7 +74,7 @@ def generate_launch_description():
                 'nav_input_topic': '/nav_cmd_vel',
                 'arm_input_topic': manual_cmd_vel_topic,
                 'manual_override_topic': manual_override_topic,
-                'output_topic': '/topic_gv_target_cmd_vel_0_307',
+                'output_topic': '/topic_gv_target_cmd_vel_0_300',
             }
         ],
     )
@@ -95,7 +95,7 @@ def generate_launch_description():
         parameters=[docking_params_file, {'use_sim_time': use_sim_time}],
         remappings=[
             ('cmd_vel', '/nav_cmd_vel'),
-            ('battery_state', '/topic_gv_battery_0_307'),
+            ('battery_state', '/topic_gv_battery_0_300'),
         ],
     )
 
@@ -134,3 +134,4 @@ def generate_launch_description():
         docking_server,
         lifecycle_manager_navigation,
     ])
+

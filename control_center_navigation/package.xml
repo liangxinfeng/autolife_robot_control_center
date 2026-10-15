@@ -30,6 +30,9 @@
   <depend>nav2_amcl</depend>
   <depend>nav2_map_server</depend>
   <depend>nav2_planner</depend>
+  <depend>nav2_smac_planner</depend>
+  <depend>nav2_core</depend>
+  <depend>nav2_mppi_controller</depend>
   <depend>nav2_controller</depend>
   <depend>nav2_rotation_shim_controller</depend>
   <depend>nav2_behaviors</depend>
@@ -38,6 +41,7 @@
   <depend>nav2_costmap_2d</depend>
   <exec_depend>dual_laser_merger</exec_depend>
   <exec_depend>laser_filters</exec_depend>
+  <depend>filters</depend>
   <depend>opennav_docking</depend>
   <depend>opennav_docking_core</depend>
   <depend>nav2_graceful_controller</depend>
@@ -59,6 +63,8 @@
 
   <exec_depend>rosidl_default_runtime</exec_depend>
   <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>control_center_chassis_guard</exec_depend>
+  <exec_depend>python3-redis</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

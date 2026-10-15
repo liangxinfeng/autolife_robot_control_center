@@ -14,9 +14,9 @@ ASR/TTS 语音链路，实现“通过文本指令控制机器人语音输出”
 当前机器人默认：
 
 - `ROS_DOMAIN_ID=0`
-- `ROBOT_ID=283`
-- TTS 话题：`/topic_tts_0_283`
-- ASR 文本话题：`/topic_chat_text_0_283`
+- `ROBOT_ID=300`
+- TTS 话题：`/topic_tts_0_300`
+- ASR 文本话题：`/topic_chat_text_0_300`
 
 ## 2. 已实现内容
 
@@ -58,7 +58,7 @@ colcon build --base-paths src/autolife_robot_control_center/text_voice_control \
 cd ~/ros2_ws
 source /opt/ros/jazzy/setup.bash
 source install/setup.bash
-ros2 launch text_voice_control bringup.launch.py robot_id:=283 ros_domain_id:=0
+ros2 launch text_voice_control bringup.launch.py robot_id:=300 ros_domain_id:=0
 ```
 
 启动后，向 `/text_voice_command` 发布文本即可播报：
@@ -108,7 +108,7 @@ ros2 run text_voice_control say_text --robot 283 --domain 0 --text "测试播报
 需要启用时：
 
 ```bash
-ros2 launch text_voice_control bringup.launch.py robot_id:=283 ros_domain_id:=0 enable_asr_bridge:=true
+ros2 launch text_voice_control bringup.launch.py robot_id:=300 ros_domain_id:=0 enable_asr_bridge:=true
 ```
 
 启动后，可以对机器人说：
@@ -160,7 +160,7 @@ std_msgs/msg/String
 
 ```yaml
 ros_domain_id: "0"
-robot_id: "283"
+robot_id: "300"
 input_topic: "/text_voice_command"
 tts_topic: ""
 publish_json: true
@@ -170,7 +170,7 @@ publish_json: true
 
 ```yaml
 ros_domain_id: "0"
-robot_id: "283"
+robot_id: "300"
 asr_topic: ""
 tts_topic: ""
 trigger_prefixes: ["播报", "说", "朗读", "请说"]
@@ -201,19 +201,19 @@ ros2 topic list | grep tts
 监听 TTS 指令：
 
 ```bash
-ros2 topic echo /topic_tts_0_283
+ros2 topic echo /topic_tts_0_300
 ```
 
 查看 ASR 文本：
 
 ```bash
-ros2 topic echo /topic_chat_text_0_283
+ros2 topic echo /topic_chat_text_0_300
 ```
 
 ## 10. 注意事项
 
 - 机器人已有的语音服务必须运行，否则本包发布了 TTS 指令也不会真正出声。
-- 若 `/topic_tts_0_283` 没有订阅者，应检查机器人 vision/voice 服务是否启动。
+- 若 `/topic_tts_0_300` 没有订阅者，应检查机器人 vision/voice 服务是否启动。
 - 若 ASR 没有输出，需要检查机器人已有 ASR 配置、API Key、麦克风和相关服务。
 - ASR 桥接默认关闭，因为它会把带前缀的识别结果变成播报动作。
 - 本包只控制“说什么”和“停止说”，不负责生成音频文件、不负责选择具体 TTS 模型。

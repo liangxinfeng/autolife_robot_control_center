@@ -11,7 +11,7 @@ class AsrTtsBridgeNode(Node):
         super().__init__("asr_tts_bridge")
 
         self.declare_parameter("ros_domain_id", "")
-        self.declare_parameter("robot_id", "283")
+        self.declare_parameter("robot_id", "300")
         self.declare_parameter("asr_topic", "")
         self.declare_parameter("tts_topic", "")
         self.declare_parameter("trigger_prefixes", ["播报", "说", "朗读", "请说"])

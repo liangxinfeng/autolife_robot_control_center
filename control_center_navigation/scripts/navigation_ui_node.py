@@ -2,9 +2,11 @@
 """Standalone Qt navigation interface; no RViz runtime is required."""
 
 import json
+import importlib.util
 import math
 from pathlib import Path as FilePath
 import re
+import shutil
 import sys
 import threading
 import time
@@ -31,7 +33,7 @@ from rclpy.qos import (
 from rclpy.time import Time
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import String
-from std_srvs.srv import Trigger
+from std_srvs.srv import Trigger, Empty
 import tf2_ros
 from visualization_msgs.msg import Marker, MarkerArray
 
@@ -45,6 +47,93 @@ from control_center_navigation.srv import (
     SaveWaypoint,
     SwitchWaypointMap,
 )
+
+try:
+    from control_center_chassis_guard import (
+        ChassisControlLease,
+        KeyEventDiagnostics,
+        ManualKeyFilter,
+        VelocityRamp,
+        VelocityRampDiagnostics,
+    )
+except ImportError:  # deployment safety net; manual driving stays fail-closed
+    ChassisControlLease = None
+
+    class ManualKeyFilter:  # no-debounce fallback, matches pre-fix behaviour
+        def __init__(self, release_delay_sec=0.0, clock=None):
+            self._keys = set()
+
+        def press(self, key, now=None):
+            changed = key not in self._keys
+            self._keys.add(key)
+            return changed
+
+        def release(self, key, now=None):
+            changed = key in self._keys
+            self._keys.discard(key)
+            return changed
+
+        def clear(self):
+            changed = bool(self._keys)
+            self._keys.clear()
+            return changed
+
+        def expire(self, now=None):
+            return False
+
+        def pressed_keys(self):
+            return frozenset(self._keys)
+
+        def next_deadline(self):
+            return None
+
+    class VelocityRamp:  # unsmoothed fallback, matches pre-fix behaviour
+        def __init__(self, *args, **kwargs):
+            self._values = [0.0, 0.0, 0.0]
+
+        @property
+        def target(self):
+            return tuple(self._values)
+
+        @property
+        def current(self):
+            return tuple(self._values)
+
+        @property
+        def idle(self):
+            return not any(self._values)
+
+        def set_target(self, linear_x, linear_y, angular_z):
+            self._values = [float(linear_x), float(linear_y), float(angular_z)]
+            return self.target
+
+        def step(self, now=None):
+            return self.current
+
+        def reset(self):
+            was_moving = not self.idle
+            self._values = [0.0, 0.0, 0.0]
+            return was_moving
+
+    class KeyEventDiagnostics:  # inert fallback
+        enabled = False
+        path = None
+
+        def log(self, kind, **fields):
+            return None
+
+        def close(self):
+            return None
+
+    class VelocityRampDiagnostics:  # inert fallback
+        enabled = False
+        path = None
+
+        def record(self, timestamp, target, current):
+            return None
+
+        def close(self):
+            return None
 
 
 PACKAGE_TITLE = '全局重定位导航中心'
@@ -67,6 +156,13 @@ def _source_package_directory():
 
 
 def _legacy_default_map_yaml():
+    # Editing source maps must not silently select a stale colcon install copy.
+    source_map = (
+        _source_package_directory().parent / 'multi_lidar_slam'
+        / 'maps' / 'yundie_2f.yaml'
+    )
+    if source_map.is_file():
+        return str(source_map.resolve())
     try:
         return str(
             FilePath(get_package_share_directory('multi_lidar_slam'))
@@ -223,7 +319,8 @@ def save_map_files(directory, name, grid, metadata, reserved_paths=()):
             ],
             'negate': 0,
             'occupied_thresh': 0.65,
-            'free_thresh': 0.25,
+            # Gray 205 is UNKNOWN (1 - 205/255 = 0.196078), not free.
+            'free_thresh': 0.196,
         }
         with yaml_path.open('x', encoding='utf-8') as stream:
             yaml_created = True
@@ -244,6 +341,113 @@ def save_map_files(directory, name, grid, metadata, reserved_paths=()):
             pgm_path.unlink()
         return False, f'保存地图失败：{error}', None
     return True, f'新地图已保存：{yaml_path}', str(yaml_path)
+
+
+def _map_file_pair(path, catalog):
+    path = FilePath(path).expanduser()
+    if path.is_symlink():
+        raise ValueError('不允许修改符号链接地图')
+    path = path.resolve()
+    if path not in {FilePath(p).resolve() for p in catalog} or not path.is_file():
+        raise ValueError('地图不在当前地图库中，请刷新后重试')
+    data = yaml.safe_load(path.read_text(encoding='utf-8'))
+    image = FilePath(data['image']).expanduser()
+    image = image if image.is_absolute() else path.parent / image
+    if image.is_symlink() or image.resolve().parent != path.parent:
+        raise ValueError('地图图像不在同一目录，不能覆盖或删除，请先另存地图')
+    image = image.resolve()
+    if not image.is_file():
+        raise ValueError('地图图像不存在')
+    return path, image, data
+
+def _image_shared(image, path, catalog):
+    for other in catalog:
+        other = FilePath(other).resolve()
+        if other == path:
+            continue
+        try:
+            data = yaml.safe_load(other.read_text(encoding='utf-8'))
+            target = FilePath(data['image'])
+            if not target.is_absolute():
+                target = other.parent / target
+            if target.resolve() == image:
+                return True
+        except Exception:
+            # Cannot establish ownership; keep the image rather than risk loss.
+            return True
+    return False
+
+def overwrite_map_files(path, grid, metadata, catalog):
+    """Keep the original YAML/image paths; back up both before replacing."""
+    path, image, data = _map_file_pair(path, catalog)
+    if _image_shared(image, path, catalog):
+        raise ValueError('图像被其他地图共用，不能覆盖，请另存新地图')
+    if image.suffix.lower() not in ('.png', '.pgm'):
+        raise ValueError('当前图像格式不支持覆盖，请另存为新地图')
+    old_image = QtGui.QImage(str(image))
+    values = np.asarray(grid)
+    expected = [float(metadata[k]) for k in ('origin_x', 'origin_y', 'origin_yaw')]
+    if (old_image.isNull() or values.shape != (old_image.height(), old_image.width())
+            or not np.allclose(data['origin'], expected, atol=1e-7, rtol=0)
+            or abs(float(data['resolution']) - float(metadata['resolution'])) > 1e-9):
+        raise ValueError('当前画面与原地图的尺寸/坐标不一致，请重新加载地图或另存')
+    if not np.isfinite(values).all() or np.any(values < -1) or np.any(values > 100):
+        raise ValueError('地图像素数据无效')
+    pixels = np.full(values.shape, 205, dtype=np.uint8)
+    known = values >= 0
+    pixels[known] = np.rint((100. - values[known]) * 254. / 100.).astype(np.uint8)
+    pixels = np.ascontiguousarray(np.flipud(pixels))
+    picture = QtGui.QImage(pixels.data, pixels.shape[1], pixels.shape[0], pixels.shape[1],
+                          QtGui.QImage.Format_Grayscale8).copy()
+    stamp = str(time.time_ns())
+    backup = path.parent / '.map_backups' / (path.stem + '_' + stamp)
+    backup.mkdir(parents=True)
+    shutil.copy2(path, backup / path.name)
+    shutil.copy2(image, backup / image.name)
+    temp_image = image.with_name('.' + image.name + '.' + stamp + '.tmp')
+    temp_yaml = path.with_name('.' + path.name + '.' + stamp + '.tmp')
+    changed = False
+    try:
+        if not picture.save(str(temp_image), image.suffix[1:].upper()):
+            raise OSError('图像写入失败')
+        data.update(mode='trinary', negate=0, occupied_thresh=.65, free_thresh=.196)
+        temp_yaml.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False), encoding='utf-8')
+        temp_image.replace(image)
+        changed = True
+        temp_yaml.replace(path)
+    except Exception:
+        if changed:
+            shutil.copy2(backup / image.name, image)
+            shutil.copy2(backup / path.name, path)
+        raise
+    finally:
+        temp_image.unlink(missing_ok=True)
+        temp_yaml.unlink(missing_ok=True)
+    return backup
+
+def archive_map_files(path, catalog, protected_paths=()):
+    """Remove from catalog by moving exact files to a recoverable local trash."""
+    path, image, _ = _map_file_pair(path, catalog)
+    if path in {FilePath(p).resolve() for p in protected_paths if p}:
+        raise ValueError('不能删除当前使用/默认地图，请先加载另一张地图')
+    files = [path]
+    if not _image_shared(image, path, catalog):
+        files.append(image)
+    state = path.with_suffix('.pbstream')
+    if state.is_file() and not state.is_symlink():
+        files.append(state)
+    trash = path.parent / '.map_trash' / (path.stem + '_' + str(time.time_ns()))
+    trash.mkdir(parents=True)
+    moved = []
+    try:
+        for item in files:
+            item.rename(trash / item.name)
+            moved.append(item)
+    except Exception:
+        for item in reversed(moved):
+            (trash / item.name).rename(item)
+        raise
+    return trash
 
 
 def yaw_from_quaternion(quaternion):
@@ -271,10 +475,27 @@ class RosSignals(QtCore.QObject):
     relocalization_status = QtCore.pyqtSignal(object)
     service_result = QtCore.pyqtSignal(str, bool, str, object)
     direct_navigation_status = QtCore.pyqtSignal(object)
+    chassis_lease_error = QtCore.pyqtSignal(str)
+
+
+class _UnavailableChassisLease:
+    """Fail-closed stand-in when control_center_chassis_guard is missing."""
+
+    held = False
+    last_error = 'control_center_chassis_guard 未安装，手动底盘控制已禁用。'
+
+    def acquire(self, timeout_sec=None):
+        return False
+
+    def release(self):
+        return True
+
+    def shutdown(self):
+        return None
 
 
 class NavigationRosNode(Node):
-    def __init__(self):
+    def __init__(self, manual_cmd_vel_topic=None):
         super().__init__('navigation_native_ui')
         self.signals = RosSignals()
         self.declare_parameter('map_topic', '/map')
@@ -282,12 +503,19 @@ class NavigationRosNode(Node):
         self.declare_parameter('global_path_topic', '/plan')
         self.declare_parameter('local_path_topic', '/local_plan')
         self.declare_parameter(
-            'front_scan_topic', '/topic_gv_front_lidar_0_307'
+            'front_scan_topic', '/topic_gv_front_lidar_0_300'
         )
         self.declare_parameter(
-            'rear_scan_topic', '/topic_gv_rear_lidar_0_307'
+            'rear_scan_topic', '/topic_gv_rear_lidar_0_300'
         )
-        self.declare_parameter('manual_cmd_vel_topic', '/manual_cmd_vel')
+        # Show exactly the per-sensor observations used for costmap marking.
+        # Keep raw topic parameters above for robot identity and diagnostics.
+        self.declare_parameter('front_display_scan_topic', '/navigation/front_scan')
+        self.declare_parameter('rear_display_scan_topic', '/navigation/rear_scan')
+        self.declare_parameter(
+            'manual_cmd_vel_topic',
+            str(manual_cmd_vel_topic or '/manual_cmd_vel'),
+        )
         self.declare_parameter('manual_cmd_vel_rate_hz', 50.0)
         self.declare_parameter('display_map_frame', 'map')
         self.declare_parameter('display_robot_frame', 'base_link')
@@ -319,6 +547,8 @@ class NavigationRosNode(Node):
         self._last_pose_time = 0.0
         self._last_map_time = 0.0
         self._last_tf_pose_time = 0.0
+        self._manual_localization = None
+        self._manual_amcl_stamp = 0.0
         self._last_cov_x = 0.0
         self._last_cov_y = 0.0
         self._accept_map_updates = True
@@ -405,9 +635,11 @@ class NavigationRosNode(Node):
             self._publish_display_pose_from_tf,
         )
         self._laser_by_topic = {}
+        self._pending_laser = {}
+        self._laser_display_timer = self.create_timer(0.05, self._flush_laser_display)
         for topic in (
-            self._param('front_scan_topic'),
-            self._param('rear_scan_topic'),
+            self._param('front_display_scan_topic'),
+            self._param('rear_display_scan_topic'),
         ):
             self.create_subscription(
                 LaserScan,
@@ -422,8 +654,6 @@ class NavigationRosNode(Node):
         self.initial_pose_publisher = self.create_publisher(
             PoseWithCovarianceStamped, '/initialpose', latched
         )
-        self._velocity = (0.0, 0.0, 0.0)
-        self._velocity_active = False
         self._velocity_lock = threading.Lock()
         self._velocity_shutdown = threading.Event()
         requested_rate = float(
@@ -432,12 +662,29 @@ class NavigationRosNode(Node):
         self._velocity_period = 1.0 / max(
             10.0, min(100.0, requested_rate)
         )
+        # Keyboard input only sets the ramp target; this node's heartbeat thread
+        # advances the commanded velocity toward it.  Keeping the ramp on that
+        # thread means a stalled Qt event loop still decelerates to zero.
+        self._velocity_diagnostics = VelocityRampDiagnostics(tag='nav')
+        self._velocity_ramp = VelocityRamp(
+            update_hz=1.0 / self._velocity_period,
+            diagnostics=self._velocity_diagnostics,
+        )
         self._velocity_thread = threading.Thread(
             target=self._velocity_heartbeat_loop,
             name='manual-cmd-vel-heartbeat',
             daemon=True,
         )
         self._velocity_thread.start()
+        self._chassis_lease = (
+            ChassisControlLease(
+                topic_hint=self._param('front_scan_topic'),
+                logger=self.get_logger(),
+                on_lease_lost=self._handle_chassis_lease_lost,
+            )
+            if ChassisControlLease is not None
+            else _UnavailableChassisLease()
+        )
 
         self._service_clients = {
             'list': self.create_client(ListWaypoints, 'list_waypoints'),
@@ -459,6 +706,10 @@ class NavigationRosNode(Node):
             'relocalize': self.create_client(
                 Trigger, '/cartographer_global_relocalization/relocalize'
             ),
+            'cancel_localization': self.create_client(
+                Trigger, '/cartographer_global_relocalization/cancel'
+            ),
+            'nomotion': self.create_client(Empty, '/request_nomotion_update'),
             'load_map': self.create_client(
                 LoadMap, '/map_server/load_map'
             ),
@@ -493,6 +744,15 @@ class NavigationRosNode(Node):
         self._last_cov_x = max(0.0, float(covariance[0]))
         self._last_cov_y = max(0.0, float(covariance[7]))
         now = time.monotonic()
+        if self._manual_localization is not None:
+            stamp = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
+            request = self._manual_localization
+            if stamp < request.get('stamp', float('inf')):
+                return
+            self._manual_amcl_stamp = stamp
+            self._manual_amcl_pose = (pose.position.x, pose.position.y,
+                                      yaw_from_quaternion(pose.orientation))
+            return  # TF and AMCL must agree before replacing the requested marker.
         if now - self._last_tf_pose_time <= 0.25:
             return
         self._last_pose_time = now
@@ -505,6 +765,15 @@ class NavigationRosNode(Node):
         })
 
     def _publish_display_pose_from_tf(self):
+        request = self._manual_localization
+        if request is not None:
+            if time.monotonic() - request['started'] > 12:
+                if not request.get('warned'):
+                    request['warned'] = True
+                    self.signals.service_result.emit('initial', False,
+                        '尚未确认定位，请核对地图及激光；橙色为指定位置，不是已确认定位', None)
+            if self._manual_amcl_stamp < request.get('stamp', float('inf')):
+                return
         try:
             transform = self.tf_buffer.lookup_transform(
                 self._display_map_frame,
@@ -515,6 +784,19 @@ class NavigationRosNode(Node):
             return
         translation = transform.transform.translation
         rotation = transform.transform.rotation
+        stamp = transform.header.stamp.sec + transform.header.stamp.nanosec * 1e-9
+        age = self.get_clock().now().nanoseconds * 1e-9 - stamp
+        if not -2.0 <= age <= 1.0:
+            return
+        if request is not None:
+            p = self._manual_amcl_pose
+            yaw = yaw_from_quaternion(rotation)
+            if stamp < request['stamp'] or math.hypot(translation.x-p[0], translation.y-p[1]) > .15:
+                return
+            if abs(math.atan2(math.sin(yaw-p[2]), math.cos(yaw-p[2]))) > .15:
+                return
+            self._manual_localization = None
+            self.signals.service_result.emit('initial', True, '手动定位已由AMCL与实时坐标确认', None)
         now = time.monotonic()
         self._last_tf_pose_time = now
         self._last_pose_time = now
@@ -578,9 +860,39 @@ class NavigationRosNode(Node):
         self.signals.waypoint_markers_received.emit(list(waypoints.values()))
 
     def _on_laser(self, topic, message):
+        # Capacity one per scanner; retry stamped TF briefly instead of drawing
+        # old rays at the robot's latest pose or accumulating a message queue.
+        self._pending_laser[topic] = (message, time.monotonic())
+
+    def _flush_laser_display(self):
+        now = time.monotonic()
+        changed = False
+        for topic, (message, received) in list(self._pending_laser.items()):
+            stamp = Time.from_msg(message.header.stamp)
+            age = (self.get_clock().now().nanoseconds - stamp.nanoseconds) / 1e9
+            if stamp.nanoseconds == 0 or age > 0.5 or age < -0.1 or now - received > 0.3:
+                self._pending_laser.pop(topic, None)
+                changed = self._laser_by_topic.pop(topic, None) is not None or changed
+                continue
+            points = self._laser_points_at_stamp(message, stamp)
+            if points is None:
+                continue
+            self._laser_by_topic[topic] = (points, received)
+            self._pending_laser.pop(topic, None)
+            changed = True
+        for topic, (_, received) in list(self._laser_by_topic.items()):
+            if now - received > 0.5:
+                self._laser_by_topic.pop(topic, None)
+                changed = True
+        if changed:
+            self.signals.laser_received.emit([
+                point for points, _ in self._laser_by_topic.values() for point in points
+            ])
+
+    def _laser_points_at_stamp(self, message, stamp):
         try:
             transform = self.tf_buffer.lookup_transform(
-                'map', message.header.frame_id, Time()
+                self._display_map_frame, message.header.frame_id, stamp
             )
         except Exception:
             return
@@ -608,11 +920,7 @@ class NavigationRosNode(Node):
                 translation.x + r00 * local_x + r01 * local_y,
                 translation.y + r10 * local_x + r11 * local_y,
             ))
-        self._laser_by_topic[topic] = points
-        merged = []
-        for values in self._laser_by_topic.values():
-            merged.extend(values)
-        self.signals.laser_received.emit(merged)
+        return points
 
     def _publish_velocity_values(self, values):
         linear_x, linear_y, angular_z = values
@@ -622,31 +930,133 @@ class NavigationRosNode(Node):
         message.angular.z = angular_z
         self.velocity_publisher.publish(message)
 
+    @property
+    def _velocity(self):
+        """Commanded velocity, i.e. the value the ramp last published."""
+        return self._velocity_ramp.current
+
+    @property
+    def _velocity_active(self):
+        return not self._velocity_ramp.idle
+
+    def _publish_ramp_step_locked(self):
+        """Advance the slew-rate limiter one tick and publish its output."""
+        self._publish_velocity_values(self._velocity_ramp.step())
+
     def publish_velocity(self):
         with self._velocity_lock:
             self._publish_velocity_values(self._velocity)
 
     def set_velocity(self, linear_x, linear_y, angular_z):
+        """Request a velocity; the heartbeat ramps the command toward it.
+
+        The target applies on this call, so a key press is never delayed, but
+        the chassis sees the first limited increment instead of a step from zero.
+        """
         values = (
             float(linear_x), float(linear_y), float(angular_z)
         )
+        nonzero = any(abs(value) > 1e-6 for value in values)
+        release = False
         with self._velocity_lock:
-            self._velocity = values
-            self._velocity_active = any(
-                abs(value) > 1e-6 for value in values
-            )
-            self._publish_velocity_values(values)
+            if nonzero and not self._chassis_lease.acquire():
+                # Fail closed: publish zeros and keep the state inert.
+                self._velocity_ramp.reset()
+                self._publish_velocity_values((0.0, 0.0, 0.0))
+                return
+            self._velocity_ramp.set_target(*values)
+            self._publish_ramp_step_locked()
+            release = self._velocity_ramp.idle
+        if release:
+            # A zero request with an already-stopped ramp: hand the chassis
+            # back.  A ramped stop keeps the lease until the command reaches
+            # zero, which the heartbeat does.
+            self._chassis_lease.release()
 
     def stop(self):
+        """Request a smooth stop (normal key release)."""
         self.set_velocity(0.0, 0.0, 0.0)
+
+    def stop_immediate(self):
+        """Zero the chassis command on this call, bypassing the ramp.
+
+        Reserved for the safety paths -- X key, focus loss, page switch, window
+        close and shutdown -- which must keep their original instant-stop
+        meaning and must never leave a ramped command outstanding.
+        """
+        with self._velocity_lock:
+            self._velocity_ramp.reset()
+            try:
+                self._publish_velocity_values((0.0, 0.0, 0.0))
+            except Exception:  # pragma: no cover - shutdown race guard
+                pass
+        self._chassis_lease.release()
+
+    def _handle_chassis_lease_lost(self, reason):
+        """Vendor takeover or Redis failure mid-drive: stop immediately."""
+        with self._velocity_lock:
+            self._velocity_ramp.reset()
+            try:
+                self._publish_velocity_values((0.0, 0.0, 0.0))
+            except Exception:  # pragma: no cover - shutdown race guard
+                pass
+        message = self._chassis_lease.last_error or str(reason)
+        self.signals.chassis_lease_error.emit(str(message))
+
+    def tick_velocity(self):
+        """Advance the ramp one control period and publish the commanded value.
+
+        This is the heartbeat's body; it stops publishing once the command and
+        the request are both zero and hands the chassis back at that point.
+        """
+        release = False
+        with self._velocity_lock:
+            if self._velocity_ramp.idle:
+                # Nothing to ramp: stay quiet instead of re-publishing zero.
+                return
+            self._publish_ramp_step_locked()
+            release = self._velocity_ramp.idle
+        if release:
+            # The ramp has just reached zero, so the stop is complete.
+            self._chassis_lease.release()
 
     def _velocity_heartbeat_loop(self):
         while not self._velocity_shutdown.wait(self._velocity_period):
-            with self._velocity_lock:
-                if self._velocity_active:
-                    self._publish_velocity_values(self._velocity)
+            self.tick_velocity()
 
     def publish_initial_pose(self, x, y, yaw):
+        if self._map_load_in_progress or not all(math.isfinite(v) for v in (x, y, yaw)):
+            self.signals.service_result.emit('initial', False, '地图切换中或坐标无效，未设置定位', None)
+            return
+        request = dict(x=x, y=y, yaw=yaw, started=time.monotonic(), map=self._loaded_map_path)
+        self._manual_localization = request
+        self._manual_amcl_stamp = 0.0
+        self.signals.pose_received.emit(dict(x=x, y=y, yaw=yaw, pending=True))
+        client = self._service_clients['cancel_localization']
+        if not client.service_is_ready():
+            self._manual_localization = None
+            self.signals.service_result.emit('initial', False, '定位服务未就绪，未发布初始位置', None)
+            return
+        future = client.call_async(Trigger.Request())
+        def canceled(future):
+            if self._manual_localization is not request:
+                return  # An older click must never overwrite the newest request.
+            try:
+                response = future.result()
+                if not response.success:
+                    raise ValueError(response.message)
+                if self._map_load_in_progress or request['map'] != self._loaded_map_path:
+                    raise ValueError('地图已改变，请重新设置位置')
+                if time.monotonic()-request['started'] > 5:
+                    raise ValueError('定位停止确认超时，请重试')
+                self._publish_manual_pose(request)
+            except Exception as error:
+                self._manual_localization = None
+                self.signals.service_result.emit('initial', False, str(error), None)
+        future.add_done_callback(canceled)
+
+    def _publish_manual_pose(self, request):
+        x, y, yaw = request['x'], request['y'], request['yaw']
         message = PoseWithCovarianceStamped()
         message.header.frame_id = 'map'
         message.header.stamp = self.get_clock().now().to_msg()
@@ -657,14 +1067,21 @@ class NavigationRosNode(Node):
         message.pose.pose.orientation.y = qy
         message.pose.pose.orientation.z = qz
         message.pose.pose.orientation.w = qw
-        message.pose.covariance[0] = 0.25
-        message.pose.covariance[7] = 0.25
-        message.pose.covariance[35] = 0.20
-        for _ in range(3):
-            self.initial_pose_publisher.publish(message)
+        # A deliberate map click is a local correction, not a broad global search.
+        message.pose.covariance[0] = 0.01
+        message.pose.covariance[7] = 0.01
+        message.pose.covariance[35] = math.radians(10) ** 2
+        request['stamp'] = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
+        self.initial_pose_publisher.publish(message)
+        client = self._service_clients['nomotion']
+        if client.service_is_ready():
+            client.call_async(Empty.Request())
+        self.signals.service_result.emit('initial', True, '已指定橙色位置，等待实时定位确认', None)
 
     def call_service(self, key, request, payload=None):
         client = self._service_clients[key]
+        if key == 'navigate':
+            self.get_logger().info(f'用户请求导航：{payload}')
         if not client.service_is_ready():
             self.signals.service_result.emit(
                 key, False, 'ROS 服务尚未就绪', payload
@@ -683,6 +1100,8 @@ class NavigationRosNode(Node):
             data = getattr(response, 'names', payload)
         except Exception as error:
             success, message, data = False, str(error), payload
+        if key == 'navigate':
+            self.get_logger().info(f'导航请求结果：{payload} success={success} {message}')
         self.signals.service_result.emit(key, success, message, data)
 
     def refresh_waypoints(self):
@@ -702,6 +1121,8 @@ class NavigationRosNode(Node):
                 ('原地图', FilePath(legacy_path).expanduser().resolve().parent)
             )
         directories.append(('地图库', self._edited_maps_directory))
+        if active_path:
+            directories.append(('当前地图目录', active_path.parent))
         for category, directory in directories:
             if not directory.is_dir():
                 continue
@@ -729,6 +1150,18 @@ class NavigationRosNode(Node):
             metadata,
             reserved_paths=reserved_paths,
         )
+
+    def save_current_map(self, grid, metadata):
+        if self._map_load_in_progress:
+            raise ValueError('地图正在切换，请稍候')
+        return overwrite_map_files(self._loaded_map_path, grid, metadata,
+                                   [entry['path'] for entry in self.map_catalog()])
+
+    def delete_map(self, path):
+        if self._map_load_in_progress:
+            raise ValueError('地图正在切换，请稍候')
+        return archive_map_files(path, [entry['path'] for entry in self.map_catalog()],
+                                 [self._loaded_map_path, _read_active_map_yaml(self._active_map_config)])
 
     def load_map(self, yaml_path):
         if self._map_load_in_progress:
@@ -944,9 +1377,14 @@ class NavigationRosNode(Node):
         })
 
     def destroy_node(self):
-        self.stop()
+        # Shutdown is a safety path: a ramped stop here would stop the heartbeat
+        # before the command reached zero and leave the chassis driving.
+        self.stop_immediate()
         self._velocity_shutdown.set()
         self._velocity_thread.join(timeout=1.0)
+        self._velocity_diagnostics.close()
+        if self._chassis_lease is not None:
+            self._chassis_lease.shutdown()
         super().destroy_node()
 
 
@@ -967,6 +1405,7 @@ class MapCanvas(QtWidgets.QWidget):
         self.loaded_grid = None
         self.map_meta = None
         self.robot = None
+        self.requested_pose = None
         self.global_path = []
         self.local_path = []
         self.laser_points = []
@@ -1035,6 +1474,7 @@ class MapCanvas(QtWidgets.QWidget):
         self.loaded_grid = None
         self.map_meta = None
         self.robot = None
+        self.requested_pose = None
         self.global_path = []
         self.local_path = []
         self.laser_points = []
@@ -1337,6 +1777,12 @@ class MapCanvas(QtWidgets.QWidget):
             )
         if self.robot is not None:
             self._draw_robot(painter)
+        if self.requested_pose is not None:
+            pose = self.requested_pose
+            self._draw_arrow(painter, pose['x'], pose['y'], pose['yaw'], QtGui.QColor('#ffb45c'), 19)
+            point = self.world_to_screen(pose['x'], pose['y'])
+            painter.setPen(QtGui.QColor('#ffb45c'))
+            painter.drawText(point + QtCore.QPointF(18, -18), '指定位置 · 待确认')
         if self.drag_world is not None and self.drag_last is not None:
             start = self.world_to_screen(*self.drag_world)
             if start is not None:
@@ -1877,10 +2323,18 @@ class NavigationWindow(QtWidgets.QMainWindow):
         self.resize(1480, 900)
         self.setMinimumSize(1120, 700)
         self.setStyleSheet(STYLE)
-        self._pressed_motion_keys = set()
+        self._key_filter = ManualKeyFilter()
+        self._key_diag = KeyEventDiagnostics()
+        self._release_timer = QtCore.QTimer(self)
+        self._release_timer.setSingleShot(True)
+        self._release_timer.timeout.connect(self._flush_pending_release)
         self._waypoint_markers = []
         self._navigation_active = False
+        self._last_chassis_lease_error = None
+        self._rgb_fullscreen = False
+        self._rgb_split_sizes = None
         self._build_ui()
+        QtWidgets.QApplication.instance().installEventFilter(self)
         self._connect_ros()
         self._refresh_map_catalog()
         self.health_timer = QtCore.QTimer(self)
@@ -1930,6 +2384,13 @@ class NavigationWindow(QtWidgets.QMainWindow):
         map_layout = QtWidgets.QVBoxLayout(map_panel)
         map_layout.setContentsMargins(12, 12, 6, 10)
         toolbar = QtWidgets.QHBoxLayout()
+        self.rgb_toggle = QtWidgets.QToolButton()
+        self.rgb_toggle.setText('RGB画面')
+        self.rgb_toggle.setCheckable(True)
+        self.rgb_toggle.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.rgb_toggle.setToolTip('点击并排显示头部画面，再次点击恢复地图')
+        self.rgb_toggle.toggled.connect(self._toggle_rgb)
+        toolbar.addWidget(self.rgb_toggle)
         self.mode_group = QtWidgets.QButtonGroup(self)
         self.mode_group.setExclusive(True)
         self.mode_buttons = {}
@@ -1973,7 +2434,24 @@ class NavigationWindow(QtWidgets.QMainWindow):
         map_layout.addLayout(toolbar)
         self.map_canvas = MapCanvas()
         self.map_canvas.set_brush_size_cm(self.brush_size_spin.value())
-        map_layout.addWidget(self.map_canvas, 1)
+        self._map_minimum_size = self.map_canvas.minimumSize()
+        self.visual_splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
+        self.visual_splitter.setChildrenCollapsible(False)
+        self.visual_splitter.setHandleWidth(8)
+        self.visual_splitter.addWidget(self.map_canvas)
+        # The shell loads this script by path, not as a Python package.
+        rgb_spec = importlib.util.spec_from_file_location(
+            '_navigation_head_rgb', FilePath(__file__).with_name('head_rgb_panel.py'))
+        rgb_module = importlib.util.module_from_spec(rgb_spec)
+        rgb_spec.loader.exec_module(rgb_module)
+        self.rgb_panel = rgb_module.HeadRGBPanel()
+        self.rgb_panel.enlarge_requested.connect(self._toggle_rgb_fullscreen)
+        self.rgb_panel.focus_lost.connect(self._stop_motion)
+        self.visual_splitter.addWidget(self.rgb_panel)
+        self.visual_splitter.setStretchFactor(0, 1)
+        self.visual_splitter.setStretchFactor(1, 1)
+        self.rgb_panel.hide()
+        map_layout.addWidget(self.visual_splitter, 1)
         body.addWidget(map_panel)
 
         side_scroll = QtWidgets.QScrollArea()
@@ -2044,6 +2522,11 @@ class NavigationWindow(QtWidgets.QMainWindow):
             history_buttons.addWidget(button)
         map_edit_layout.addLayout(history_buttons)
 
+        self.save_current_map_button = QtWidgets.QPushButton('保存当前地图')
+        self.save_current_map_button.setObjectName('primaryButton')
+        self.save_current_map_button.clicked.connect(self._save_current_map)
+        map_edit_layout.addWidget(self.save_current_map_button)
+
         save_row = QtWidgets.QHBoxLayout()
         self.map_name_edit = QtWidgets.QLineEdit()
         self.map_name_edit.setPlaceholderText('输入新地图名称')
@@ -2064,10 +2547,13 @@ class NavigationWindow(QtWidgets.QMainWindow):
         library_buttons.addWidget(refresh_maps)
         library_buttons.addWidget(load_map_button)
         map_edit_layout.addLayout(library_buttons)
+        delete_map_button = QtWidgets.QPushButton('删除选中地图')
+        delete_map_button.clicked.connect(self._delete_selected_map)
+        map_edit_layout.addWidget(delete_map_button)
         map_edit_hint = QtWidgets.QLabel(
-            '编辑时左键描绘，右键仍可拖动地图。旧地图受保护，'
-            '同名地图会拒绝保存；加载成功后会设为下次默认地图，'
-            '切换该地图的独立航点库并自动重新执行全局定位。'
+            '保存当前地图会先备份原图；删除可恢复，航点库保留。'
+            '加载地图会切换默认地图、对应航点库并重新定位。'
+            '涂改仅更新导航栅格，不修改增量建图的历史轨迹。'
         )
         map_edit_hint.setObjectName('hint')
         map_edit_hint.setWordWrap(True)
@@ -2083,7 +2569,15 @@ class NavigationWindow(QtWidgets.QMainWindow):
         self.waypoint_list.itemDoubleClicked.connect(
             lambda _item: self._navigate_waypoint()
         )
+        self.waypoint_list.itemClicked.connect(
+            lambda item: self.event_label.setText(
+                f'已选中“{item.text()}”，点击“导航到选中点”或双击该航点开始；单击不会移动机器人'
+            )
+        )
         waypoint_layout.addWidget(self.waypoint_list)
+        hint = QtWidgets.QLabel('单击选中 · 双击或点击下方按钮开始导航')
+        hint.setWordWrap(True)
+        waypoint_layout.addWidget(hint)
         wp_buttons = QtWidgets.QGridLayout()
         actions = (
             ('导航到选中点', self._navigate_waypoint, 0, 0),
@@ -2137,7 +2631,7 @@ class NavigationWindow(QtWidgets.QMainWindow):
         ):
             button = QtWidgets.QPushButton(text)
             button.pressed.connect(partial(self._start_motion, *vector))
-            button.released.connect(self._stop_motion)
+            button.released.connect(self._release_motion_button)
             grid.addWidget(button, row, column)
         stop = QtWidgets.QPushButton('X 急停')
         stop.setObjectName('stopButton')
@@ -2168,6 +2662,47 @@ class NavigationWindow(QtWidgets.QMainWindow):
             self._map_edit_state_changed
         )
 
+    def _toggle_rgb(self, enabled):
+        # A layout switch must not strand a held manual-control key.
+        self._stop_motion()
+        if not enabled:
+            if not self._rgb_fullscreen:
+                self._rgb_split_sizes = self.visual_splitter.sizes()
+            self._rgb_fullscreen = False
+            self.rgb_panel.enlarge_button.setText('放大画面')
+            self.map_canvas.show()
+            self.rgb_panel.hide()
+            self.map_canvas.setMinimumSize(self._map_minimum_size)
+            self.map_canvas.setFocus(QtCore.Qt.OtherFocusReason)
+        else:
+            self.map_canvas.setMinimumSize(300, 300)
+            self.rgb_panel.show()
+            self.visual_splitter.setSizes(self._rgb_split_sizes or [600, 600])
+            self.rgb_panel.viewport.setFocus(QtCore.Qt.OtherFocusReason)
+
+    def _toggle_rgb_fullscreen(self):
+        if not self.rgb_toggle.isChecked():
+            return
+        self._stop_motion()
+        self._rgb_fullscreen = not self._rgb_fullscreen
+        if self._rgb_fullscreen:
+            self._rgb_split_sizes = self.visual_splitter.sizes()
+            self.map_canvas.hide()
+        else:
+            self.map_canvas.show()
+            self.visual_splitter.setSizes(self._rgb_split_sizes or [600, 600])
+        self.rgb_panel.enlarge_button.setText(
+            '恢复并排' if self._rgb_fullscreen else '放大画面')
+        self.rgb_panel.viewport.setFocus(QtCore.Qt.OtherFocusReason)
+
+    def eventFilter(self, watched, event):
+        # Embedded QMainWindow does not itself receive host-window deactivation.
+        if (event.type() == QtCore.QEvent.WindowDeactivate
+                and watched is self.window() and self.isVisible()
+                and self.rgb_toggle.isChecked()):
+            self._stop_motion()
+        return super().eventFilter(watched, event)
+
     def _chip(self, text, object_name):
         label = QtWidgets.QLabel(text)
         label.setObjectName(object_name)
@@ -2197,6 +2732,16 @@ class NavigationWindow(QtWidgets.QMainWindow):
         signals.direct_navigation_status.connect(self._navigation_status)
         signals.relocalization_status.connect(self._relocalization_status)
         signals.service_result.connect(self._service_result)
+        signals.chassis_lease_error.connect(self._chassis_lease_error)
+
+    def _chassis_lease_error(self, message):
+        if message == self._last_chassis_lease_error:
+            return
+        self._last_chassis_lease_error = message
+        QtWidgets.QMessageBox.warning(
+            self, '底盘手动控制不可用',
+            '未获得底盘控制所有权，本次按键不会产生非零速度：\n' + message,
+        )
 
     def navigation_map_snapshot(self):
         return self.map_canvas.display_snapshot()
@@ -2305,6 +2850,61 @@ class NavigationWindow(QtWidgets.QMainWindow):
         else:
             QtWidgets.QMessageBox.warning(self, '保存失败', message)
 
+    def _save_current_map(self):
+        if self._navigation_active or self.node._map_load_in_progress:
+            QtWidgets.QMessageBox.warning(self, '暂不能保存', '请先停止导航，并等待地图切换完成。')
+            return
+        if not self.map_canvas.has_edits():
+            QtWidgets.QMessageBox.information(self, '地图没有修改', '当前没有需要保存的修改。')
+            return
+        path = self.node._loaded_map_path
+        answer = QtWidgets.QMessageBox.question(
+            self, '保存当前地图', f'将覆盖当前地图（不是下拉框预选地图）：\n{path}\n\n'
+            '原文件会备份，航点保持不变。导航已启动时将重新加载并重新定位。',
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        try:
+            grid, metadata = self.map_canvas.edited_map_snapshot()
+            backup = self.node.save_current_map(grid, metadata)
+            self.map_canvas.loaded_grid = grid.copy()
+            self.map_canvas._undo_stack.clear()
+            self.map_canvas._redo_stack.clear()
+            self.map_canvas._emit_edit_state()
+            self.event_label.setText(f'当前地图已保存；原图备份：{backup}')
+            if all(self.node._service_clients[k].service_is_ready()
+                   for k in ('load_map', 'switch_waypoint_map')):
+                self._stop_motion()
+                self.node.load_map(path)
+            else:
+                QtWidgets.QMessageBox.information(self, '保存成功',
+                    '当前地图已保存。导航尚未就绪，下次启动导航时生效。\n原图备份：' + str(backup))
+        except Exception as error:
+            QtWidgets.QMessageBox.warning(self, '保存失败', str(error))
+
+    def _delete_selected_map(self):
+        if self._navigation_active or self.node._map_load_in_progress:
+            QtWidgets.QMessageBox.warning(self, '暂不能删除', '请先停止导航，并等待地图切换完成。')
+            return
+        path = str(self.map_selector.currentData() or '')
+        if not path:
+            return
+        protected = [self.node._loaded_map_path, _read_active_map_yaml(self.node._active_map_config)]
+        if FilePath(path).resolve() in {FilePath(p).resolve() for p in protected if p}:
+            QtWidgets.QMessageBox.warning(self, '不能删除当前地图', '请先加载并使用另一张地图，再删除该地图。')
+            return
+        answer = QtWidgets.QMessageBox.question(self, '确认删除地图',
+            f'从地图库删除：\n{path}\n\n地图及其独占图像、建图状态将移入.map_trash，可恢复。航点库保留。',
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+        if answer != QtWidgets.QMessageBox.Yes:
+            return
+        try:
+            trash = self.node.delete_map(path)
+            self._refresh_map_catalog()
+            self.event_label.setText(f'地图已移入回收目录：{trash}；航点库保留')
+        except Exception as error:
+            QtWidgets.QMessageBox.warning(self, '删除失败', str(error))
+
     def _refresh_map_catalog(self, select_path=None):
         if isinstance(select_path, bool):
             select_path = None
@@ -2374,6 +2974,12 @@ class NavigationWindow(QtWidgets.QMainWindow):
         self.map_canvas.set_map(message)
 
     def _pose_received(self, pose):
+        if pose.get('pending'):
+            self.map_canvas.requested_pose = pose
+            self.map_canvas.robot = None
+            self.map_canvas.update()
+            return
+        self.map_canvas.requested_pose = None
         self.map_canvas.robot = pose
         self.map_canvas.update()
 
@@ -2413,6 +3019,8 @@ class NavigationWindow(QtWidgets.QMainWindow):
         self.navigation_target.setText(f'目标：{target or "地图指定位置/无"}')
         if state == 'dwelling':
             self._set_chip(self.nav_chip, '导航：航点停留', 'good')
+        elif state == 'operator_arrived':
+            self._set_chip(self.nav_chip, '导航：人工确认到达', 'good')
         elif state in (
             'running', 'accepted', 'started', 'sending', 'advancing',
             'far_navigation_refine_pending', 'far_navigation_refining',
@@ -2438,7 +3046,7 @@ class NavigationWindow(QtWidgets.QMainWindow):
         self.reloc_state.setText({
             'waiting': '等待地图与激光',
             'map_ready': '地图已就绪',
-            'waiting_scans': '等待双激光同步',
+            'waiting_scans': '激光数据未就绪',
             'matching': f'正在全地图搜索（第 {attempt} 次）',
             'succeeded': '全局定位成功',
             'failed': '全局定位失败',
@@ -2455,6 +3063,12 @@ class NavigationWindow(QtWidgets.QMainWindow):
         self.reloc_state.style().polish(self.reloc_state)
 
     def _update_health(self):
+        lease = self.node._chassis_lease
+        lease_error = not lease.held and lease.last_error
+        if lease_error:
+            self._set_chip(self.pose_chip, '底盘控制权：失败', 'bad')
+            self.pose_chip.setToolTip(lease.last_error)
+            return
         map_connected = self.node.map_age < 5.0
         map_cached = self.map_canvas.image is not None
         self._set_chip(
@@ -2486,6 +3100,9 @@ class NavigationWindow(QtWidgets.QMainWindow):
             self.node.navigate_to_pose(x, y, yaw)
 
     def _initial_pose(self, x, y, yaw):
+        if self._navigation_active or self.node._map_load_in_progress:
+            self.event_label.setText('请先停止导航并等待地图加载完成，再设置初始位姿')
+            return
         answer = QtWidgets.QMessageBox.question(
             self, '确认初始位姿',
             f'发布 x={x:.2f}, y={y:.2f}, 朝向={math.degrees(yaw):.1f}°？',
@@ -2494,7 +3111,7 @@ class NavigationWindow(QtWidgets.QMainWindow):
         )
         if answer == QtWidgets.QMessageBox.Yes:
             self.node.publish_initial_pose(x, y, yaw)
-            self.event_label.setText('已向 AMCL 发布初始位姿')
+            self.event_label.setText('正在停止全局搜索并设置手动位置…')
 
     def _retry_relocalization(self):
         self.node.call_service('relocalize', Trigger.Request())
@@ -2512,6 +3129,7 @@ class NavigationWindow(QtWidgets.QMainWindow):
             return
         request = NavigateToWaypoint.Request()
         request.name = names[0]
+        self.event_label.setText(f'正在请求导航到“{names[0]}”…')
         self.node.call_service('navigate', request, names[0])
 
     def _navigate_sequence(self):
@@ -2586,6 +3204,8 @@ class NavigationWindow(QtWidgets.QMainWindow):
         self.event_label.setObjectName('statusGood' if success else 'statusBad')
         self.event_label.style().unpolish(self.event_label)
         self.event_label.style().polish(self.event_label)
+        if key == 'navigate' and not success:
+            QtWidgets.QMessageBox.warning(self, '导航未启动', message)
         if key == 'list' and success:
             selected = {item.text() for item in self.waypoint_list.selectedItems()}
             self.waypoint_list.clear()
@@ -2616,14 +3236,26 @@ class NavigationWindow(QtWidgets.QMainWindow):
         )
 
     def _stop_motion(self, *_unused):
-        self._pressed_motion_keys.clear()
+        # Safety stop: X key / 急停 button, focus loss, page switch and window
+        # close must not be rate limited, and must clear the ramp so no request
+        # survives.
+        self._key_filter.clear()
+        self._release_timer.stop()
+        self.node.stop_immediate()
+
+    def _release_motion_button(self):
+        # The on-screen direction buttons mirror the keys, so letting one go is
+        # a normal release and decelerates like a key release does.
+        self._key_filter.clear()
+        self._release_timer.stop()
         self.node.stop()
 
     def _apply_pressed_motion(self):
+        pressed = self._key_filter.pressed_keys()
         x_scale = 0.0
         y_scale = 0.0
         angular_scale = 0.0
-        for key in self._pressed_motion_keys:
+        for key in pressed:
             dx, dy, da = self.MOVES[key]
             x_scale += dx
             y_scale += dy
@@ -2635,24 +3267,52 @@ class NavigationWindow(QtWidgets.QMainWindow):
             y_scale /= translation_length
         angular_scale = max(-1.0, min(1.0, angular_scale))
 
-        if not self._pressed_motion_keys or (
+        if not pressed or (
             abs(x_scale) < 1e-6
             and abs(y_scale) < 1e-6
             and abs(angular_scale) < 1e-6
         ):
+            # Keys released: zero only the target, so the heartbeat decelerates.
             self.node.stop()
             return
         self._start_motion(x_scale, y_scale, angular_scale)
 
+    def _schedule_release_flush(self):
+        """Arm the single-shot timer for the earliest pending key release."""
+        deadline = self._key_filter.next_deadline()
+        if deadline is None:
+            self._release_timer.stop()
+            return
+        delay_ms = max(
+            1, int(math.ceil((deadline - time.monotonic()) * 1000.0)))
+        self._release_timer.start(delay_ms)
+
+    def _flush_pending_release(self):
+        if self._key_filter.expire():
+            self._key_diag.log(
+                'expire',
+                pressed=sorted(int(key) for key in self._key_filter.pressed_keys()),
+            )
+            self._apply_pressed_motion()
+        self._schedule_release_flush()
+
     def keyPressEvent(self, event):
         if event.isAutoRepeat():
             return
+        if event.key() == QtCore.Qt.Key_Escape and self._rgb_fullscreen:
+            self._toggle_rgb_fullscreen()
+            event.accept()
+            return
         if event.key() in self.MOVES:
-            self._pressed_motion_keys.add(event.key())
+            self._key_diag.log(
+                'press', key=int(event.key()), autorepeat=False,
+                pending=self._key_filter.pending_count)
+            self._key_filter.press(event.key())
             self._apply_pressed_motion()
             event.accept()
             return
         if event.key() == QtCore.Qt.Key_X:
+            self._key_diag.log('stop_key', key=int(event.key()))
             self._stop_motion()
             event.accept()
             return
@@ -2666,18 +3326,34 @@ class NavigationWindow(QtWidgets.QMainWindow):
         if event.isAutoRepeat():
             return
         if event.key() in self.MOVES:
-            self._pressed_motion_keys.discard(event.key())
+            self._key_diag.log(
+                'release', key=int(event.key()), autorepeat=False,
+                pending=self._key_filter.pending_count)
+            if self._key_filter.release(event.key()):
+                self._schedule_release_flush()
             self._apply_pressed_motion()
             event.accept()
             return
         super().keyReleaseEvent(event)
 
     def focusOutEvent(self, event):
+        self._key_diag.log('focus_out')
         self._stop_motion()
         super().focusOutEvent(event)
 
-    def closeEvent(self, event):
+    def hideEvent(self, event):
+        # The page is embedded in the control center stack, so switching to the
+        # mapping page hides it instead of closing it.  Leaving the page must
+        # never leave a requested velocity behind for the heartbeat to ramp to.
+        self._key_diag.log('hide')
         self._stop_motion()
+        super().hideEvent(event)
+
+    def closeEvent(self, event):
+        self._key_diag.log('close')
+        self._key_diag.close()
+        self._stop_motion()
+        self.rgb_panel.shutdown()
         event.accept()
 
 

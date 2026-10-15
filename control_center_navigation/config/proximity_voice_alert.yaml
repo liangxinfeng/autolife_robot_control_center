@@ -1,7 +1,7 @@
 proximity_voice_alert:
   ros__parameters:
     enabled: true
-    front_scan_topic: "/topic_gv_front_lidar_0_307"
+    front_scan_topic: "/topic_gv_front_lidar_0_300"
     navigation_status_topic: "/navigate_to_pose/_action/status"
     voice_command_topic: "/text_voice_command"
     alert_text: "前方有人或障碍物，请注意避让"
@@ -10,7 +10,7 @@ proximity_voice_alert:
     # 正前方扇区内连续出现足够多近点才播报，避免单个噪点误触发。
     trigger_distance_m: 0.80
     clear_distance_m: 0.95
-    # 306 前雷达 LaserScan 的机器人正前方位于扫描数据的 ±180°。
+    # 300 前雷达 LaserScan 的机器人正前方位于扫描数据的 ±180°。
     forward_angle_deg: 180.0
     half_angle_deg: 40.0
     minimum_points: 3

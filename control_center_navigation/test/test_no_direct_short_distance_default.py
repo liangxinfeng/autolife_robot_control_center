@@ -14,5 +14,5 @@ def test_control_center_defaults_to_regular_nav2_for_every_goal():
 
     assert "declare_parameter('short_distance_direct_start_enabled', False)" in manager
     assert "'short_distance_direct_start_enabled',\n        default_value='false'" in launch
-    assert "if not force_normal and self._short_direct_start_enabled:" in manager
+    assert "if not force_normal and self._short_direct_start_enabled and not self._uses_mppi_only():" in manager
     assert "self._far_navigation_auto_refine_enabled" in manager

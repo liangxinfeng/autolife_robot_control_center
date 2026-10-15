@@ -7,11 +7,14 @@ import signal
 import subprocess
 import sys
 import time
+import uuid
 
 from ament_index_python.packages import get_package_prefix
 import rclpy
 from rclpy.node import Node
 from PyQt5 import QtCore, QtGui, QtWidgets
+from std_msgs.msg import String
+from control_center_shell import preflight
 
 
 APP_TITLE = '机器人综合控制台'
@@ -129,6 +132,14 @@ def _external_cartographer_processes():
     return _process_matches('cartographer_(node|occupancy_grid_node)')
 
 
+def _active_map_publishers(node):
+    """Return names of live /map owners, regardless of SLAM implementation."""
+    return sorted({
+        f'{info.node_namespace.rstrip("/")}/{info.node_name}'
+        for info in node.get_publishers_info_by_topic('/map')
+    })
+
+
 def _legacy_joint_processes():
     """Return only processes belonging to the superseded standalone package."""
     return [
@@ -202,9 +213,18 @@ def _stop_legacy_joint_processes():
 class ControlCenterNode(Node):
     def __init__(self):
         super().__init__('control_center_shell')
-        self.declare_parameter('robot_id', 307)
-        self.declare_parameter('topic_suffix', '0_307')
+        self.declare_parameter('robot_id', 300)
+        self.declare_parameter('topic_suffix', '0_300')
         self.declare_parameter('start_navigation', False)
+        self._operator_session = uuid.uuid4().hex
+        self._operator_heartbeat_pub = self.create_publisher(
+            String, '/control_center/operator_heartbeat', 10
+        )
+
+    def publish_operator_heartbeat(self):
+        self._operator_heartbeat_pub.publish(
+            String(data=self._operator_session)
+        )
 
 
 class ManagedProcess(QtCore.QObject):
@@ -222,6 +242,7 @@ class ManagedProcess(QtCore.QObject):
         self.process.finished.connect(self._on_finished)
         self.intentional_stop = False
         self.process_group_id = None
+        self.last_arguments = None
 
     @property
     def running(self):
@@ -233,6 +254,7 @@ class ManagedProcess(QtCore.QObject):
         executable = shutil.which('ros2') or '/opt/ros/jazzy/bin/ros2'
         setsid = shutil.which('setsid')
         self.intentional_stop = False
+        self.last_arguments = list(arguments)
         self.state_changed.emit(self.key, 'starting')
         self.output.emit(self.key, '$ ' + executable + ' ' + ' '.join(arguments))
         if setsid:
@@ -244,6 +266,7 @@ class ManagedProcess(QtCore.QObject):
         if not self.running:
             self.state_changed.emit(self.key, 'stopped')
             return
+        group_id = self.process_group_id
         self.intentional_stop = True
         self.output.emit(self.key, '正在停止模块……')
         if self.process_group_id is not None and os.name == 'posix':
@@ -272,13 +295,46 @@ class ManagedProcess(QtCore.QObject):
                 else:
                     self.process.kill()
                 self.process.waitForFinished(1000)
+        # ros2 launch may exit before its children. Keep the original PGID
+        # locally because _on_finished clears self.process_group_id.
+        if group_id is not None and os.name == 'posix':
+            for stop_signal, timeout_sec in ((signal.SIGTERM, 1.0),
+                                             (signal.SIGKILL, 0.5)):
+                members = [p for p in preflight._processes().values()
+                           if p['pgid'] == group_id]
+                if not members:
+                    break
+                self.output.emit(self.key, f'清理残留进程组 {group_id}：{len(members)} 个进程')
+                try:
+                    os.killpg(group_id, stop_signal)
+                except ProcessLookupError:
+                    break
+                deadline = time.monotonic() + timeout_sec
+                while time.monotonic() < deadline:
+                    if not any(p['pgid'] == group_id
+                               for p in preflight._processes().values()):
+                        break
+                    time.sleep(0.05)
+            if any(p['pgid'] == group_id for p in preflight._processes().values()):
+                self.output.emit(self.key, f'残留进程组 {group_id} 未完全退出；下次启动将自检。')
+            else:
+                preflight.forget_process(self.key)
 
     def _on_started(self):
         # The process is started through `setsid`, so its PID is also the
         # session/process-group id. Signalling the group is essential: killing
         # only `ros2 launch` can orphan Nav2, Cartographer or joint nodes.
         self.process_group_id = int(self.process.processId())
+        QtCore.QTimer.singleShot(
+            100, lambda key=self.key, pid=self.process_group_id:
+            self._record_process_group(key, pid))
         self.state_changed.emit(self.key, 'running')
+
+    def _record_process_group(self, key, pid):
+        try:
+            preflight.record_process(key, pid)
+        except OSError as error:
+            self.output.emit(key, f'无法保存进程组记录：{error}')
 
     def _read_output(self):
         raw = bytes(self.process.readAllStandardOutput())
@@ -398,6 +454,86 @@ class ModuleHost(QtWidgets.QWidget):
         self.stop_button.setEnabled(state in ('running', 'starting'))
 
 
+class PreflightWorker(QtCore.QThread):
+    progress = QtCore.pyqtSignal(str)
+    completed = QtCore.pyqtSignal(str, str)
+
+    def __init__(self, suffix, parent=None, takeover=False, active_groups=None):
+        super().__init__(parent)
+        self.suffix = suffix
+        self.takeover = bool(takeover)
+        self.active_groups = {
+            key: int(pid) for key, pid in (active_groups or {}).items() if pid
+        }
+
+    def run(self):
+        def emit(message):
+            print('[preflight] ' + message, flush=True)
+            self.progress.emit(message)
+        try:
+            result, detail = preflight.run(
+                self.suffix, emit=emit, takeover=self.takeover,
+                active_groups=self.active_groups or None)
+        except Exception as error:
+            result, detail = 'FAIL', f'启动自检异常：{error}'
+            emit('FAIL ' + detail)
+        emit(f'result={result} detail={detail}')
+        self.completed.emit(result, detail)
+
+
+class StatusCheckWorker(QtCore.QThread):
+    progress = QtCore.pyqtSignal(str)
+    completed = QtCore.pyqtSignal(str, str)
+
+    def __init__(self, suffix, active_groups, parent=None):
+        super().__init__(parent)
+        self.suffix = suffix
+        self.active_groups = dict(active_groups)
+
+    def run(self):
+        def emit(message):
+            print('[status-check] ' + message, flush=True)
+            self.progress.emit(message)
+        try:
+            result, detail = preflight.check_only(
+                self.suffix, active_groups=self.active_groups, emit=emit
+            )
+        except Exception as error:
+            result, detail = 'WARN', f'状态自检异常：{error}'
+            emit('WARN ' + detail)
+        emit(f'result={result} detail={detail}')
+        self.completed.emit(result, detail)
+
+
+class ModuleHealthWorker(QtCore.QThread):
+    progress = QtCore.pyqtSignal(str)
+    completed = QtCore.pyqtSignal(str, str)
+
+    def __init__(self, module, suffix, group_id, parent=None):
+        super().__init__(parent)
+        self.module = module
+        self.suffix = suffix
+        self.group_id = int(group_id)
+
+    def run(self):
+        def emit(message):
+            print('[service-repair] ' + message, flush=True)
+            self.progress.emit(message)
+        error = preflight.check_module_health(
+            self.module, self.group_id, timeout=12.0, emit=emit
+        )
+        if error:
+            emit(f'{self.module}: FAIL {error}')
+            cleaned = preflight.stop_managed_group(
+                self.module, self.group_id, emit=emit
+            )
+            if not cleaned:
+                error += '；失败进程组未能安全清理'
+            self.completed.emit('FAIL', error)
+            return
+        self.completed.emit('PASS', '模块关键进程与地图输出正常')
+
+
 class ControlCenterWindow(QtWidgets.QMainWindow):
     def __init__(self, node):
         super().__init__()
@@ -412,6 +548,18 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         self.setMinimumSize(1180, 740)
         self.setStyleSheet(STYLE)
         self._closing = False
+        self._preflight_ready = False
+        self._preflight_worker = None
+        self._service_repair_worker = None
+        self._status_check_worker = None
+        self._status_check_for_repair = False
+        self._module_health_worker = None
+        self._last_preflight_failure = ''
+        self._service_repair_target = None
+        self._service_repair_arguments = None
+        self._repair_prior_preflight_ready = False
+        self._service_repair_restart = None
+        self._repair_stop_wait_count = 0
         self._vendor_was_active = _service_is_active(VENDOR_SLAM_SERVICE)
         self._vendor_paused = False
         self._navigation_module = None
@@ -436,10 +584,102 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             process.state_changed.connect(self._process_state_changed)
 
         self._build_ui()
+        # This timer intentionally runs on the Qt main event loop.  A GUI
+        # crash or frozen event loop therefore stops the heartbeat even when
+        # a background ROS/thread worker is still alive.
+        self._operator_heartbeat_timer = QtCore.QTimer(self)
+        self._operator_heartbeat_timer.setInterval(100)
+        self._operator_heartbeat_timer.timeout.connect(
+            self._publish_operator_heartbeat
+        )
+        self._operator_heartbeat_timer.start()
+        self.centralWidget().setEnabled(False)
+        self.current_state_label.setText('启动自检中')
+        self.current_state_label.setObjectName('stateStarting')
+        self.statusBar().showMessage('正在检查控制环境...')
+
+    def _publish_operator_heartbeat(self):
+        if self._preflight_ready and not self._closing:
+            self.node.publish_operator_heartbeat()
+
+    def start_preflight(self):
+        if self._preflight_worker is not None and self._preflight_worker.isRunning():
+            return
+        if (self._service_repair_worker is not None
+                and self._service_repair_worker.isRunning()):
+            return
+        if (self._status_check_worker is not None
+                and self._status_check_worker.isRunning()):
+            return
+        if (self._module_health_worker is not None
+                and self._module_health_worker.isRunning()):
+            return
+        active_modules = [
+            key for key, process in self.processes.items() if process.running
+        ]
+        if active_modules:
+            detail = '先停止正在运行的模块再重新自检：' + '、'.join(active_modules)
+            self.statusBar().showMessage(detail)
+            self._append_log('preflight', detail)
+            return
+        if self._preflight_worker is not None:
+            self._preflight_worker.deleteLater()
+        self._preflight_ready = False
+        self.centralWidget().setEnabled(False)
+        self.preflight_failure_label.hide()
+        self.preflight_repair_button.hide()
+        self.statusBar().showMessage('正在检查控制环境...')
+        self._preflight_worker = PreflightWorker(self.topic_suffix, self)
+        self._preflight_worker.progress.connect(
+            lambda message: self._append_log('preflight', message))
+        self._preflight_worker.completed.connect(self._preflight_complete)
+        self._preflight_worker.start()
+
+    def _preflight_complete(self, result, detail):
+        if self._closing:
+            return
+        if result in ('FAIL', 'WARN'):
+            self._last_preflight_failure = detail
+            self._preflight_ready = True
+            self.centralWidget().setEnabled(True)
+            for host in (self.nav_host, self.slam_host, self.joint_host):
+                host.setEnabled(True)
+            self._refresh_compact_controls()
+            self.current_state_label.setText('自检有警告')
+            self.current_state_label.setObjectName('stateError')
+            self.current_state_label.style().unpolish(self.current_state_label)
+            self.current_state_label.style().polish(self.current_state_label)
+            self.statusBar().showMessage(
+                '启动自检发现问题，控制中心仍可使用：' + detail
+            )
+            self.preflight_failure_label.setText(
+                '启动自检发现问题：' + detail
+                + '。控制中心其他功能仍可使用；若目标模块存在资源占用，'
+                '该模块会单独提示并拒绝重复启动。可前往“系统服务 → 服务状态修复”处理。'
+            )
+            self.preflight_retry_button.setEnabled(True)
+            self.preflight_retry_button.show()
+            self.preflight_repair_button.setEnabled(True)
+            self.preflight_repair_button.show()
+            self.preflight_failure_label.show()
+            if self._service_panel is not None:
+                self._service_panel.set_service_repair_context(detail)
+            if self.start_navigation_on_open:
+                QtCore.QTimer.singleShot(350, self.start_navigation)
+            return
+        self._last_preflight_failure = ''
+        self._preflight_ready = True
+        self.centralWidget().setEnabled(True)
+        for host in (self.nav_host, self.slam_host, self.joint_host):
+            host.setEnabled(True)
+        self.preflight_retry_button.hide()
+        self.preflight_repair_button.hide()
+        if self._service_panel is not None:
+            self._service_panel.set_service_repair_context('')
+        self._refresh_compact_controls()
         self._load_navigation_ui()
         self.statusBar().showMessage(
-            f'机器人 {self.robot_id} · 话题后缀 {self.topic_suffix}'
-        )
+            f'机器人 {self.robot_id} · 自检 {result} · 话题后缀 {self.topic_suffix}')
         if self.start_navigation_on_open:
             QtCore.QTimer.singleShot(350, self.start_navigation)
 
@@ -478,7 +718,23 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         browser_layout.addWidget(self.current_state_label)
         browser_layout.addWidget(self.current_start_button)
         browser_layout.addWidget(self.current_stop_button)
+        self.preflight_retry_button = QtWidgets.QPushButton('重新自检')
+        self.preflight_retry_button.clicked.connect(self.start_preflight)
+        self.preflight_retry_button.hide()
+        browser_layout.addWidget(self.preflight_retry_button)
+        self.preflight_repair_button = QtWidgets.QPushButton('前往服务状态修复')
+        self.preflight_repair_button.setObjectName('successButton')
+        self.preflight_repair_button.clicked.connect(self._show_service_repair)
+        self.preflight_repair_button.hide()
+        browser_layout.addWidget(self.preflight_repair_button)
         layout.addWidget(browser_bar)
+
+        self.preflight_failure_label = QtWidgets.QLabel()
+        self.preflight_failure_label.setWordWrap(True)
+        self.preflight_failure_label.setStyleSheet(
+            'background: #48282b; color: #f19a9f; padding: 10px;')
+        self.preflight_failure_label.hide()
+        layout.addWidget(self.preflight_failure_label)
 
         self.stack = QtWidgets.QStackedWidget()
         layout.addWidget(self.stack, 1)
@@ -486,6 +742,7 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         nav_empty = EmptyModulePage(
             '正在准备导航界面', '导航是综合控制台的默认主功能。'
         )
+        nav_empty.start_requested.connect(self.start_navigation)
         self.nav_host = ModuleHost(
             '导航、航点与全局重定位',
             '默认主模块；提供地图、航点、键盘控制和全局重定位。',
@@ -589,8 +846,10 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         self.current_state_label.style().polish(self.current_state_label)
         self.current_start_button.setVisible(state in ('stopped', 'error'))
         self.current_stop_button.setVisible(state in ('running', 'starting'))
-        self.current_start_button.setEnabled(state in ('stopped', 'error'))
-        self.current_stop_button.setEnabled(state in ('running', 'starting'))
+        self.current_start_button.setEnabled(
+            self._preflight_ready and state in ('stopped', 'error'))
+        self.current_stop_button.setEnabled(
+            self._preflight_ready and state in ('running', 'starting'))
 
     def _append_log(self, source, message):
         timestamp = time.strftime('%H:%M:%S')
@@ -604,6 +863,9 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             'joint': self.joint_host,
         }[key]
         host.set_state(state)
+        if self._service_panel is not None and not self._last_preflight_failure:
+            detail, button_text = self._service_repair_context()
+            self._service_panel.set_service_repair_context(detail, button_text)
         self._refresh_compact_controls()
         if key == 'slam' and state in ('stopped', 'error'):
             QtCore.QTimer.singleShot(0, self._finish_slam_map_transition)
@@ -686,6 +948,10 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
                 lambda message: self._append_log('service', message)
             )
             panel.service_state_changed.connect(self._service_state_observed)
+            panel.repair_requested.connect(self._start_service_repair)
+            panel.status_check_requested.connect(self._start_status_check)
+            detail, button_text = self._service_repair_context()
+            panel.set_service_repair_context(detail, button_text)
             self._service_panel = panel
             old = self.service_page
             self.stack.removeWidget(old)
@@ -702,6 +968,380 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
                 self, '系统服务页面加载失败', str(error)
             )
             return False
+
+    def _show_service_repair(self):
+        self.tabs.setCurrentIndex(3)
+        if self._load_service_manager_ui() and self._service_panel is not None:
+            detail, button_text = self._service_repair_context()
+            self._service_panel.set_service_repair_context(detail, button_text)
+
+    def _service_repair_context(self):
+        if self._last_preflight_failure:
+            return self._last_preflight_failure, '修复服务状态'
+        navigation = self.processes['navigation']
+        slam = self.processes['slam']
+        if navigation.running or (
+                self.nav_host.state == 'error' and navigation.last_arguments):
+            return ('导航模块运行中：点击修复会自动停止并按原参数重启导航，'
+                    '同时收回被外部程序占用的地图/底盘资源。'), '修复服务状态'
+        if slam.running or (
+                self.slam_host.state == 'error' and slam.last_arguments):
+            return ('建图模块运行中：点击修复会自动停止并按原参数重启建图，'
+                    '同时收回被外部程序占用的地图/底盘资源。'), '修复服务状态'
+        return '', '修复服务状态'
+
+    def _select_service_repair_target(self):
+        active = [
+            key for key in ('navigation', 'slam')
+            if self.processes[key].running
+        ]
+        if len(active) > 1:
+            return None, '导航和建图同时运行，拒绝自动重建，请先停止其中一个模块'
+        if active:
+            return active[0], ''
+        candidates = []
+        if (self.nav_host.state == 'error'
+                and self.processes['navigation'].last_arguments):
+            candidates.append('navigation')
+        if (self.slam_host.state == 'error'
+                and self.processes['slam'].last_arguments):
+            candidates.append('slam')
+        if len(candidates) == 1:
+            return candidates[0], ''
+        return None, ''
+
+    def _start_status_check(self, repair_probe=False):
+        if self._closing:
+            return
+        for worker in (
+            self._preflight_worker,
+            self._service_repair_worker,
+            self._status_check_worker,
+            self._module_health_worker,
+        ):
+            if worker is not None and worker.isRunning():
+                return
+        if self._status_check_worker is not None:
+            self._status_check_worker.deleteLater()
+        active_groups = {}
+        for key, process in self.processes.items():
+            if not process.running:
+                continue
+            group_id = process.process_group_id
+            if group_id is None:
+                process_id = process.process.processId()
+                group_id = int(process_id) if process_id else None
+            if group_id:
+                active_groups[key] = int(group_id)
+        self._status_check_for_repair = bool(repair_probe)
+        if self._service_panel is not None:
+            if repair_probe:
+                self._service_panel.set_service_repair_progress(
+                    '检测到控制模块仍在运行，先执行只读状态检查；正常时不重启。'
+                )
+            else:
+                self._service_panel.set_status_check_progress(
+                    '正在只读检查控制进程、服务、双雷达及地图发布者……'
+                )
+        self._append_log('status-check', '开始执行只读状态自检。')
+        self._status_check_worker = StatusCheckWorker(
+            self.topic_suffix, active_groups, self
+        )
+        self._status_check_worker.progress.connect(
+            lambda message: self._append_log('status-check', message)
+        )
+        self._status_check_worker.completed.connect(
+            self._status_check_complete
+        )
+        self._status_check_worker.start()
+
+    def _status_check_complete(self, result, detail):
+        if self._closing:
+            return
+        if self._status_check_for_repair:
+            self._status_check_for_repair = False
+            if result == 'PASS':
+                message = detail + '；当前控制模块保持运行，未执行重启。'
+                self._clear_preflight_warning()
+                self.statusBar().showMessage('状态正常，无需修复')
+                if self._service_panel is not None:
+                    self._service_panel.set_service_repair_context('')
+                    self._service_panel.finish_service_repair('PASS', message)
+                return
+            # One-click repair: stop own navigation/mapping modules, run the
+            # full takeover repair, then restart them with the same arguments.
+            restart = {}
+            for key in ('navigation', 'slam'):
+                process = self.processes[key]
+                if process.running and process.last_arguments:
+                    restart[key] = list(process.last_arguments)
+            stopped_any = False
+            for key in ('navigation', 'slam'):
+                if self.processes[key].running:
+                    if key == 'navigation':
+                        self.stop_navigation()
+                    else:
+                        self.stop_slam()
+                    stopped_any = True
+            self._service_repair_restart = restart or None
+            if self._service_panel is not None:
+                self._service_panel.set_service_repair_progress(
+                    '正在停止本控制中心的导航/建图模块，随后执行修复并自动重启……'
+                )
+            self._append_log(
+                'service-repair',
+                '检测到问题（' + detail + '）；停止本中心模块后执行一键修复。')
+            if not stopped_any:
+                self._execute_service_repair()
+                return
+            self._repair_stop_wait_count = 0
+            QtCore.QTimer.singleShot(300, self._wait_repair_module_stop)
+            return
+
+        self._last_preflight_failure = detail if result != 'PASS' else ''
+        if result == 'PASS':
+            self._clear_preflight_warning()
+        if self._service_panel is not None:
+            self._service_panel.finish_status_check(result, detail)
+            self._service_panel.set_service_repair_context(
+                self._last_preflight_failure
+            )
+        self._append_log('status-check', f'{result}: {detail}')
+        self.statusBar().showMessage(
+            '状态自检通过' if result == 'PASS' else '状态自检发现问题：' + detail
+        )
+
+    def _clear_preflight_warning(self):
+        self._last_preflight_failure = ''
+        self.preflight_failure_label.hide()
+        self.preflight_retry_button.hide()
+        self.preflight_repair_button.hide()
+        self._refresh_compact_controls()
+
+    def _wait_repair_module_stop(self):
+        if self._closing:
+            return
+        if any(self.processes[key].running for key in ('navigation', 'slam')):
+            self._repair_stop_wait_count += 1
+            if self._repair_stop_wait_count >= 50:
+                detail = '控制模块未能及时停止，已取消本次修复；可手动停止模块后重试。'
+                if self._service_panel is not None:
+                    self._service_panel.finish_service_repair('FAIL', detail)
+                self.statusBar().showMessage(detail)
+                return
+            QtCore.QTimer.singleShot(300, self._wait_repair_module_stop)
+            return
+        self._execute_service_repair()
+
+    def _start_service_repair(self):
+        active_modules = [
+            key for key in ('navigation', 'slam', 'joint')
+            if self.processes[key].running
+        ]
+        if active_modules:
+            # Healthy modules are not restarted needlessly; the read-only
+            # probe decides whether the full repair has to run.
+            self._start_status_check(repair_probe=True)
+            return
+        self._execute_service_repair()
+
+    def _execute_service_repair(self):
+        target, target_error = self._select_service_repair_target()
+        if target_error:
+            if self._service_panel is not None:
+                self._service_panel.finish_service_repair(
+                    'FAIL', target_error
+                )
+            return
+        blocking = [key for key in ('navigation', 'slam')
+                    if self.processes[key].running and key != target]
+        if blocking:
+            detail = (
+                '为避免修复中断正在运行的模块，请先停止：'
+                + '、'.join(blocking)
+            )
+            if self._service_panel is not None:
+                self._service_panel.finish_service_repair('FAIL', detail)
+            self.statusBar().showMessage(detail)
+            return
+        if self._preflight_worker is not None and self._preflight_worker.isRunning():
+            return
+        if (self._status_check_worker is not None
+                and self._status_check_worker.isRunning()):
+            return
+        if (self._service_repair_worker is not None
+                and self._service_repair_worker.isRunning()):
+            return
+        if (self._module_health_worker is not None
+                and self._module_health_worker.isRunning()):
+            return
+        if self._service_repair_worker is not None:
+            self._service_repair_worker.deleteLater()
+        self._service_repair_target = target
+        self._service_repair_arguments = (
+            list(self.processes[target].last_arguments)
+            if target is not None else None
+        )
+        self._repair_prior_preflight_ready = self._preflight_ready
+        self._preflight_ready = False
+        for host in (self.nav_host, self.slam_host, self.joint_host):
+            host.setEnabled(False)
+        target_name = {'navigation': '导航', 'slam': '建图'}.get(target, '服务')
+        if self._service_panel is not None:
+            self._service_panel.set_service_repair_progress(
+                f'正在检查并修复{target_name}相关服务和进程……'
+            )
+        self.statusBar().showMessage(f'正在执行{target_name}状态修复...')
+        active_groups = {
+            key: process.process_group_id
+            for key, process in self.processes.items()
+            if process.running and process.process_group_id
+        }
+        self._service_repair_worker = PreflightWorker(
+            self.topic_suffix, self, takeover=True, active_groups=active_groups)
+        self._service_repair_worker.progress.connect(
+            lambda message: self._append_log('service-repair', message)
+        )
+        self._service_repair_worker.completed.connect(
+            self._service_repair_complete
+        )
+        self._service_repair_worker.start()
+
+    def _service_repair_complete(self, result, detail):
+        if self._closing:
+            return
+        restart = self._service_repair_restart or {}
+        target = self._service_repair_target
+        if target in ('navigation', 'slam'):
+            process = self.processes[target]
+            if (process.last_arguments and target not in restart
+                    and not process.running):
+                restart[target] = list(process.last_arguments)
+        restart_allowed = result in ('PASS', 'AUTO_RECOVERED')
+        if not restart_allowed and restart:
+            # Warnings unrelated to the map must not block the module restart
+            # once the map resource itself is free again.
+            try:
+                restart_allowed = not preflight._external_map_publishers()
+            except Exception:
+                restart_allowed = False
+        if restart_allowed and restart:
+            self._service_repair_restart = restart
+            QtCore.QTimer.singleShot(250, self._restart_next_repaired_module)
+            return
+        self._service_repair_restart = None
+        if self._service_panel is not None:
+            self._service_panel.finish_service_repair(result, detail)
+        self._preflight_ready = True
+        self.centralWidget().setEnabled(True)
+        for host in (self.nav_host, self.slam_host, self.joint_host):
+            host.setEnabled(True)
+        self._refresh_compact_controls()
+        if result in ('PASS', 'AUTO_RECOVERED'):
+            self._last_preflight_failure = ''
+            self.preflight_repair_button.hide()
+            self.preflight_retry_button.hide()
+            self.preflight_failure_label.hide()
+            self.statusBar().showMessage('服务状态检查/修复完成，控制中心可用')
+        else:
+            self._last_preflight_failure = detail
+            self.preflight_failure_label.setText(
+                '服务状态修复未完成：' + detail
+                + '。控制中心仍可使用；可在“系统服务”页面查看后重试。'
+            )
+            self.preflight_failure_label.show()
+            self.preflight_retry_button.show()
+            self.preflight_repair_button.show()
+            self.statusBar().showMessage('服务状态修复未完成：' + detail)
+
+    def _restart_next_repaired_module(self):
+        restart = self._service_repair_restart or {}
+        if not restart:
+            self._module_repair_complete('PASS', '无需重启模块')
+            return
+        target = next(iter(restart))
+        arguments = restart.pop(target)
+        self._service_repair_restart = restart or None
+        self._service_repair_target = target
+        self._service_repair_arguments = arguments
+        process = self.processes.get(target)
+        target_name = {'navigation': '导航', 'slam': '建图'}.get(target, '模块')
+        if process is None or not arguments:
+            self._module_repair_complete('FAIL', f'{target_name}启动参数不可用')
+            return
+        if process.running:
+            self._module_repair_complete('FAIL', f'{target_name}旧进程组未完全退出')
+            return
+        if not self._pause_vendor_stack():
+            self._module_repair_complete(
+                'FAIL', f'{target_name}接管厂商服务失败，模块未重启')
+            return
+        host = self.nav_host if target == 'navigation' else self.slam_host
+        if not self._require_unowned_map(target, host):
+            self._module_repair_complete(
+                'FAIL', f'{target_name}启动前 /map 仍被占用，模块未重启')
+            return
+        if self._service_panel is not None:
+            self._service_panel.set_service_repair_progress(
+                f'正在重新启动{target_name}并验证关键进程和 /map……'
+            )
+        self._append_log('service-repair', f'使用原启动参数重新启动{target_name}模块。')
+        process.start(arguments)
+        QtCore.QTimer.singleShot(700, self._start_module_health_check)
+
+    def _start_module_health_check(self):
+        target = self._service_repair_target
+        process = self.processes.get(target)
+        target_name = {'navigation': '导航', 'slam': '建图'}.get(target, '模块')
+        if process is None or not process.running or not process.process_group_id:
+            self._module_repair_complete('FAIL', f'{target_name}进程未能启动')
+            return
+        self._module_health_worker = ModuleHealthWorker(
+            target, self.topic_suffix, process.process_group_id, self
+        )
+        self._module_health_worker.progress.connect(
+            lambda message: self._append_log('service-repair', message)
+        )
+        self._module_health_worker.completed.connect(
+            self._module_repair_complete
+        )
+        self._module_health_worker.start()
+
+    def _module_repair_complete(self, result, detail):
+        if self._service_repair_restart:
+            # More modules are waiting to be restarted after this one.
+            self._service_repair_target = None
+            QtCore.QTimer.singleShot(250, self._restart_next_repaired_module)
+            return
+        target = self._service_repair_target
+        target_name = {'navigation': '导航', 'slam': '建图'}.get(target, '模块')
+        success = result == 'PASS'
+        message = (
+            f'{target_name}状态修复完成，关键进程和地图输出已恢复'
+            if success else f'{target_name}状态修复未完成：{detail}'
+        )
+        if self._service_panel is not None:
+            self._service_panel.finish_service_repair(result, message)
+        self.statusBar().showMessage(message)
+        self._last_preflight_failure = '' if success else message
+        self._preflight_ready = True
+        self.centralWidget().setEnabled(True)
+        for host in (self.nav_host, self.slam_host, self.joint_host):
+            host.setEnabled(True)
+        self._refresh_compact_controls()
+        if success:
+            self.preflight_failure_label.hide()
+            self.preflight_retry_button.hide()
+            self.preflight_repair_button.hide()
+        else:
+            self.preflight_failure_label.setText(
+                message + '。控制中心仍可使用；可再次执行“服务状态修复”或点击“重新自检”。'
+            )
+            self.preflight_failure_label.show()
+            self.preflight_retry_button.show()
+            self.preflight_repair_button.show()
+        self._service_repair_target = None
+        self._service_repair_arguments = None
 
     def _pause_vendor_stack(self):
         service_active = _service_is_active(VENDOR_SLAM_SERVICE)
@@ -757,7 +1397,9 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
                 'navigation_ui_node.py',
                 '_control_center_navigation_ui',
             )
-            node = module.NavigationRosNode()
+            node = module.NavigationRosNode(
+                manual_cmd_vel_topic='/control_center/manual_cmd_vel'
+            )
             window = module.NavigationWindow(node)
             window.setWindowFlags(QtCore.Qt.Widget)
             window.setMinimumSize(0, 0)
@@ -834,8 +1476,54 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             except Exception as error:
                 self._append_log('navigation', f'清理旧地图消息时出现警告：{error}')
 
+    def _require_unowned_map(self, module_key, host):
+        """Do not start a GUI map producer while another stack owns /map."""
+        try:
+            owners = _active_map_publishers(self.node)
+        except Exception as error:
+            host.set_state('error')
+            self._append_log(module_key, f'无法检查 /map 发布者：{error}')
+            QtWidgets.QMessageBox.warning(
+                self, '无法确认地图归属',
+                '未能检查 /map 的发布者，已取消启动。请检查 ROS 连接后重试。',
+            )
+            return False
+        if owners:
+            host.set_state('error')
+            self._append_log(module_key, '已有 /map 发布者：' + ', '.join(owners))
+            QtWidgets.QMessageBox.warning(
+                self, '地图已由其他程序发布',
+                '当前 /map 发布者：\n' + '\n'.join(owners)
+                + '\n\n可到“系统服务”页点击“修复服务状态”自动收回地图资源，'
+                '或先停止现有建图或定位程序，再启动控制中心模块。',
+            )
+            return False
+        return True
+
+    def _guard_module_process_conflict(self, module, host, title, description):
+        conflicts = preflight.module_process_conflicts(module)
+        if not conflicts:
+            return False
+        detail = '\n'.join(
+            f"PID {item['pid']}: {item['command']}" for item in conflicts[:4]
+        )
+        host.set_state('error')
+        self._append_log(module, f'{description}，发现进程占用：{detail}')
+        QtWidgets.QMessageBox.warning(
+            self, title,
+            f'{description}。为避免重复控制，本次不启动该模块；'
+            f'控制中心其他功能仍可使用。\n\n{detail}',
+        )
+        return True
+
     def start_navigation(self):
+        if not self._preflight_ready:
+            return
         if self.processes['navigation'].running:
+            return
+        if self._guard_module_process_conflict(
+                'navigation', self.nav_host, '导航资源被占用',
+                '检测到已有导航或底盘仲裁进程'):
             return
         if self.processes['slam'].running:
             answer = QtWidgets.QMessageBox.question(
@@ -856,6 +1544,8 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             return
         if not self._pause_vendor_stack():
             self.nav_host.set_state('error')
+            return
+        if not self._require_unowned_map('navigation', self.nav_host):
             return
         remaining_amcl = _process_matches('/nav2_amcl/amcl')
         if remaining_amcl:
@@ -886,6 +1576,13 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         self.processes['navigation'].start(arguments)
 
     def stop_navigation(self):
+        if self._navigation_node is not None:
+            try:
+                self._navigation_node.stop_immediate()
+            except Exception as error:
+                self._append_log(
+                    'navigation', f'发送导航停止交接命令失败：{error}'
+                )
         self.processes['navigation'].stop()
 
     def _load_slam_ui(self, resume_state=None):
@@ -896,7 +1593,11 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
                 'control_center_slam', 'slam_ui_node.py',
                 '_control_center_slam_ui',
             )
-            page = module.SlamPage(topic_suffix=self.topic_suffix, resume_state=resume_state)
+            page = module.SlamPage(
+                topic_suffix=self.topic_suffix,
+                resume_state=resume_state,
+                chassis_command_topic='/control_center/chassis/slam_input',
+            )
             page.stop_requested.connect(self.stop_slam)
             self._slam_module = module
             self._slam_page = page
@@ -908,7 +1609,13 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             return False
 
     def start_slam(self):
+        if not self._preflight_ready:
+            return
         if self.processes['slam'].running:
+            return
+        if self._guard_module_process_conflict(
+                'slam', self.slam_host, '建图资源被占用',
+                '检测到已有 SLAM、雷达适配或 Cartographer 进程'):
             return
         choice, accepted = QtWidgets.QInputDialog.getItem(
             self, '选择建图方式', '本次建图：',
@@ -950,6 +1657,8 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         if not self._pause_vendor_stack():
             self.slam_host.set_state('error')
             return
+        if not self._require_unowned_map('slam', self.slam_host):
+            return
         remaining_amcl = _process_matches('/nav2_amcl/amcl')
         if remaining_amcl:
             self.slam_host.set_state('error')
@@ -969,6 +1678,7 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             'multi_lidar_slam_optimized.launch.py',
             'open_rviz:=false',
             'enable_keyboard_control:=false',
+            'enable_motion_safety_watchdog:=true',
             'publish_lidar_static_tf:=true',
             f'front_scan_topic:=/topic_gv_front_lidar_{self.topic_suffix}',
             f'rear_scan_topic:=/topic_gv_rear_lidar_{self.topic_suffix}',
@@ -988,6 +1698,11 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         # transient-local OccupancyGrid can be delivered after the snapshot is
         # restored and overwrite the navigation canvas again.
         self._set_navigation_map_updates(False)
+        if self._slam_page is not None:
+            try:
+                self._slam_page.node.stop_motion()
+            except Exception as error:
+                self._append_log('slam', f'发送建图停止交接命令失败：{error}')
         self.processes['slam'].stop()
         self._set_navigation_map_updates(False, drain=True)
         self._restore_navigation_map()
@@ -1025,34 +1740,31 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             return False
 
     def start_joint(self):
+        if not self._preflight_ready:
+            return
         if self.processes['joint'].running:
+            return
+        if self._guard_module_process_conflict(
+                'joint', self.joint_host, '关节控制资源被占用',
+                '检测到已有 joint bridge 或关节控制进程'):
             return
         old_joint_processes = _legacy_joint_processes()
         if old_joint_processes:
-            self._append_log(
-                'joint',
-                '检测到旧 whole_body_joint_control，正在自动退出旧界面和桥接节点……',
+            self.joint_host.set_state('error')
+            QtWidgets.QMessageBox.warning(
+                self, '关节控制资源被占用',
+                '检测到旧 whole_body_joint_control，无法确认是否由其他人使用；'
+                '本次未自动终止，也未启动第二套桥接节点。\n\n'
+                + '\n'.join(old_joint_processes[:4]),
             )
-            stopped, remaining = _stop_legacy_joint_processes()
-            if remaining:
-                self.joint_host.set_state('error')
-                QtWidgets.QMessageBox.warning(
-                    self, '旧关节控制包无法自动退出',
-                    '已尝试自动停止原 whole_body_joint_control，但仍有进程存在。'
-                    '为避免两套桥接节点同时控制机器人，本次未启动。\n\n'
-                    + '\n'.join(remaining[:4]),
-                )
-                return
-            self._append_log(
-                'joint',
-                f'旧关节包已自动退出（清理 {len(stopped)} 个进程），继续启动当前模块。',
-            )
+            return
         if not self._load_joint_ui():
             return
         self.processes['joint'].start([
             'launch', 'control_center_joint_control',
             'whole_body_joint_control.launch.py',
             'panel:=false',
+            'require_operator_heartbeat:=true',
             f'robot_id:={self.robot_id}',
             f'topic_suffix:={self.topic_suffix}',
         ])
@@ -1065,7 +1777,7 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
                 if hasattr(self._joint_panel, 'hardware_toggle'):
                     self._joint_panel.hardware_toggle.setChecked(False)
                 if hasattr(self._joint_panel, 'spin_timer'):
-                    self._joint_panel.spin_timer.stop()
+                    self._joint_panel.shutdown_ros()
                 self._joint_node.destroy_node()
             except Exception as error:
                 self._append_log('joint', f'释放关节界面时出现警告：{error}')
@@ -1114,6 +1826,21 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
             self._append_log('service', f'关闭服务管理页面时出现警告：{error}')
 
     def closeEvent(self, event):
+        if self._preflight_worker is not None and self._preflight_worker.isRunning():
+            event.ignore()
+            return
+        if (self._service_repair_worker is not None
+                and self._service_repair_worker.isRunning()):
+            event.ignore()
+            return
+        if (self._status_check_worker is not None
+                and self._status_check_worker.isRunning()):
+            event.ignore()
+            return
+        if (self._module_health_worker is not None
+                and self._module_health_worker.isRunning()):
+            event.ignore()
+            return
         if self._closing:
             event.accept()
             return
@@ -1127,13 +1854,15 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
                 event.ignore()
                 return
         self._closing = True
+        self._preflight_ready = False
+        self._operator_heartbeat_timer.stop()
         if self._joint_panel is not None:
             self.stop_joint()
         if self._slam_page is not None:
             self.stop_slam()
         self._shutdown_service_page()
-        self.processes['navigation'].stop()
         self._shutdown_navigation_page()
+        self.processes['navigation'].stop()
         self._restore_vendor_stack()
         event.accept()
 
@@ -1156,15 +1885,18 @@ def main(args=None):
     signal_timer.start(250)
     signal_timer.timeout.connect(lambda: None)
     window.show()
+    QtCore.QTimer.singleShot(0, window.start_preflight)
     try:
         return application.exec_()
     finally:
         if not window._closing:
             window._closing = True
+            window._preflight_ready = False
+            window._operator_heartbeat_timer.stop()
+            window._shutdown_navigation_page()
             for process in window.processes.values():
                 process.stop()
             window._shutdown_service_page()
-            window._shutdown_navigation_page()
             window._restore_vendor_stack()
         node.destroy_node()
         if rclpy.ok():

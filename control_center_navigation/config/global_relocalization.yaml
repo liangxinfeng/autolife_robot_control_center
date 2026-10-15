@@ -5,20 +5,18 @@ cartographer_global_relocalization:
     publish_initial_pose: true
 
     map_topic: /map
-    scan_topic: /topic_gv_front_lidar_0_307
-    rear_scan_topic: /topic_gv_rear_lidar_0_307
+    scan_topic: /topic_gv_front_lidar_0_300
+    rear_scan_topic: /topic_gv_rear_lidar_0_300
     use_rear_scan: true
     require_rear_scan: true
     scan_pair_max_age_sec: 0.10
     scan_max_age_sec: 0.60
-    # Use trustworthy sub-20cm returns as auxiliary geometry, not a stop condition.
+    # Same matcher as 307; retain robot-specific scan topic names.
     near_wall_matching: true
-    # Extra verification only when the original score margin is inconclusive.
     supplemental_verification: true
     supplemental_margin: 0.06
     maximum_wall_conflict: 0.15
     odom_frame: odom
-    # Localization scoring only. Raw obstacle / Nav2 observations are unchanged.
     minimum_matched_ratio: 0.35
     minimum_structural_ratio: 0.15
     minimum_matched_sectors: 3

@@ -1,0 +1,7 @@
+<library path="wall_tail_filter">
+  <class name="control_center_navigation/WeakWallTailFilter"
+         type="control_center_navigation::WeakWallTailFilter"
+         base_class_type="filters::FilterBase&lt;sensor_msgs::msg::LaserScan&gt;">
+    <description>Conservative low-intensity end-of-wall tail rejection; missing or ambiguous evidence passes unchanged.</description>
+  </class>
+</library>

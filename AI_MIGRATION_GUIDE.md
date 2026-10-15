@@ -222,25 +222,25 @@ pgrep -af 'nav2_amcl|cartographer_node|adaptive_object_grasping'
 - 306 工作空间实际为 `/home/ubuntu/ros2_ws`（末尾有空格）；283 为正常路径
   `/home/ubuntu/ros2_ws`，并且迁移前连 `src` 目录都不存在，需要先创建。
 - 两台机器均为 ROS 2 Jazzy；283 厂家服务实际使用 `ROS_DOMAIN_ID=0`、
-  `ROBOT_ID=283`、`rmw_cyclonedds_cpp` 和回环接口 `lo`。
+  `ROBOT_ID=300`、`rmw_cyclonedds_cpp` 和回环接口 `lo`。
 - 使用 Fast DDS 在本机测试未发现厂家话题。诊断时必须切回与厂家服务相同的
   CycloneDDS 配置；若出现 participant index 耗尽，可在临时诊断配置中提高
   `MaxAutoParticipantIndex`，不要修改厂家服务配置来绕过问题。
 - 已实测存在并验证类型：
 
   ```text
-  /topic_gv_front_lidar_0_283      sensor_msgs/msg/LaserScan
-  /topic_gv_rear_lidar_0_283       sensor_msgs/msg/LaserScan
-  /topic_gv_wheel_odom_0_283       nav_msgs/msg/Odometry
-  /topic_gv_target_cmd_vel_0_283   geometry_msgs/msg/Twist
-  /control_reset_0_283              std_msgs/msg/String
+  /topic_gv_front_lidar_0_300      sensor_msgs/msg/LaserScan
+  /topic_gv_rear_lidar_0_300       sensor_msgs/msg/LaserScan
+  /topic_gv_wheel_odom_0_300       nav_msgs/msg/Odometry
+  /topic_gv_target_cmd_vel_0_300   geometry_msgs/msg/Twist
+  /control_reset_0_300              std_msgs/msg/String
   ```
 
 - 前后雷达 `frame_id` 分别为 `front_laser_frame`、`rear_laser_frame`，轮速里程计为
   `odom -> base_link`。厂家当时没有提供雷达静态 TF，因此先沿用同型号 306 外参只能作为
   启动基线，导航前仍要做静止墙面重合测试和 180° 朝向检查。
-- `/control_reset_0_283` 已确认有厂家节点
-  `node_arm_vr_control_service_0_283` 订阅，系统服务页复位按钮可使用 283 后缀；迁移验收
+- `/control_reset_0_300` 已确认有厂家节点
+  `node_arm_vr_control_service_0_300` 订阅，系统服务页复位按钮可使用 283 后缀；迁移验收
   仍只检查订阅关系，不应远程直接触发真机复位。
 - 283 迁移前缺少 `cartographer_ros`，且 `rosdep` 未初始化；这是本次编译前必须处理的
   实际依赖问题。`moveit_py`、`pick_ik` 不属于本控制中心七个子包的依赖。
@@ -270,7 +270,7 @@ pgrep -af 'nav2_amcl|cartographer_node|adaptive_object_grasping'
   覆盖已保存的新航点。
 - 迁移包含中文动作文件名。不要在会破坏 UTF-8 文件名的 Windows 解压/重打包流程中
   中转源码；优先在 Linux 上用 `tar` 解压，并核对“打招呼、比心、爱心、鞠躬”等文件。
-- 迁移时只对运行文件定向替换 `0_306 -> 0_283` 和默认 `robot_id 306 -> 283`；
+- 迁移时只对运行文件定向替换 `0_306 -> 0_300` 和默认 `robot_id 306 -> 283`；
   URDF、地图、动作 PKL、历史文档和 306 标定记录均未做全仓库替换。
 
 ## 7. AI 执行约束

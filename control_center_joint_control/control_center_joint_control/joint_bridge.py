@@ -21,6 +21,7 @@ from .action_library import (
     normalize_action_record,
 )
 from .body_height import BODY_HEIGHT_JOINTS, matches_body_height_profile
+from .operator_targets import resolve_operator_targets
 from .joint_definitions import (
     ALL_JOINTS,
     BASE_MODEL_JOINTS,
@@ -41,10 +42,14 @@ from .joint_definitions import (
 class JointBridge(Node):
     def __init__(self):
         super().__init__('whole_body_joint_bridge')
-        self.declare_parameter('robot_id', 307)
+        self.declare_parameter('robot_id', 300)
         self.declare_parameter('topic_suffix', '')
         self.declare_parameter('feedback_timeout_sec', 0.6)
         self.declare_parameter('hardware_unlock_timeout_sec', 180.0)
+        self.declare_parameter('require_operator_heartbeat', False)
+        self.declare_parameter('operator_heartbeat_topic',
+                               '/control_center/operator_heartbeat')
+        self.declare_parameter('operator_heartbeat_timeout_sec', 0.50)
         self.declare_parameter('max_single_step_deg', 5.0)
         self.declare_parameter('max_gripper_command_lead_deg', 30.0)
         self.declare_parameter('goal_tolerance_deg', 1.0)
@@ -105,6 +110,17 @@ class JointBridge(Node):
         self._last_event = '等待机器人关节反馈'
         self._last_event_level = 'info'
         self._recent_own_payloads = {}
+        self._last_external_command_at = None
+        self._operator_heartbeat_required = bool(
+            self.get_parameter('require_operator_heartbeat').value
+        )
+        self._operator_heartbeat_timeout = max(
+            0.15,
+            float(self.get_parameter('operator_heartbeat_timeout_sec').value),
+        )
+        self._last_operator_heartbeat = None
+        self._operator_session = ''
+        self._operator_heartbeat_lost = False
         self._active_goals = {}
         self._goal_sent_groups = set()
         self._action_state = None
@@ -193,6 +209,12 @@ class JointBridge(Node):
         )
         self.create_subscription(
             String, whole_body_command_topic, self._on_whole_body_target_observed, 10
+        )
+        self.create_subscription(
+            String,
+            str(self.get_parameter('operator_heartbeat_topic').value),
+            self._on_operator_heartbeat,
+            10,
         )
         self.create_service(
             SetBool, '/control_center_joint_control/set_hardware_enabled',
@@ -334,6 +356,7 @@ class JointBridge(Node):
             group_name, targets, speed_scale, motion_profile = (
                 self._parse_operator_command(message.data)
             )
+            single_joint = json.loads(message.data).get('single_joint')
         except Exception as error:
             self._event(f'发送目标无效：{error}', 'warn')
             return
@@ -362,6 +385,7 @@ class JointBridge(Node):
 
         if (
             group_name == 'leg_waist'
+            and single_joint is None
             and not motion_profile
             and matches_body_height_profile(targets)
             and abs(
@@ -389,6 +413,12 @@ class JointBridge(Node):
             ))
             for joint in targets
         }
+        if single_joint is not None:
+            # Cancel old goals for unedited members of this group. Preserve
+            # the selected joint's progressive command for continuous dragging.
+            for joint in targets:
+                if joint != single_joint:
+                    commanded[joint] = float(self._current[joint])
         if motion_profile == 'body_height':
             commanded['Joint_Waist_Yaw'] = float(
                 self._current['Joint_Waist_Yaw']
@@ -991,14 +1021,10 @@ class JointBridge(Node):
         if group_name not in GROUPS:
             raise ValueError(f'unknown group {group_name}')
         requested = data.get('targets_deg', {})
-        if not isinstance(requested, dict):
-            raise ValueError('targets_deg must be an object')
-        allowed = set(group_joint_names(group_name))
-        if set(requested) != allowed:
-            missing = sorted(allowed - set(requested))
-            extra = sorted(set(requested) - allowed)
-            raise ValueError(f'joint set mismatch; missing={missing}, extra={extra}')
-        targets = {name: clamp_joint(name, requested[name]) for name in allowed}
+        single_joint = data.get('single_joint')
+        targets = resolve_operator_targets(
+            group_name, requested, self._current, single_joint
+        )
         speed_scale = float(data.get('speed_scale', 1.0))
         if not math.isfinite(speed_scale) or not 0.1 <= speed_scale <= 2.0:
             raise ValueError('speed_scale must be between 0.1 and 2.0')
@@ -1007,6 +1033,8 @@ class JointBridge(Node):
             raise ValueError(f'unknown motion profile {motion_profile}')
         if motion_profile == 'body_height' and group_name != 'leg_waist':
             raise ValueError('body_height motion profile requires leg_waist group')
+        if single_joint is not None and motion_profile:
+            raise ValueError('single_joint cannot run a coordinated motion profile')
         return group_name, targets, speed_scale, motion_profile
 
     def _publish_vendor(self, publisher, payload):
@@ -1025,8 +1053,78 @@ class JointBridge(Node):
         # Those messages are expected during the preparation state machine.
         if self._hardware_prepare is not None:
             return
+        self._last_external_command_at = now
         if self._hardware_enabled:
             self._lock('检测到其他节点下发全身关节命令，为避免冲突已自动锁定')
+
+    def _on_operator_heartbeat(self, message):
+        session = str(message.data).strip()
+        if not session:
+            return
+        if not self._operator_session:
+            self._operator_session = session
+        elif session != self._operator_session:
+            if not self._operator_heartbeat_lost:
+                self._operator_heartbeat_lost = True
+                self.get_logger().error(
+                    'Different control-center session detected; this joint '
+                    'bridge remains locked to its original owner'
+                )
+                active = bool(self._active_goals or self._action_state)
+                if active:
+                    self._hold_active_joint_targets_once()
+                if self._hardware_enabled:
+                    self._lock(
+                        '控制中心会话已更换，旧关节桥接已停止并锁定'
+                    )
+            return
+        self._last_operator_heartbeat = time.monotonic()
+
+    def _hold_active_joint_targets_once(self):
+        if not self._hardware_enabled or not self._is_feedback_fresh():
+            return False
+        if (
+            self._last_external_command_at is not None
+            and time.monotonic() - self._last_external_command_at < 0.50
+        ):
+            self._event(
+                '检测到其他关节控制端刚发送命令；不发送保持目标，已停止本桥接后续输出',
+                'warn',
+            )
+            return False
+
+        groups = set(self._active_goals) | set(self._goal_sent_groups)
+        if self._action_state is not None:
+            groups.update(self._action_state['record'].get('groups', []))
+        if not groups:
+            return False
+
+        body_payload = {}
+        body_groups = ('leg_waist', 'left_arm', 'right_arm', 'neck')
+        if groups.intersection(body_groups):
+            for group_name in body_groups:
+                body_payload[GROUPS[group_name]['command_key']] = [
+                    self._current[joint]
+                    for joint in group_joint_names(group_name)
+                ]
+        if 'grippers' in groups:
+            self._publish_vendor(
+                self._gripper_pub,
+                {
+                    'left_gripper_target_joints_position': [
+                        self._current['Joint_Left_Gripper']
+                    ],
+                    'right_gripper_target_joints_position': [
+                        self._current['Joint_Right_Gripper']
+                    ],
+                },
+            )
+        if body_payload:
+            self._publish_vendor(self._whole_body_pub, body_payload)
+        if body_payload or 'grippers' in groups:
+            self._event('控制界面失联，已发送一次当前位置保持目标', 'warn')
+            return True
+        return False
 
     def _prune_recent_own_payloads(self, now):
         self._recent_own_payloads = {
@@ -1465,6 +1563,23 @@ class JointBridge(Node):
         ]
 
     def _check_auto_lock(self):
+        if self._operator_heartbeat_required:
+            heartbeat_stale = (
+                self._last_operator_heartbeat is None
+                or time.monotonic() - self._last_operator_heartbeat
+                > self._operator_heartbeat_timeout
+            )
+            if heartbeat_stale:
+                if not self._operator_heartbeat_lost:
+                    self._operator_heartbeat_lost = True
+                    active = bool(self._active_goals or self._action_state)
+                    if active:
+                        self._hold_active_joint_targets_once()
+                    if self._hardware_enabled:
+                        self._lock(
+                            '控制中心界面心跳超时，关节目标已停止并自动锁定；请重新解锁'
+                        )
+                return
         if not self._hardware_enabled:
             return
         if self._active_goals or self._action_state is not None:
@@ -1484,6 +1599,15 @@ class JointBridge(Node):
         preview = dict(self._preview or self._current)
         self._joint_state_pub.publish(self._make_model_joint_state(current))
         self._target_joint_state_pub.publish(self._make_model_joint_state(preview))
+
+    def destroy_node(self):
+        # On orderly bridge shutdown, hold only the groups this bridge was
+        # actively moving, then stop publishing.  A heartbeat timeout uses
+        # the same bounded handoff for a GUI crash.
+        if self._hardware_enabled and (self._active_goals or self._action_state):
+            self._hold_active_joint_targets_once()
+            self._lock('关节控制桥接正在关闭，控制输出已锁定')
+        return super().destroy_node()
 
     def _make_model_joint_state(self, values_deg):
         message = JointState()

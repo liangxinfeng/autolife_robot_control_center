@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import json
 import math
+import time
+from charger_waypoints import is_charger_waypoint
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -14,6 +16,8 @@ from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import BatteryState
 from std_msgs.msg import Bool, String
+from action_msgs.srv import CancelGoal
+from std_srvs.srv import Trigger
 
 
 class CmdVelArbiterNode(Node):
@@ -21,10 +25,17 @@ class CmdVelArbiterNode(Node):
         super().__init__('cmd_vel_arbiter')
 
         self.declare_parameter('nav_input_topic', '/nav_cmd_vel')
-        self.declare_parameter('arm_input_topic', '/arm_cmd_vel_vr_0_307')
-        self.declare_parameter('output_topic', '/arm_cmd_vel_raw_0_307')
+        self.declare_parameter('arm_input_topic', '/arm_cmd_vel_vr_0_300')
+        self.declare_parameter('output_topic', '/arm_cmd_vel_raw_0_300')
         self.declare_parameter('nav_priority_timeout_sec', 0.5)
         self.declare_parameter('manual_override_topic', '/manual_cmd_vel_active')
+        self.declare_parameter(
+            'control_center_input_topic', '/control_center/manual_cmd_vel'
+        )
+        self.declare_parameter(
+            'operator_heartbeat_topic', '/control_center/operator_heartbeat'
+        )
+        self.declare_parameter('operator_heartbeat_timeout_sec', 0.30)
         self.declare_parameter('manual_override_timeout_sec', 0.45)
         self.declare_parameter('straight_docking_enabled', True)
         self.declare_parameter('docking_status_topic', '/waypoints/navigation_status')
@@ -42,7 +53,7 @@ class CmdVelArbiterNode(Node):
         self.declare_parameter('staging_final_heading_distance', 0.35)
         self.declare_parameter('staging_final_max_linear_speed', 0.05)
         self.declare_parameter('staging_final_max_angular_speed', 0.10)
-        self.declare_parameter('battery_topic', '/topic_gv_battery_0_307')
+        self.declare_parameter('battery_topic', '/topic_gv_battery_0_300')
         self.declare_parameter('charging_current_threshold', 0.10)
         self.declare_parameter('charging_use_current', False)
         self.declare_parameter('charging_confirm_samples', 2)
@@ -55,6 +66,16 @@ class CmdVelArbiterNode(Node):
         manual_override_topic = self.get_parameter(
             'manual_override_topic'
         ).get_parameter_value().string_value
+        control_center_input_topic = str(
+            self.get_parameter('control_center_input_topic').value
+        )
+        operator_heartbeat_topic = str(
+            self.get_parameter('operator_heartbeat_topic').value
+        )
+        operator_heartbeat_timeout_sec = max(
+            0.10,
+            float(self.get_parameter('operator_heartbeat_timeout_sec').value),
+        )
         nav_priority_timeout_sec = (
             self.get_parameter('nav_priority_timeout_sec').get_parameter_value().double_value
         )
@@ -123,6 +144,21 @@ class CmdVelArbiterNode(Node):
         self._manual_override_timeout = Duration(seconds=manual_override_timeout_sec)
         self._manual_override_active = False
         self._last_manual_override_stamp = None
+        self._operator_session = ''
+        self._last_operator_heartbeat = None
+        self._operator_heartbeat_timeout = operator_heartbeat_timeout_sec
+        self._operator_lost = False
+        self._last_external_manual_at = None
+        self._last_control_center_nonzero = False
+        self._cancel_goal_clients = [
+            self.create_client(CancelGoal, f'/{name}/_action/cancel_goal')
+            for name in (
+                'navigate_to_pose', 'navigate_through_poses', 'follow_waypoints'
+            )
+        ]
+        self._cancel_waypoint_client = self.create_client(
+            Trigger, '/cancel_navigation'
+        )
         self._straight_docking_status_timeout = Duration(
             seconds=straight_docking_status_timeout_sec
         )
@@ -159,6 +195,21 @@ class CmdVelArbiterNode(Node):
             self._handle_arm_cmd_vel,
             10,
         )
+        self._control_center_subscription = self.create_subscription(
+            Twist,
+            control_center_input_topic,
+            self._handle_control_center_cmd_vel,
+            10,
+        )
+        self._operator_heartbeat_subscription = self.create_subscription(
+            String,
+            operator_heartbeat_topic,
+            self._handle_operator_heartbeat,
+            10,
+        )
+        self._operator_watchdog_timer = self.create_timer(
+            0.05, self._check_operator_heartbeat
+        )
         self._manual_override_subscription = self.create_subscription(
             Bool,
             manual_override_topic,
@@ -186,6 +237,10 @@ class CmdVelArbiterNode(Node):
             f'Arbitrating cmd_vel: nav={nav_input_topic}, arm={arm_input_topic}, output={output_topic}'
         )
         self.get_logger().info(
+            f'Control-center heartbeat watchdog: topic={operator_heartbeat_topic}, '
+            f'timeout={operator_heartbeat_timeout_sec:.2f}s'
+        )
+        self.get_logger().info(
             f'Explicit manual override: topic={manual_override_topic}, '
             f'timeout={manual_override_timeout_sec:.2f}s'
         )
@@ -210,14 +265,14 @@ class CmdVelArbiterNode(Node):
             return
 
         state = payload.get('state')
-        if state in ('docking_failed', 'paused'):
+        if state in ('docking_failed', 'docking_charge_wait', 'paused'):
             self._dock_output_inhibit = True
         elif state in ('started', 'docking_started', 'undocking', 'short_distance_started'):
             self._dock_output_inhibit = False
         waypoint_name = payload.get('active_waypoint') or payload.get('waypoint_name') or ''
         if (
             state == 'docking_staging_approach'
-            and waypoint_name == self._charger_waypoint_name
+            and is_charger_waypoint(waypoint_name, self._charger_waypoint_name)
         ):
             distance = payload.get('distance_remaining')
             if distance is not None:
@@ -393,6 +448,8 @@ class CmdVelArbiterNode(Node):
         )
 
     def _publish_charging_stop_if_needed(self) -> None:
+        if self._operator_lost:
+            return
         if getattr(self, '_dock_output_inhibit', False) and not self._manual_override_is_active():
             self._publisher.publish(Twist())
             return
@@ -427,13 +484,17 @@ class CmdVelArbiterNode(Node):
             )
 
     def _handle_nav_cmd_vel(self, msg: Twist) -> None:
+        if self._operator_lost:
+            return
         self._last_nav_stamp = self._clock.now()
         if self._manual_override_is_active():
             return
         if not self._continuity.permits_navigation():
             self._publisher.publish(Twist())
             return
-        self._publisher.publish(self._filter_nav_cmd_vel(msg))
+        output = self._filter_nav_cmd_vel(msg)
+        self._publisher.publish(output)
+        self._last_control_center_nonzero = not self._is_zero_twist(output)
 
     def _publish_localization_stop(self):
         if (self._nav_has_priority() and not self._manual_override_is_active()
@@ -441,6 +502,7 @@ class CmdVelArbiterNode(Node):
             self._publisher.publish(Twist())
 
     def _handle_arm_cmd_vel(self, msg: Twist) -> None:
+        self._last_external_manual_at = time.monotonic()
         if self._charging_hold_active():
             self._publisher.publish(Twist())
             return
@@ -450,6 +512,93 @@ class CmdVelArbiterNode(Node):
         if self._nav_has_priority():
             return
         self._publisher.publish(msg)
+
+    def _handle_control_center_cmd_vel(self, msg: Twist) -> None:
+        if self._operator_lost or not self._operator_heartbeat_fresh():
+            return
+        if self._charging_hold_active():
+            self._publisher.publish(Twist())
+            self._last_control_center_nonzero = False
+            return
+        if self._manual_override_is_active() or self._nav_has_priority():
+            return
+        output = self._filter_nav_cmd_vel(msg)
+        self._publisher.publish(output)
+        self._last_control_center_nonzero = not self._is_zero_twist(output)
+
+    @staticmethod
+    def _is_zero_twist(message):
+        return all(abs(float(value)) <= 1e-7 for value in (
+            message.linear.x, message.linear.y, message.linear.z,
+            message.angular.x, message.angular.y, message.angular.z,
+        ))
+
+    def _handle_operator_heartbeat(self, message):
+        session = str(message.data).strip()
+        if not session:
+            return
+        if not self._operator_session:
+            self._operator_session = session
+            self.get_logger().info('Control-center operator session is active')
+        elif session != self._operator_session:
+            self.get_logger().error(
+                'A different control-center session appeared; keeping this '
+                'navigation process locked to its original owner'
+            )
+            self._lose_operator()
+            return
+        self._last_operator_heartbeat = time.monotonic()
+
+    def _operator_heartbeat_fresh(self, now=None):
+        if self._last_operator_heartbeat is None:
+            return False
+        current = time.monotonic() if now is None else now
+        return current - self._last_operator_heartbeat <= self._operator_heartbeat_timeout
+
+    def _check_operator_heartbeat(self):
+        if self._last_operator_heartbeat is None or self._operator_lost:
+            return
+        now = time.monotonic()
+        if self._operator_heartbeat_fresh(now):
+            return
+        self._lose_operator()
+
+    def _lose_operator(self):
+        if self._operator_lost:
+            return
+        self._operator_lost = True
+        self._last_nav_stamp = None
+        self.get_logger().error(
+            'Control-center heartbeat lost; canceling navigation and blocking its commands'
+        )
+        for client in self._cancel_goal_clients:
+            if client.service_is_ready():
+                try:
+                    client.call_async(CancelGoal.Request())
+                except Exception as error:
+                    self.get_logger().warning(
+                        f'Navigation goal cancellation request failed: {error}'
+                    )
+        if self._cancel_waypoint_client.service_is_ready():
+            try:
+                self._cancel_waypoint_client.call_async(Trigger.Request())
+            except Exception as error:
+                self.get_logger().warning(
+                    f'Waypoint cancellation request failed: {error}'
+                )
+
+        external_manual_fresh = (
+            self._last_external_manual_at is not None
+            and now - self._last_external_manual_at <= 0.30
+        )
+        if self._last_control_center_nonzero and not external_manual_fresh:
+            # One transition stop while this arbiter owns the active command;
+            # then remain silent so VR/other publishers can take over.
+            self._publisher.publish(Twist())
+            self._last_control_center_nonzero = False
+            self.get_logger().warning(
+                'Published one bounded stop command; watchdog is now silent'
+            )
 
 
 def main(args=None) -> None:

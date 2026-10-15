@@ -8,7 +8,7 @@ class OdomTopicRelayNode(Node):
     def __init__(self) -> None:
         super().__init__('odom_topic_relay')
 
-        self.declare_parameter('input_topic', '/topic_gv_wheel_odom_0_307')
+        self.declare_parameter('input_topic', '/topic_gv_wheel_odom_0_300')
         self.declare_parameter('output_topic', '/odom')
 
         input_topic = self.get_parameter('input_topic').get_parameter_value().string_value
