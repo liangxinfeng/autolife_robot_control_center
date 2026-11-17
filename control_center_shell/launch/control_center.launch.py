@@ -18,8 +18,8 @@ def generate_launch_description():
         '</Discovery></Domain></CycloneDDS>'
     )
     return LaunchDescription([
-        DeclareLaunchArgument('robot_id', default_value='300'),
-        DeclareLaunchArgument('topic_suffix', default_value='0_300'),
+        DeclareLaunchArgument('robot_id', default_value='345'),
+        DeclareLaunchArgument('topic_suffix', default_value='0_345'),
         DeclareLaunchArgument('start_navigation', default_value='false'),
         SetEnvironmentVariable('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'),
         SetEnvironmentVariable('ROS_DOMAIN_ID', '0'),

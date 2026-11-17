@@ -31,12 +31,12 @@ VISION_SETTINGS_PATH = Path(
     'autolife_robot_vision/settings.toml'
 )
 NAVIGATION_VOICE_CONFIG_PATH = Path(
-    '/home/ubuntu/ros2_ws/src/autolife_robot_control_center/'
+    '/home/ubuntu/ros2_ws/src/'
     'control_center_navigation/config/voice_feedback.yaml'
 )
 VISION_ROBOT_CONFIG_PATH = Path(
     '/home/ubuntu/miniconda3/envs/robot_env/lib/python3.12/site-packages/'
-    'autolife_robot_vision/configs/robot_v2_2.json'
+    'autolife_robot_vision/configs/robot_v3_1.json'
 )
 ALSA_CARDS_PATH = Path('/proc/asound/cards')
 LOGO_SERVICE_UNIT = 'autolife-logo-display.service'
@@ -630,12 +630,13 @@ class ServiceManagerPanel(QtWidgets.QWidget):
     service_state_changed = QtCore.pyqtSignal(str, str, str)
     repair_requested = QtCore.pyqtSignal()
     status_check_requested = QtCore.pyqtSignal()
+    restore_requested = QtCore.pyqtSignal()
 
     def __init__(
         self,
         action_guard=None,
         auto_refresh=True,
-        topic_suffix='0_300',
+        topic_suffix='0_345',
         parent=None,
     ):
         super().__init__(parent)
@@ -778,6 +779,9 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self.service_repair_button.setEnabled(True)
         self.service_repair_button.clicked.connect(self._request_service_repair)
         repair_row.addWidget(self.service_repair_button)
+        self.restore_services_button = QtWidgets.QPushButton('恢复被暂停服务')
+        self.restore_services_button.clicked.connect(self.restore_requested.emit)
+        repair_row.addWidget(self.restore_services_button)
         actions.addLayout(repair_row)
 
         check_row = QtWidgets.QHBoxLayout()
@@ -819,6 +823,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._repair_busy = True
         self.service_repair_button.setEnabled(False)
         self.status_check_button.setEnabled(False)
+        self.restore_services_button.setEnabled(False)
         self.service_repair_detail.setText(
             '正在执行安全检查和一次性恢复，请勿关闭控制中心。'
         )
@@ -831,6 +836,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._status_check_busy = True
         self.service_repair_button.setEnabled(False)
         self.status_check_button.setEnabled(False)
+        self.restore_services_button.setEnabled(False)
         self.status_check_status.setText('检查中')
         self.status_check_status.setObjectName('stateWarn')
         self.status_check_status.style().unpolish(self.status_check_status)
@@ -842,6 +848,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._repair_busy = True
         self.service_repair_button.setEnabled(False)
         self.status_check_button.setEnabled(False)
+        self.restore_services_button.setEnabled(False)
         self.service_repair_detail.setText(str(detail))
         self._set_service_repair_status('修复中', 'stateWarn')
 
@@ -849,6 +856,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._status_check_busy = True
         self.service_repair_button.setEnabled(False)
         self.status_check_button.setEnabled(False)
+        self.restore_services_button.setEnabled(False)
         self.status_check_status.setText('检查中')
         self.status_check_status.setObjectName('stateWarn')
         self.status_check_status.style().unpolish(self.status_check_status)
@@ -859,6 +867,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._repair_busy = False
         self.service_repair_button.setEnabled(True)
         self.status_check_button.setEnabled(True)
+        self.restore_services_button.setEnabled(True)
         if result in ('PASS', 'AUTO_RECOVERED'):
             self.service_repair_detail.setText(str(detail))
             self._set_service_repair_status('修复完成', 'stateGood')
@@ -870,6 +879,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._status_check_busy = False
         self.service_repair_button.setEnabled(True)
         self.status_check_button.setEnabled(True)
+        self.restore_services_button.setEnabled(True)
         if result == 'PASS':
             self.status_check_status.setText('检查通过')
             self.status_check_status.setObjectName('stateGood')

@@ -25,7 +25,7 @@ setup(
             glob('motion_library/action_pkls/*.pkl'),
         ),
         ('share/' + package_name + '/urdf', glob('urdf/*')),
-        ('share/' + package_name + '/meshes/robot_v2_2', glob('meshes/robot_v2_2/*')),
+        ('share/' + package_name + '/meshes/robot_v3_1', glob('meshes/robot_v3_1/*')),
     ],
     install_requires=['setuptools'],
     tests_require=['pytest'],

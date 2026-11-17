@@ -16,7 +16,7 @@ def main():
         else '/tmp/whole_body_joint_view_test.png'
     )
     app = QtWidgets.QApplication([])
-    view = RobotOpenGLWidget(package_root / 'urdf' / 'robot_v2_2.urdf')
+    view = RobotOpenGLWidget(package_root / 'urdf' / 'robot_v3_1.urdf')
     view.resize(900, 700)
     view.set_joint_states(
         {'Joint_Left_Elbow': 20.0, 'Joint_Right_Elbow': -20.0},

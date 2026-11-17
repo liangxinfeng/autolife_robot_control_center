@@ -1,4 +1,0 @@
-<library path="settled_mppi">
-  <class name="control_center_navigation::SettledMPPIController" type="control_center_navigation::SettledMPPIController" base_class_type="nav2_core::Controller"><description>MPPI terminal braking and settling.</description></class>
-  <class name="control_center_navigation::SettledGoalChecker" type="control_center_navigation::SettledGoalChecker" base_class_type="nav2_core::GoalChecker"><description>Fresh map pose and stopped-state arrival certificate.</description></class>
-</library>

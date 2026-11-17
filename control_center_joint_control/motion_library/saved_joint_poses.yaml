@@ -1,213 +1,57 @@
 version: 1
 poses:
-  bag:
-    saved_at: '2026-08-31T10:23:58+08:00'
+  Pick_towel_S3:
+    saved_at: '2026-10-30T10:05:22+08:00'
     joints_deg:
-      Joint_Neck_Roll: -0.5792088796431968
-      Joint_Neck_Pitch: -34.41375022634788
-      Joint_Neck_Yaw: -2.2403362325821763
-      Joint_Left_Shoulder_Inner: -0.16479257618705395
-      Joint_Left_Shoulder_Outer: -4.822929396408824
-      Joint_Left_UpperArm: 7.305804210960953
-      Joint_Left_Elbow: 111.7403528265922
-      Joint_Left_Forearm: -4.338602362610361
-      Joint_Left_Wrist_Upper: 3.5298956249953317
-      Joint_Left_Wrist_Lower: 0.84149214589672
-      Joint_Right_Shoulder_Inner: 0.29662663713677856
-      Joint_Right_Shoulder_Outer: 4.735040022442341
-      Joint_Right_UpperArm: -7.195942493502849
-      Joint_Right_Elbow: -110.15834409519623
-      Joint_Right_Forearm: 1.103775412150243
-      Joint_Right_Wrist_Upper: -1.7594835777840507
-      Joint_Right_Wrist_Lower: 0.6884935739154981
-      Joint_Ankle: 50.2652204529313
-      Joint_Knee: 96.93773001678719
-      Joint_Waist_Pitch: 47.004641698411675
-      Joint_Waist_Yaw: -0.0011803493026859503
+      Joint_Neck_Roll: 0.010928303003311157
+      Joint_Neck_Pitch: 25.015268325805664
+      Joint_Neck_Yaw: -1.9999340772628784
+      Joint_Left_Shoulder_Inner: 0.19775390625
+      Joint_Left_Shoulder_Outer: 3.90020751953125
+      Joint_Left_UpperArm: 2.8014705181121826
+      Joint_Left_Elbow: -98.60093688964844
+      Joint_Left_Forearm: 1.890650987625122
+      Joint_Left_Wrist_Upper: -13.999428749084473
+      Joint_Left_Wrist_Lower: -11.704376220703125
+      Joint_Right_Shoulder_Inner: 2.5983123779296875
+      Joint_Right_Shoulder_Outer: 3.49920654296875
+      Joint_Right_UpperArm: 3.3947134017944336
+      Joint_Right_Elbow: -100.2927474975586
+      Joint_Right_Forearm: 6.5898756980896
+      Joint_Right_Wrist_Upper: 8.994102478027344
+      Joint_Right_Wrist_Lower: -12.207077980041504
+      Joint_Ankle: 0.00439453125
+      Joint_Knee: 1.71661376953125e-05
+      Joint_Waist_Pitch: -0.00013619415403809398
+      Joint_Waist_Yaw: -0.0009079609881155193
+      Joint_Left_Gripper: 10.0
+      Joint_Right_Gripper: 12.198421478271484
+  复位:
+    saved_at: '2026-11-11T11:59:01+08:00'
+    joints_deg:
+      Joint_Neck_Roll: 0.010928303003311157
+      Joint_Neck_Pitch: 25.015268325805664
+      Joint_Neck_Yaw: -1.9999340772628784
+      Joint_Left_Shoulder_Inner: 35.00299072265625
+      Joint_Left_Shoulder_Outer: 4.09246826171875
+      Joint_Left_UpperArm: 2.8014705181121826
+      Joint_Left_Elbow: -120.00194549560547
+      Joint_Left_Forearm: 1.890650987625122
+      Joint_Left_Wrist_Upper: -13.999428749084473
+      Joint_Left_Wrist_Lower: -11.704376220703125
+      Joint_Right_Shoulder_Inner: 34.99748229980469
+      Joint_Right_Shoulder_Outer: -9.8988037109375
+      Joint_Right_UpperArm: 3.3947134017944336
+      Joint_Right_Elbow: -120.00194549560547
+      Joint_Right_Forearm: 6.5898756980896
+      Joint_Right_Wrist_Upper: 9.015958786010742
+      Joint_Right_Wrist_Lower: -12.207077980041504
+      Joint_Ankle: 0.0
+      Joint_Knee: 0.0
+      Joint_Waist_Pitch: -0.0010895532323047519
+      Joint_Waist_Yaw: -0.0008171648951247334
       Joint_Left_Gripper: 10.0
       Joint_Right_Gripper: 10.0
-  hold the basket:
-    saved_at: '2026-08-10T11:05:10+08:00'
-    joints_deg:
-      Joint_Neck_Roll: -0.09835622484507116
-      Joint_Neck_Pitch: -31.20078021474212
-      Joint_Neck_Yaw: 0.20764091911737245
-      Joint_Left_Shoulder_Inner: -21.785578571933236
-      Joint_Left_Shoulder_Outer: -0.34057132412002006
-      Joint_Left_UpperArm: 10.909268543585231
-      Joint_Left_Elbow: 132.54816211314872
-      Joint_Left_Forearm: -2.152908477164335
-      Joint_Left_Wrist_Upper: -5.93415889898596
-      Joint_Left_Wrist_Lower: 73.75624016437645
-      Joint_Right_Shoulder_Inner: 19.698205940229975
-      Joint_Right_Shoulder_Outer: 0.09887554571229344
-      Joint_Right_UpperArm: -10.88729620009361
-      Joint_Right_Elbow: -134.61356240136027
-      Joint_Right_Forearm: -1.868768272056352
-      Joint_Right_Wrist_Upper: 8.731847072356873
-      Joint_Right_Wrist_Lower: 67.50515565200081
-      Joint_Ankle: -0.001089553202479339
-      Joint_Knee: -0.0007717668517561984
-      Joint_Waist_Pitch: 2.3988329674586777
-      Joint_Waist_Yaw: -0.04417230275051653
-      Joint_Left_Gripper: 335.17615733314904
-      Joint_Right_Gripper: 332.22547058779713
-  laundry_down:
-    saved_at: '2026-09-21T10:09:52+08:00'
-    joints_deg:
-      Joint_Neck_Roll: -0.6229227573521173
-      Joint_Neck_Pitch: -34.39189328749342
-      Joint_Neck_Yaw: -2.0873376606009546
-      Joint_Left_Shoulder_Inner: -0.20873726317029548
-      Joint_Left_Shoulder_Outer: -4.800957052917203
-      Joint_Left_UpperArm: 7.305804210960953
-      Joint_Left_Elbow: 111.69640813960896
-      Joint_Left_Forearm: -4.294888484901441
-      Joint_Left_Wrist_Upper: 3.508038686140871
-      Joint_Left_Wrist_Lower: 0.7977782681877994
-      Joint_Right_Shoulder_Inner: 0.29662663713677856
-      Joint_Right_Shoulder_Outer: 4.71306767895072
-      Joint_Right_UpperArm: -7.195942493502849
-      Joint_Right_Elbow: -110.20228878217947
-      Joint_Right_Forearm: 1.1256323510047033
-      Joint_Right_Wrist_Upper: -1.8031974554929713
-      Joint_Right_Wrist_Lower: 0.6884935739154981
-      Joint_Ankle: 75.99996771694215
-      Joint_Knee: 155.0
-      Joint_Waist_Pitch: 81.00001815922005
-      Joint_Waist_Yaw: 0.024378752905475205
-      Joint_Left_Gripper: 180.8443120818049
-      Joint_Right_Gripper: 180.90988289836815
-  laundry_up:
-    saved_at: '2026-10-10T15:22:11+08:00'
-    joints_deg:
-      Joint_Neck_Roll: 0.01092846942723013
-      Joint_Neck_Pitch: -11.813675450835872
-      Joint_Neck_Yaw: -2.021766844037574
-      Joint_Left_Shoulder_Inner: 0.010986171745810382
-      Joint_Left_Shoulder_Outer: -0.010986171745810382
-      Joint_Left_UpperArm: -0.010986171745810382
-      Joint_Left_Elbow: 109.98256534726326
-      Joint_Left_Forearm: -0.01092846942723013
-      Joint_Left_Wrist_Upper: 12.010387900525911
-      Joint_Left_Wrist_Lower: -0.01092846942723013
-      Joint_Right_Shoulder_Inner: 0.010986171745810382
-      Joint_Right_Shoulder_Outer: -0.010986171745810382
-      Joint_Right_UpperArm: 0.010986171745810382
-      Joint_Right_Elbow: -110.00453769075487
-      Joint_Right_Forearm: -0.01092846942723013
-      Joint_Right_Wrist_Upper: -11.966674022817093
-      Joint_Right_Wrist_Lower: -0.01092846942723013
-      Joint_Ankle: -0.001044155152376033
-      Joint_Knee: -0.00018159220041322313
-      Joint_Waist_Pitch: -0.002088310304752066
-      Joint_Waist_Yaw: -0.006491921164772727
-      Joint_Left_Gripper: 177.50020043707218
-      Joint_Right_Gripper: 180.29788861044327
-  pick up towel:
-    saved_at: '2026-08-06T16:19:54+08:00'
-    joints_deg:
-      Joint_Neck_Roll: 0.01092846942723013
-      Joint_Neck_Pitch: -39.98726963423525
-      Joint_Neck_Yaw: -1.9999099051831135
-      Joint_Left_Shoulder_Inner: 0.010986171745810382
-      Joint_Left_Shoulder_Outer: -0.010986171745810382
-      Joint_Left_UpperArm: -0.010986171745810382
-      Joint_Left_Elbow: 110.00453769075487
-      Joint_Left_Forearm: -0.01092846942723013
-      Joint_Left_Wrist_Upper: 12.010387900525911
-      Joint_Left_Wrist_Lower: 0.01092846942723013
-      Joint_Right_Shoulder_Inner: -0.010986171745810382
-      Joint_Right_Shoulder_Outer: -0.010986171745810382
-      Joint_Right_UpperArm: 0.010986171745810382
-      Joint_Right_Elbow: -110.00453769075487
-      Joint_Right_Forearm: 0.01092846942723013
-      Joint_Right_Wrist_Upper: -12.010387900526013
-      Joint_Right_Wrist_Lower: 0.01092846942723013
-      Joint_Ankle: 0.0028600771565082646
-      Joint_Knee: -0.003314057657541322
-      Joint_Waist_Pitch: -0.0004993785511363636
-      Joint_Waist_Yaw: -0.0008625629519628099
-      Joint_Left_Gripper: 178.44004880781415
-      Joint_Right_Gripper: 178.61490431864985
-  pick up water:
-    saved_at: '2026-08-10T16:55:03+08:00'
-    joints_deg:
-      Joint_Neck_Roll: 0.01092846942723013
-      Joint_Neck_Pitch: -29.71450837263882
-      Joint_Neck_Yaw: -5.038024405953089
-      Joint_Left_Shoulder_Inner: -0.27465429364515775
-      Joint_Left_Shoulder_Outer: -4.71306767895072
-      Joint_Left_UpperArm: 6.88832968462026
-      Joint_Left_Elbow: 110.33412284312898
-      Joint_Left_Forearm: -2.0873376606009546
-      Joint_Left_Wrist_Upper: 4.885025833971867
-      Joint_Left_Wrist_Lower: -0.16392704140845193
-      Joint_Right_Shoulder_Inner: 0.3185989806283993
-      Joint_Right_Shoulder_Outer: 4.735040022442341
-      Joint_Right_UpperArm: -6.88832968462026
-      Joint_Right_Elbow: -110.3341228431291
-      Joint_Right_Forearm: 2.1091945994554147
-      Joint_Right_Wrist_Upper: -4.906882772826328
-      Joint_Right_Wrist_Lower: -0.16392704140845193
-      Joint_Ankle: 30.12846134910899
-      Joint_Knee: 58.47668356146694
-      Joint_Waist_Pitch: 28.72970202737603
-      Joint_Waist_Yaw: -0.00045398050103305786
-      Joint_Left_Gripper: 21.57279864935228
-      Joint_Right_Gripper: 21.37608619966224
-  picked the takeout (already):
-    saved_at: '2026-08-11T10:47:04+08:00'
-    joints_deg:
-      Joint_Neck_Roll: 0.9070629624601007
-      Joint_Neck_Pitch: -27.638099181465098
-      Joint_Neck_Yaw: -2.2184792937277162
-      Joint_Left_Shoulder_Inner: 6.8224126541454995
-      Joint_Left_Shoulder_Outer: -10.733489795652368
-      Joint_Left_UpperArm: 3.8341739392862966
-      Joint_Left_Elbow: 131.60335134300945
-      Joint_Left_Forearm: -6.546153186910847
-      Joint_Left_Wrist_Upper: 3.6828941969765534
-      Joint_Left_Wrist_Lower: 29.168084901277417
-      Joint_Right_Shoulder_Inner: -2.405971612331456
-      Joint_Right_Shoulder_Outer: 3.2409206650127396
-      Joint_Right_UpperArm: -8.426393729033103
-      Joint_Right_Elbow: -107.69744162413572
-      Joint_Right_Forearm: -4.2730315460469805
-      Joint_Right_Wrist_Upper: -6.021586654403801
-      Joint_Right_Wrist_Lower: -3.7921788912488545
-      Joint_Ankle: -0.0011349512525826446
-      Joint_Knee: -0.001089553202479339
-      Joint_Waist_Pitch: 0.24841813016528927
-      Joint_Waist_Yaw: 0.513088762267562
-      Joint_Left_Gripper: 353.3829873989146
-      Joint_Right_Gripper: 10.0
-  vr复位:
-    saved_at: '2026-10-14T17:51:29+08:00'
-    joints_deg:
-      Joint_Neck_Roll: -0.03278540828169039
-      Joint_Neck_Pitch: -29.998648577746806
-      Joint_Neck_Yaw: -1.9999099051831135
-      Joint_Left_Shoulder_Inner: 0.1428202326954332
-      Joint_Left_Shoulder_Outer: 0.4064883545947806
-      Joint_Left_UpperArm: -0.05493085872905191
-      Joint_Left_Elbow: 140.2165099917212
-      Joint_Left_Forearm: 0.20764091911737245
-      Joint_Left_Wrist_Upper: -4.972453589389708
-      Joint_Left_Wrist_Lower: -0.09835622484507116
-      Joint_Right_Shoulder_Inner: -0.27465429364515775
-      Joint_Right_Shoulder_Outer: -0.07690320222067268
-      Joint_Right_UpperArm: -0.20873726317029548
-      Joint_Right_Elbow: -140.23848233521284
-      Joint_Right_Forearm: -0.09835622484507116
-      Joint_Right_Wrist_Upper: 0.01092846942723013
-      Joint_Right_Wrist_Lower: -0.0764992859906109
-      Joint_Ankle: -0.02555910220816116
-      Joint_Knee: -0.07654111247417356
-      Joint_Waist_Pitch: -0.025604500258264464
-      Joint_Waist_Yaw: -0.01248446377840909
-      Joint_Left_Gripper: 10.862898610666747
-      Joint_Right_Gripper: 11.015897182648075
   打招呼:
     saved_at: '2026-07-30T11:28:23+08:00'
     joints_deg:
@@ -215,9 +59,9 @@ poses:
       Joint_Neck_Pitch: 0.01092846942723013
       Joint_Neck_Yaw: 0.01092846942723013
       Joint_Left_Shoulder_Inner: -69.48753629222257
-      Joint_Left_Shoulder_Outer: -12.996641175288492
+      Joint_Left_Shoulder_Outer: -9.5
       Joint_Left_UpperArm: 2.3180822383650748
-      Joint_Left_Elbow: 111.69640813960896
+      Joint_Left_Elbow: -1.5
       Joint_Left_Forearm: -4.404173179173742
       Joint_Left_Wrist_Upper: -0.01092846942723013
       Joint_Left_Wrist_Lower: -0.01092846942723013
@@ -234,32 +78,6 @@ poses:
       Joint_Waist_Yaw: 0.0
       Joint_Left_Gripper: 182.5928671901617
       Joint_Right_Gripper: 181.74044657483776
-  爱心:
-    saved_at: '2026-07-30T18:49:33+08:00'
-    joints_deg:
-      Joint_Neck_Roll: 0.01092846942723013
-      Joint_Neck_Pitch: -0.01092846942723013
-      Joint_Neck_Yaw: -0.01092846942723013
-      Joint_Left_Shoulder_Inner: 14.996124433025065
-      Joint_Left_Shoulder_Outer: -145.0064808728926
-      Joint_Left_UpperArm: -94.997427085984
-      Joint_Left_Elbow: 88.99897731277397
-      Joint_Left_Forearm: -0.01092846942723013
-      Joint_Left_Wrist_Upper: -0.01092846942723013
-      Joint_Left_Wrist_Lower: -64.99160768373778
-      Joint_Right_Shoulder_Inner: -14.996124433025166
-      Joint_Right_Shoulder_Outer: 145.0064808728926
-      Joint_Right_UpperArm: 94.997427085984
-      Joint_Right_Elbow: -88.99897731277397
-      Joint_Right_Forearm: 0.01092846942723013
-      Joint_Right_Wrist_Upper: 0.01092846942723013
-      Joint_Right_Wrist_Lower: -64.99160768373778
-      Joint_Ankle: -0.010214561273243801
-      Joint_Knee: -0.002950873256714876
-      Joint_Waist_Pitch: -0.01130411447572314
-      Joint_Waist_Yaw: -0.0008625629519628099
-      Joint_Left_Gripper: 182.22129922963586
-      Joint_Right_Gripper: 181.41259249202085
   鞠躬:
     saved_at: '2026-07-30T11:33:28+08:00'
     joints_deg:
@@ -269,7 +87,7 @@ poses:
       Joint_Left_Shoulder_Inner: -33.60669937042032
       Joint_Left_Shoulder_Outer: 2.296109894873454
       Joint_Left_UpperArm: 69.11400645286523
-      Joint_Left_Elbow: 107.49969053271113
+      Joint_Left_Elbow: -1.5
       Joint_Left_Forearm: -10.414831364150313
       Joint_Left_Wrist_Upper: -0.4917811242253558
       Joint_Left_Wrist_Lower: -4.098176035211298
@@ -295,7 +113,7 @@ poses:
       Joint_Left_Shoulder_Inner: 20.005818749112564
       Joint_Left_Shoulder_Outer: -0.010986171745810382
       Joint_Left_UpperArm: 0.010986171745810382
-      Joint_Left_Elbow: 109.98256534726326
+      Joint_Left_Elbow: -1.5
       Joint_Left_Forearm: -0.01092846942723013
       Joint_Left_Wrist_Upper: 0.01092846942723013
       Joint_Left_Wrist_Lower: -0.01092846942723013

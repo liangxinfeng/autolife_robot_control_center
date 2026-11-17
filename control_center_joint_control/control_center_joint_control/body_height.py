@@ -1,9 +1,12 @@
 """Verified coordinated waist/leg profile for vertical body-height changes."""
 
-from .joint_definitions import clamp_joint
+import math
+
+from .joint_definitions import JOINT_LIMITS
 
 
-# These values mirror the vendor's ``move_z.py`` profile on the S2 robot.
+# Motor-coordinate ratios shared with the installed 345 V5 body_height.py.
+# S3 model axes: ankle +Y, knee -Y, waist pitch +Y.
 # ``lowering_m`` is a positive distance down from the straight 0-degree pose.
 MAX_BODY_LOWERING_M = 0.56
 MAX_REVERSE_BODY_LOWERING_M = 0.53
@@ -18,10 +21,18 @@ BODY_HEIGHT_JOINTS = tuple(BODY_HEIGHT_JOINT_TARGETS_DEG)
 def body_height_targets(lowering_m, *, allow_reverse=False):
     """Return the coordinated joint targets for a requested lowering distance."""
     minimum = -MAX_REVERSE_BODY_LOWERING_M if allow_reverse else 0.0
-    lowering_m = min(MAX_BODY_LOWERING_M, max(minimum, float(lowering_m)))
+    lowering_m = float(lowering_m)
+    if not math.isfinite(lowering_m):
+        raise ValueError('身体高度目标必须为有限数值')
+    lowering_m = min(MAX_BODY_LOWERING_M, max(minimum, lowering_m))
     scale = lowering_m / MAX_BODY_LOWERING_M
+    # Clip shared progress, not individual joints: retain ankle/knee/waist
+    # geometry at the S3 knee limit (slightly below the nominal 155 degrees).
+    low = max(JOINT_LIMITS[n][0] / v for n, v in BODY_HEIGHT_JOINT_TARGETS_DEG.items())
+    high = min(JOINT_LIMITS[n][1] / v for n, v in BODY_HEIGHT_JOINT_TARGETS_DEG.items())
+    scale = min(high, max(low, scale))
     return {
-        name: clamp_joint(name, maximum * scale)
+        name: maximum * scale
         for name, maximum in BODY_HEIGHT_JOINT_TARGETS_DEG.items()
     }
 
@@ -36,6 +47,8 @@ def estimate_body_lowering(joints_deg, *, signed=False):
         name: float(joints_deg[name])
         for name in BODY_HEIGHT_JOINTS
     }
+    if not all(math.isfinite(v) for v in values.values()):
+        raise ValueError('腰腿反馈必须为有限数值')
     denominator = sum(
         maximum * maximum
         for maximum in BODY_HEIGHT_JOINT_TARGETS_DEG.values()

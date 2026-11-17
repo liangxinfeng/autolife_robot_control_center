@@ -1,3 +1,7 @@
+> 345 于 2026-10-19 调整布局：`control_center_navigation` 和当前使用的 `control_center_slam`
+> 位于 `ros2_ws/src/` 顶层，需与控制中心一起复制、构建；旧 `multi_lidar_slam` 已删除，历史地图位于 `control_center_navigation/maps/`。
+> ROS 包名、控制中心与 VR 的启动入口保持不变。当前目录结构以 README.md 为准。
+
 # Autolife Robot Control Center 跨机器人迁移指南（AI 阅读版）
 
 适用于同型号 AutoLife S2（`robot_v2_2`）之间迁移，例如从 306 迁移到 283/300。
@@ -133,7 +137,7 @@ Python 环境版本或安装位置不同，需要修改
 
 ```text
 text_voice_control   语音播报与语音命令
-multi_lidar_slam     雷达融合配置及默认导航地图 yundie_2f
+control_center_navigation  导航配置及统一地图目录（含 yundie_2f）
 ```
 
 迁移时必须完整复制整个 `autolife_robot_control_center/`，不要只复制五个界面子包。
@@ -157,10 +161,10 @@ rosdep install --from-paths \
   --ignore-src -r -y
 
 # 用 tar/zip 中转后必须恢复 launch 所调用 Python 节点的可执行权限。
-chmod 755 src/autolife_robot_control_center/control_center_navigation/scripts/*.py
+chmod 755 src/control_center_navigation/scripts/*.py
 
 colcon build --packages-select \
-  text_voice_control multi_lidar_slam \
+  text_voice_control \
   control_center_navigation control_center_slam \
   control_center_joint_control control_center_service_manager \
   control_center_shell
@@ -205,7 +209,7 @@ ros2 launch control_center_shell control_center.launch.py \
 ```bash
 python3 -c 'from OpenGL import GL; from PyQt5 import QtOpenGL; print("OpenGL OK")'
 ros2 pkg prefix text_voice_control
-ros2 pkg prefix multi_lidar_slam
+ros2 pkg prefix control_center_navigation
 ros2 topic hz /topic_gv_front_lidar_<SUFFIX>
 ros2 topic hz /topic_gv_rear_lidar_<SUFFIX>
 ros2 topic hz /topic_gv_wheel_odom_<SUFFIX>

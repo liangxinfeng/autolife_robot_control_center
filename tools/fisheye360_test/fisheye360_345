@@ -1,0 +1,56 @@
+#!/bin/bash
+set -eu
+PORT=8452
+APP_DIR="$(cd -- "$(dirname -- "$0")" && pwd -P)"
+PY="$HOME/ros2_ws/venvs/openarmx_v4_placo/bin/python"
+STATE="$HOME/.local/state/fisheye360-345"
+LOG="$STATE/service.log"
+PIDFILE="$STATE/service.pid"
+URL="http://127.0.0.1:$PORT"
+mkdir -p "$STATE"
+
+listening() { ss -Htlpn "( sport = :$PORT )"; }
+service_pid() {
+  local pid cmd
+  read -r pid < "$PIDFILE" || return 1
+  [[ "$pid" =~ ^[1-9][0-9]*$ && -r /proc/$pid/cmdline ]] || return 1
+  cmd="$(tr '\000' ' ' < "/proc/$pid/cmdline")"
+  [[ "$cmd" == *" $APP_DIR/fisheye360_service.py --host 0.0.0.0 --port $PORT " ]] || return 1
+  [[ "$(listening)" == *"pid=$pid,"* ]] || return 1
+  printf '%s\n' "$pid"
+}
+start_service() (
+  flock -x 9
+  if service_pid >/dev/null 2>&1; then return 0; fi
+  if [[ -n "$(listening)" ]]; then
+    printf '%s\n' "端口 $PORT 已被其他服务使用。" >&2
+    return 1
+  fi
+  nohup "$PY" "$APP_DIR/fisheye360_service.py" --host 0.0.0.0 --port "$PORT" \
+    >>"$LOG" 2>&1 </dev/null 9>&- &
+  printf '%s\n' "$!" > "$PIDFILE"
+  for _ in {1..20}; do
+    if service_pid >/dev/null 2>&1; then return 0; fi
+    sleep .25
+  done
+  printf '%s\n' "无法启动鱼眼测试服务：$LOG" >&2
+  return 1
+) 9>"$STATE/service.lock"
+open_browser() {
+  local browser= candidate
+  for candidate in google-chrome google-chrome-stable chromium-browser chromium; do
+    if command -v "$candidate" >/dev/null 2>&1; then browser="$candidate"; break; fi
+  done
+  if [[ -z "$browser" ]]; then printf '%s\n' "请用浏览器打开 $URL"; return 0; fi
+  local args=(--new-window --start-fullscreen --no-first-run --no-default-browser-check)
+  if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then args+=(--ozone-platform=wayland); fi
+  nohup "$browser" "${args[@]}" "$URL" >>"$STATE/browser.log" 2>&1 </dev/null &
+}
+case "${1:-start}" in
+  start) start_service; open_browser ;;
+  --start-service) start_service ;;
+  open) open_browser ;;
+  --status) if p="$(service_pid 2>/dev/null)"; then echo "8452 正在运行 PID=$p"; else echo "8452 未运行"; fi ;;
+  --stop) if p="$(service_pid 2>/dev/null)"; then kill -TERM "$p"; fi ;;
+  *) printf '%s\n' "usage: $0 [start|open|--start-service|--status|--stop]" >&2; exit 2 ;;
+esac

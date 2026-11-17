@@ -12,7 +12,7 @@ class TestResolveChassisIdentity:
 
     def test_topic_suffix_only(self):
         assert resolve_chassis_identity(
-            topic_suffix='0_307', environ={}) == ('0', '307')
+            topic_suffix='0_345', environ={}) == ('0', '307')
 
     def test_topic_hint_extraction(self):
         assert resolve_chassis_identity(
@@ -20,12 +20,12 @@ class TestResolveChassisIdentity:
 
     def test_env_wins_over_suffix(self):
         assert resolve_chassis_identity(
-            topic_suffix='0_307',
+            topic_suffix='0_345',
             environ={'ROS_DOMAIN_ID': '5', 'ROBOT_ID': '306'}) == ('5', '306')
 
     def test_partial_env_filled_by_suffix(self):
         assert resolve_chassis_identity(
-            topic_suffix='0_307', environ={'ROBOT_ID': '306'}) == ('0', '306')
+            topic_suffix='0_345', environ={'ROBOT_ID': '306'}) == ('0', '306')
 
     def test_unresolved_returns_empty_strings(self):
         assert resolve_chassis_identity(environ={}) == ('', '')

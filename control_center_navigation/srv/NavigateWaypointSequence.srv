@@ -1,6 +1,0 @@
-string[] names
-float64[] dwell_times
-bool loop
----
-bool success
-string message

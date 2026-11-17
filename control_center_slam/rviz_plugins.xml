@@ -1,8 +1,0 @@
-<library path="map_save_panel">
-  <class
-    name="control_center_slam/MapSavePanel"
-    type="control_center_slam::MapSavePanel"
-    base_class_type="rviz_common::Panel">
-    <description>Finish, optimize, name, and save a Cartographer map.</description>
-  </class>
-</library>

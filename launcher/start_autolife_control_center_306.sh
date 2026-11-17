@@ -36,7 +36,7 @@ source /opt/ros/jazzy/setup.bash
 source "$WORKSPACE/install/setup.bash"
 
 export ROS_DOMAIN_ID=0
-export ROBOT_ID=300
+export ROBOT_ID=345
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 export CYCLONEDDS_URI='<CycloneDDS><Domain><General><Interfaces><NetworkInterface name="lo"/></Interfaces></General><Discovery><ParticipantIndex>auto</ParticipantIndex><MaxAutoParticipantIndex>200</MaxAutoParticipantIndex></Discovery></Domain></CycloneDDS>'
 
@@ -47,7 +47,7 @@ fi
 
 if [ "${1:-}" = "--check" ]; then
   printf 'OK: workspace=%q package=%s robot_id=%s topic_suffix=%s\n' \
-    "$WORKSPACE" "$(ros2 pkg prefix control_center_shell)" "$ROBOT_ID" "0_300"
+    "$WORKSPACE" "$(ros2 pkg prefix control_center_shell)" "$ROBOT_ID" "0_345"
   exit 0
 fi
 
@@ -60,8 +60,8 @@ mkdir -p "$STATE_DIR"
 printf '\n[%s] launching control center 300\n' "$(date '+%F %T')" >> "$LOG_FILE"
 
 ros2 launch control_center_shell control_center.launch.py \
-  robot_id:=300 \
-  topic_suffix:=0_300 \
+  robot_id:=345 \
+  topic_suffix:=0_345 \
   start_navigation:=true >> "$LOG_FILE" 2>&1
 status=$?
 

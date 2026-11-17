@@ -16,11 +16,13 @@ def test_straight_and_lowest_endpoints():
         'Joint_Knee': 0.0,
         'Joint_Waist_Pitch': 0.0,
     }
-    assert body_height_targets(MAX_BODY_LOWERING_M) == {
-        'Joint_Ankle': 76.0,
-        'Joint_Knee': 155.0,
-        'Joint_Waist_Pitch': 81.0,
-    }
+    from control_center_joint_control.joint_definitions import JOINT_LIMITS
+    scale=min(1., JOINT_LIMITS['Joint_Knee'][1]/155.)
+    assert body_height_targets(MAX_BODY_LOWERING_M) == pytest.approx({
+        'Joint_Ankle': 76.0*scale,
+        'Joint_Knee': 155.0*scale,
+        'Joint_Waist_Pitch': 81.0*scale,
+    })
 
 
 def test_profile_round_trip_and_vertical_upper_body():

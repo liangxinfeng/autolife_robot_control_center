@@ -31,6 +31,12 @@ from control_center_chassis_guard.velocity_ramp import (  # noqa: E402
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 CONTROL_CENTER_ROOT = PACKAGE_ROOT.parent
+NAVIGATION_ROOT = CONTROL_CENTER_ROOT.parent / 'control_center_navigation'
+if not (NAVIGATION_ROOT / 'package.xml').is_file():
+    NAVIGATION_ROOT = CONTROL_CENTER_ROOT / 'control_center_navigation'
+SLAM_ROOT = CONTROL_CENTER_ROOT.parent / 'control_center_slam'
+if not (SLAM_ROOT / 'package.xml').is_file():
+    SLAM_ROOT = CONTROL_CENTER_ROOT / 'control_center_slam'
 RELEASE_DELAY_SEC = 0.03
 TICK = 0.02
 LINEAR_LIMIT = 0.5
@@ -120,14 +126,14 @@ def ros_context():
 @pytest.fixture(scope='module')
 def slam_module():
     return _load_or_skip(
-        CONTROL_CENTER_ROOT / 'control_center_slam' / 'scripts' / 'slam_ui_node.py',
+        SLAM_ROOT / 'scripts' / 'slam_ui_node.py',
         'zcode_keydebounce_slam_ui')
 
 
 @pytest.fixture(scope='module')
 def nav_module():
     return _load_or_skip(
-        CONTROL_CENTER_ROOT / 'control_center_navigation' / 'scripts'
+        NAVIGATION_ROOT / 'scripts'
         / 'navigation_ui_node.py',
         'zcode_keydebounce_nav_ui')
 
@@ -152,7 +158,7 @@ def _send(widget, pressed, key=KEY_W):
 
 
 def _make_slam_page(slam_module, clock):
-    page = slam_module.SlamPage(topic_suffix='0_306')
+    page = slam_module.SlamPage(topic_suffix='0_345')
     page.velocity_timer.stop()
     recorder = RecordingPublisher()
     lease = RecordingLease()

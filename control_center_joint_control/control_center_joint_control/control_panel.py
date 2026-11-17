@@ -2,6 +2,7 @@
 """Compact PyQt operator panel for live joint monitoring and guarded control."""
 
 import json
+import math
 from pathlib import Path
 import signal
 import sys
@@ -32,7 +33,7 @@ from .body_height import (
     body_height_targets,
     estimate_body_lowering,
 )
-from .joint_definitions import ALL_JOINTS, GROUPS, GROUP_ORDER, JOINT_LABELS, JOINT_TO_GROUP
+from .joint_definitions import ALL_JOINTS, GROUPS, GROUP_ORDER, JOINT_LABELS, JOINT_TO_GROUP, GRIPPER_JOINTS
 from .motion_storage import (
     ACTION_FILE_NAME,
     POSE_FILE_NAME,
@@ -70,13 +71,17 @@ class JointRow(QtWidgets.QFrame):
     def __init__(self, name, label, lower, upper, parent=None):
         super().__init__(parent)
         self.name = name
+        self.unit = "" if name in GRIPPER_JOINTS else "°"
         self.label_text = label
         self.lower = lower
         self.upper = upper
         self.current = None
         self._changing = False
         self.setObjectName('jointRow')
-        self.setToolTip(f'{name}\n允许范围：{lower:.1f}° ～ {upper:.1f}°')
+        self.setToolTip(f'{name}\n允许范围：{lower:.1f}{self.unit} ～ {upper:.1f}{self.unit}')
+
+        if name in GRIPPER_JOINTS:
+            self.setToolTip('345 DM Type1：10=张开端，360=闭合端；这是原厂位置量，不是毫米开口。\n原厂内部电机范围7–107°，力矩上限2.0。')
 
         layout = QtWidgets.QGridLayout(self)
         layout.setContentsMargins(10, 7, 10, 7)
@@ -85,7 +90,7 @@ class JointRow(QtWidgets.QFrame):
         self.name_label = QtWidgets.QLabel(label)
         self.name_label.setMinimumWidth(104)
         self.name_label.setToolTip(name)
-        self.current_label = QtWidgets.QLabel('--.-°')
+        self.current_label = QtWidgets.QLabel('--.-' + self.unit)
         self.current_label.setObjectName('currentValue')
         self.current_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.current_label.setMinimumWidth(65)
@@ -100,12 +105,12 @@ class JointRow(QtWidgets.QFrame):
         self.target_box.setDecimals(1)
         self.target_box.setSingleStep(0.5)
         self.target_box.setRange(lower, upper)
-        self.target_box.setSuffix('°')
+        self.target_box.setSuffix(self.unit)
         self.target_box.setKeyboardTracking(False)
         self.target_box.setMinimumWidth(92)
         self.target_box.setEnabled(False)
 
-        self.delta_label = QtWidgets.QLabel('Δ --.-°')
+        self.delta_label = QtWidgets.QLabel('Δ --.-' + self.unit)
         self.delta_label.setObjectName('deltaValue')
         self.delta_label.setMinimumWidth(72)
         self.delta_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
@@ -163,9 +168,9 @@ class JointRow(QtWidgets.QFrame):
         self.slider.setEnabled(enabled)
         self.target_box.setEnabled(enabled)
         if self.current is None:
-            self.current_label.setText('--.-°')
+            self.current_label.setText('--.-' + self.unit)
         else:
-            self.current_label.setText(f'{self.current:.1f}°')
+            self.current_label.setText(f'{self.current:.1f}{self.unit}')
         self._update_delta()
 
         lost = bool(state.get('communication_lost', True))
@@ -186,11 +191,11 @@ class JointRow(QtWidgets.QFrame):
 
     def _update_delta(self):
         if self.current is None:
-            self.delta_label.setText('Δ --.-°')
+            self.delta_label.setText('Δ --.-' + self.unit)
             self.delta_label.setProperty('changed', False)
         else:
             delta = self.target() - self.current
-            self.delta_label.setText(f'Δ {delta:+.1f}°')
+            self.delta_label.setText(f'Δ {delta:+.1f}{self.unit}')
             self.delta_label.setProperty('changed', abs(delta) >= 0.15)
         self.delta_label.style().unpolish(self.delta_label)
         self.delta_label.style().polish(self.delta_label)
@@ -210,12 +215,13 @@ class BodyHeightControl(QtWidgets.QFrame):
         self._changing = False
         self._target_lowering_m = 0.0
         self._reverse_squat = False
+        self._feedback_available = False
         self._target_residual_deg = 0.0
         self._current_lowering_m = None
         self._current_residual_deg = 0.0
         self.setObjectName('bodyHeightCard')
         self.setToolTip(
-            '采用厂家 S2 高度联动比例，同步调整踝、膝和腰部俯仰；'
+            '采用与345 V5一致的腰腿联动比例，同步调整踝、膝和腰部俯仰；'
             '腰部旋转保持不动。'
         )
 
@@ -234,7 +240,7 @@ class BodyHeightControl(QtWidgets.QFrame):
         self.direction_box = QtWidgets.QComboBox()
         self.direction_box.addItems(['正向下蹲', '反向下蹲'])
         self.direction_box.setEnabled(False)
-        self.direction_box.setToolTip('反向最多53cm；仍需腰腿二次解锁与实时调整确认')
+        self.direction_box.setToolTip('先回到直立、目标归零后切换；切换本身不发送运动')
         layout.addWidget(self.direction_box, 0, 5)
 
         high_label = QtWidgets.QLabel('标准高度')
@@ -282,10 +288,12 @@ class BodyHeightControl(QtWidgets.QFrame):
     def _direction_changed(self, index):
         if self._changing:
             return
+        if not self._can_switch_direction():
+            self.set_target(self._target_lowering_m, self._target_residual_deg)
+            return
         self._reverse_squat = index == 1
-        maximum = MAX_REVERSE_BODY_LOWERING_M if self._reverse_squat else MAX_BODY_LOWERING_M
-        value = min(maximum, abs(self._target_lowering_m))
-        self._set_from_user(-value if self._reverse_squat else value)
+        # Selection only. Never turn an existing squat target into its mirror.
+        self.set_target(0.0, 0.0)
 
     def _slider_changed(self, value):
         if self._changing:
@@ -341,6 +349,7 @@ class BodyHeightControl(QtWidgets.QFrame):
         self._refresh_state()
 
     def _refresh_state(self):
+        self.direction_box.setEnabled(self._can_switch_direction())
         target_qualifier = '约' if self._target_residual_deg > 2.0 else ''
         target = f"目标{'反向' if self._reverse_squat else '正向'}{target_qualifier}降低 {abs(self._target_lowering_m) * 100.0:.1f} cm"
         if self._current_lowering_m is None:
@@ -352,11 +361,20 @@ class BodyHeightControl(QtWidgets.QFrame):
             f' · {target}'
         )
 
+    def _can_switch_direction(self):
+        return (self._feedback_available and self._current_lowering_m is not None
+                and abs(self._current_lowering_m) <= .002
+                and self._current_residual_deg <= 1.0
+                and abs(self._target_lowering_m) <= .002)
+
     def set_available(self, available):
+        self._feedback_available = bool(available)
+        self.setToolTip('与345 V5一致的腰腿联动；厘米为联动档位近似值；真机仍需解锁、腰腿二次解锁。'
+                        if available else '等待新鲜且通信正常的腰腿反馈；当前不可调节。')
         self.slider.setEnabled(bool(available))
         self.target_box.setEnabled(bool(available))
         self.straight_button.setEnabled(bool(available))
-        self.direction_box.setEnabled(bool(available))
+        self.direction_box.setEnabled(self._can_switch_direction())
 
 
 class JointControlRosNode(Node):
@@ -551,18 +569,20 @@ class GroupPage(QtWidgets.QWidget):
         lowering_m, residual = estimate_body_lowering(self.targets(), signed=True)
         self.body_height_control.set_target(lowering_m, residual)
 
-    def update_body_height_current(self):
+    def update_body_height_current(self, feedback_valid=True):
         if self.body_height_control is None:
             return
         current = {
             name: self.rows[name].current
             for name in BODY_HEIGHT_JOINTS
         }
-        available = all(value is not None for value in current.values())
+        available = feedback_valid and all(value is not None and math.isfinite(value) for value in current.values())
         self.body_height_control.set_available(available)
         if available:
             lowering_m, residual = estimate_body_lowering(current, signed=True)
             self.body_height_control.set_current(lowering_m, residual)
+        else:
+            self.body_height_control.set_current(None)
 
     def set_filter(self, text):
         for row in self.rows.values():
@@ -903,7 +923,7 @@ class ControlPanel(QtWidgets.QMainWindow):
         urdf_path = (
             Path(get_package_share_directory('control_center_joint_control'))
             / 'urdf'
-            / 'robot_v2_2.urdf'
+            / 'robot_v3_1.urdf'
         ).resolve()
         self.robot_view = RobotViewPanel(urdf_path)
         self.robot_view.joint_selected.connect(self._model_joint_selected)
@@ -987,7 +1007,10 @@ class ControlPanel(QtWidgets.QMainWindow):
             for name, row in page.rows.items():
                 if name in joints:
                     row.update_current(joints[name])
-            page.update_body_height_current()
+            height_feedback_valid = connected and all(
+                not joints.get(n, {}).get('communication_lost', True)
+                for n in BODY_HEIGHT_JOINTS)
+            page.update_body_height_current(height_feedback_valid)
         if connected and not self._initialized_targets:
             # Initialize explicitly from the bridge preview snapshot. This is
             # the same snapshot as the first complete robot feedback and

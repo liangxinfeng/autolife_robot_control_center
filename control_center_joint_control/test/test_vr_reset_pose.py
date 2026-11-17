@@ -27,7 +27,7 @@ def _settings():
 
 
 def test_save_keeps_immutable_original_and_restore(tmp_path):
-    config_path = tmp_path / 'robot_v2_2.json'
+    config_path = tmp_path / 'robot_v3_1.json'
     settings_path = tmp_path / 'settings.toml'
     state_path = tmp_path / 'state.json'
     config_path.write_text(json.dumps(_config()), encoding='utf-8')

@@ -81,7 +81,7 @@ def preview(card):
 
 
 SAVED_VOLUME_PATH = Path('/home/ubuntu/miniconda3/envs/robot_env/lib/python3.12/site-packages/'
-                        'autolife_robot_vision/configs/robot_v2_2.json')
+                        'autolife_robot_vision/configs/robot_v3_1.json')
 def ensure_saved_volume():
     """Apply the control-center setting, including intentional mute."""
     level = json.loads(SAVED_VOLUME_PATH.read_text())['audio']['speaker_volume']

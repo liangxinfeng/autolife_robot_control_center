@@ -10,7 +10,7 @@ from control_center_joint_control.robot_view import (
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
-URDF_PATH = PACKAGE_ROOT / 'urdf' / 'robot_v2_2.urdf'
+URDF_PATH = PACKAGE_ROOT / 'urdf' / 'robot_v3_1.urdf'
 
 
 def test_urdf_model_has_complete_visual_and_joint_tree():

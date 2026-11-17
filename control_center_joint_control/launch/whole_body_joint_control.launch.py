@@ -18,10 +18,10 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     share = Path(get_package_share_directory('control_center_joint_control'))
-    urdf_path = share / 'urdf' / 'robot_v2_2.urdf'
+    urdf_path = share / 'urdf' / 'robot_v3_1.urdf'
     robot_description = urdf_path.read_text().replace(
-        '../meshes/robot_v2_2/',
-        'package://control_center_joint_control/meshes/robot_v2_2/',
+        '../meshes/robot_v3_1/',
+        'package://control_center_joint_control/meshes/robot_v3_1/',
     )
 
     robot_id = LaunchConfiguration('robot_id')
@@ -38,7 +38,7 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'robot_id': ParameterValue(robot_id, value_type=int),
-            # Values such as 0_300 otherwise look numeric to the launch
+            # Values such as 0_345 otherwise look numeric to the launch
             # YAML parameter parser (and can become octal integer 198).
             'topic_suffix': ParameterValue(topic_suffix, value_type=str),
             'require_operator_heartbeat': ParameterValue(
@@ -65,12 +65,12 @@ def generate_launch_description():
             '</Discovery></Domain></CycloneDDS>',
         ),
         DeclareLaunchArgument(
-            'robot_id', default_value='300',
+            'robot_id', default_value='345',
             description='Robot number used by vendor topic suffixes.',
         ),
         DeclareLaunchArgument(
             'topic_suffix', default_value='',
-            description='Explicit vendor suffix, e.g. 0_300. Empty uses ROS_DOMAIN_ID_robot_id.',
+            description='Explicit vendor suffix, e.g. 0_345. Empty uses ROS_DOMAIN_ID_robot_id.',
         ),
         DeclareLaunchArgument(
             'panel', default_value='true',

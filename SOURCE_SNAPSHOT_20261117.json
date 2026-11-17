@@ -1,0 +1,1145 @@
+{
+  "source": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center",
+  "robot": "345",
+  "date": "2026-11-17",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "e8440c72d9824dea4816c9d0652e824a4460b42e3c89be57a0b2ae6c5e1cd0c8",
+      "size": 315,
+      "mode": "0o644"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "e2f1da08fce5e84ce41b3fae8aa85edd9582cb005058b17f8b1de31241d9675d",
+      "size": 267,
+      "mode": "0o644"
+    },
+    {
+      "path": "AI_MIGRATION_GUIDE.md",
+      "sha256": "d1402d2a1b60f851902257b9197a23982e1122356842b12c3dacf2346987407f",
+      "size": 13642,
+      "mode": "0o644"
+    },
+    {
+      "path": "HANDOFF_307.md",
+      "sha256": "f00ede70b758c69863cae5c6e9990016f28777a21c2f485d31f8d27ac7376711",
+      "size": 5840,
+      "mode": "0o644"
+    },
+    {
+      "path": "README.md",
+      "sha256": "955b831eca8048caa94411f3dbfde651216ec35eb524e6c3859e5c81dda12230",
+      "size": 1638,
+      "mode": "0o644"
+    },
+    {
+      "path": "ROBOT300_20261015.md",
+      "sha256": "799c50ca0c25846719b96c6bc4de462a07a7ed48a59f08c960ab249a62ff473d",
+      "size": 1712,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/README.md",
+      "sha256": "c2a741385a7a2f93edfe67760a929cbc23648cbfd3e43ef2a44891e26fa00565",
+      "size": 5706,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/conftest.py",
+      "sha256": "7ad47fb8b81f165d91427d0b281ea17c83fed477c42cab8329fa9cd1abdf0854",
+      "size": 622,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/package.xml",
+      "sha256": "6448f3504e1982746c1bbfdf9da7de77d0053e169b8285ad472b9deec2f94195",
+      "size": 635,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/setup.cfg",
+      "sha256": "2437d8285e35b8ccd6fbd357399a17f16f2edd16484d1d02c05c8b062fa59254",
+      "size": 125,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/setup.py",
+      "sha256": "8fd362e9161d5f5387fd736e8691b6805ead051033cb8a348cefca1d0dc34833",
+      "size": 871,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/__init__.py",
+      "sha256": "6c486dcfa951afee713cc2195baf03c5a02a41610c2aae75a336c1ed2bddd3b9",
+      "size": 689,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/chassis_control_lease.py",
+      "sha256": "4536bb760684c05dad77d42c86f089f280b8fdec9bd2d9bc792a2028e21c14d9",
+      "size": 12833,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/chassis_teleop_smoothing.yaml",
+      "sha256": "8bff6c0b7e1125cbd45f16f496612378106405e25461aabea7412e1e77d0a4e6",
+      "size": 4922,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/manual_key_filter.py",
+      "sha256": "5b494ec211e2b09992e809c18639061bd7f509269e5204ec0be0ad690b605d40",
+      "size": 6044,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/velocity_ramp.py",
+      "sha256": "4a52e41f6553d809ac6b84a408e029f7b0e40ead99cccce3df3a7430e42ad5ff",
+      "size": 12818,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/resource/control_center_chassis_guard",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/test/fake_redis.py",
+      "sha256": "19202a6e948e9102b1ab5bab4abeb220f4d9f2489e234e4125a6462df56bacd7",
+      "size": 3483,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_chassis_control_lease.py",
+      "sha256": "9a421702b0b3c63eb5bd261a182b4654bdc474c16ed2614c6c1be62695243582",
+      "size": 6726,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_identity.py",
+      "sha256": "d823f2b8b3120866ebe37b52c5ffb99c63f4bd57b832dd15dcacdade1f4f86d8",
+      "size": 1850,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_manual_key_filter.py",
+      "sha256": "edec4959d88c505592fc8d015756e7fa4cb3992f37f7071872ae214c9a531a7d",
+      "size": 7014,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_redis_integration.py",
+      "sha256": "0d5342236326b968fd74a0cd24fad864958780116763a4894f16de11ad3695ce",
+      "size": 2323,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_ui_gating_integration.py",
+      "sha256": "9aff748fb650c8ee67d10b99fb39bedf3ca888271992062bdd08eac3e32459e4",
+      "size": 8847,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_ui_key_debounce_integration.py",
+      "sha256": "07bd7e06a02eec7278e53f13e8e5e9f2930942d5e4129321c907eecdb641a209",
+      "size": 11907,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_ui_ramp_integration.py",
+      "sha256": "33a3436cf223e6f3c0797a57de2a132991a4ef3f5baf42921b99f09ff903d4ec",
+      "size": 23290,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_velocity_ramp.py",
+      "sha256": "3ced950f298035c11181c4ec7e25cab7b103ef14d60d6b38616b7b2d26aa4a58",
+      "size": 14437,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/AI_MIGRATION_GUIDE.md",
+      "sha256": "16e9d3b60afd95cd2c1162b44715e2f3a68b63bf831117401cddbab973e34469",
+      "size": 3927,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/README.md",
+      "sha256": "78eb93493a3cbed1edc577e9b1ba8c0eabbe8ab96faf7d7f5a9cf3284c4c275d",
+      "size": 11925,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/package.xml",
+      "sha256": "4ce0819d01f58cd69ca68ac2892e00fb345f8fc6eb9dacda9017c0090bb342ad",
+      "size": 1084,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/setup.cfg",
+      "sha256": "29bbbaf4d256ab94dfd0c1089235ba32569c18e4945481281a9f97e7a7cf6c3e",
+      "size": 125,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/setup.py",
+      "sha256": "56f30c1caa5bce8a1901241cd253a207c73e5ff48e048c5ec16f234da3edcca8",
+      "size": 1495,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/shake_hand_example.pkl",
+      "sha256": "667b92a4da956a1bccc14ab40e02bfdc1b25513b8351d3028ed7ac445c5307b6",
+      "size": 4793179,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/config/saved_joint_actions.yaml",
+      "sha256": "a8c02c244ce316c89c23baba1fc1d3cdddf719e9e18f40e85fc8a253cd9fbeb7",
+      "size": 23,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/config/saved_joint_poses.yaml",
+      "sha256": "5e083521d6590cd029d0aa5db4ceca87deb30c98198880ee265c27920b4f7d3c",
+      "size": 3407,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/__init__.py",
+      "sha256": "44ecd1c24b4d407b72dfbd8e1901331778e6deef561fcf132da251aa080312a9",
+      "size": 55,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/action_editor.py",
+      "sha256": "221d7ee759efad24cbf900e5ff9126bc780579189ebb01b21775254331363b9a",
+      "size": 20685,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/action_library.py",
+      "sha256": "0b1cbbd1424375929f8760c01d56c7be01ada3ddd533ec20c8a037dd142122e7",
+      "size": 5742,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/body_height.py",
+      "sha256": "db550bb32fa4b4676da88925c8c0ba5589e266ec6a53e5f2800f52ae3a2df897",
+      "size": 2888,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/control_panel.py",
+      "sha256": "95ff0c55c3136a0fd05d07da08c8ffbbca6016833562698dcbea880113e2d504",
+      "size": 94255,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/joint_bridge.py",
+      "sha256": "bf716c18c71a28f23e89cf7f3cafb5c71db7980d4acf37fdf823c77be739cb2d",
+      "size": 73336,
+      "mode": "0o755"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/joint_definitions.py",
+      "sha256": "7bdb1a5421dcf521523414bf4a8ced5c27d52f5a8ad1863c923c8fcfd8428910",
+      "size": 4894,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/motion_storage.py",
+      "sha256": "8d4b312c6602c23b8ff8ad035160194840d6863afcc22ef3de8a4755a2c37e48",
+      "size": 2156,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/operator_targets.py",
+      "sha256": "c4424f4dd3ef4ffa65ca9b00ede059bca86cd59461b3e7a939da55174aa4b123",
+      "size": 1093,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/pose_library.py",
+      "sha256": "db8c16f3902cd7736ae83548452b65b4597ca612b45e0700939ea586d5018257",
+      "size": 2431,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/robot_view.py",
+      "sha256": "7d58894c3ac97f7f690f9da7969de807efea9c0b2e8fccc0ebfe8396632f5327",
+      "size": 35445,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/trajectory_pickle.py",
+      "sha256": "182aabfa0043f96f84ac7d3c1f81cb1ee80622648f6e0cd921df9e42f95e22fa",
+      "size": 6255,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/vr_reset_pose.py",
+      "sha256": "4283a51e1529d0dcb25f006140e564d11a5ac4362613983c0a822ed0a97dba58",
+      "size": 11478,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/launch/whole_body_joint_control.launch.py",
+      "sha256": "0298db38ed80341d1144d970fc175283eed1eaddd449eb3448a3e7c0e40b7310",
+      "size": 5452,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Ankle_to_Knee.STL",
+      "sha256": "1afc2714313f183d12ee0d68850950baec95ea286ab26f2f61d82290df4cc000",
+      "size": 277984,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Left.STL",
+      "sha256": "9f3690b61c343a496bd7d209e7bb289357efa3fb0ac9abd02c8f324cca954215",
+      "size": 8484,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Right.STL",
+      "sha256": "80642a3e4708a29316d34ec9bdbd11d98a0dc121ea7069da09cf7884f0bab65b",
+      "size": 8484,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Back.STL",
+      "sha256": "18003a8af0a5483b607753f0de981f7ccb7851432cef18f87045fea6680156d3",
+      "size": 61884,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Forehead.STL",
+      "sha256": "9c16bd112c09fe8476be06acddd7ade7df53f18f555aa89cc80449264e0a6fb6",
+      "size": 65784,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Left_Eye.STL",
+      "sha256": "c742d0e313ce92af131ccdabb16f901557583b912ef4544125ff0b5052876f23",
+      "size": 60984,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Right_Eye.STL",
+      "sha256": "da735a9cb7b2ef12fd15afc024b974642d904b96a0573d45d73d23be292b5359",
+      "size": 60984,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Ground_Vehicle.STL",
+      "sha256": "8dd85b2d8c0b5ea2df730c99c355f99e635b77c73fae48ceaf4b82ba5ad7bc77",
+      "size": 1140134,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_IMU.STL",
+      "sha256": "05036f7d6f9b338be55325e3572720600e2a4e28184f19877f0ffda5db103447",
+      "size": 24284,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Knee_to_Waist_Pitch.STL",
+      "sha256": "ca18902a232322f9d963fa4ea02d14d56ab3c6fed29ec871d649668d64f6748e",
+      "size": 475584,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Elbow_to_Forearm.STL",
+      "sha256": "7240a7aff0b85e0e51d9bf66b8e8e13836eb688e8e5ab10e9f45a6a82f0b9585",
+      "size": 511484,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Forearm_to_Wrist_Upper.STL",
+      "sha256": "c460d5a89bc871575bb9b4603cff24b68a8d87e3344630f6cbd213b63a0a2f68",
+      "size": 594334,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper.STL",
+      "sha256": "014f18e9a0fa0c2e1089ba9c17d30345d50dc1f108054baf85cdaff93bcc69bd",
+      "size": 393084,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Finger.STL",
+      "sha256": "aa7acd7ba602993674bbbcd3699dc3e9e291363cf6f7b9ac7690d592e3e8c644",
+      "size": 196084,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Inner_Knuckle.STL",
+      "sha256": "b81196b9763fc4a153aff14c20bab37f31e59aee557f58f06510e1990d915e3f",
+      "size": 97184,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Finger.STL",
+      "sha256": "13e28d9bb3a25e5d1d53d201df588c2c8419c07e6b74ea841fa828c5a1b95029",
+      "size": 195984,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Inner_Knuckle.STL",
+      "sha256": "64e60a8a38025453b4e9a28aa9966d79f2d1f9adbcb1d71a8598e9791fdee98d",
+      "size": 94984,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Outer_Knuckle.STL",
+      "sha256": "a0dcbae9fcfce99c2e30fa974ac0ba4c9c29ac0ba61eb7160c0ff584c3ea8c2f",
+      "size": 395484,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Inner_to_Shoulder_Outer.STL",
+      "sha256": "4331eb7c039e2dd9b7ed81e2beedbdebd5bca110330f040b2c641dab2769fdd0",
+      "size": 428534,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Outer_to_UpperArm.STL",
+      "sha256": "c553ee859be2c47264c81015b4d077851f6b3ff784965a2b3ff2380ca5dd5f52",
+      "size": 537784,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_UpperArm_to_Elbow.STL",
+      "sha256": "9e4d5f6aba352a0d2bc6eed2396aa7c6886edae40c0f6eebc96ae1267c2c4aa7",
+      "size": 378384,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_Single_Gripper.STL",
+      "sha256": "d9cc18ace17758aed771a0a92bdd2dba79bcdc2efa7ec0e0f25416b78e6935e4",
+      "size": 442334,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_to_Gripper.STL",
+      "sha256": "c4280ad4a7eef277135794ee803edc9f82e19fb78c5201f5a29b70dc7cc57aad",
+      "size": 407934,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Upper_to_Wrist_Lower.STL",
+      "sha256": "369d0ebb7748aede577fe36ea4822e7055fb98176790dd8fa18093659f1ace3c",
+      "size": 477434,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Back.STL",
+      "sha256": "14f867027da347efc9c54242ddae2e743d3856905f6298dfefa5f4898fe0d67e",
+      "size": 429684,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Front.STL",
+      "sha256": "a6f4a8d2b158f4cfce625faeece402a5f4d07a6075950b541bdc2e91290fe6f0",
+      "size": 430284,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Pitch_to_Neck_Yaw.STL",
+      "sha256": "d64045307b47bdf0512a18d89f30356145ca35a0a02fecbc4a096ea9f1750b98",
+      "size": 350084,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Roll_to_Neck_Pitch.STL",
+      "sha256": "3337c06dbbe6fc775c2e9234faf60112c84fbca02e5bb6d88fa384ebd7554ae0",
+      "size": 540284,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Yaw_to_Head.STL",
+      "sha256": "e215dc5af7a2199106ec33bd68976365f705825408c91b50812a2cbfc361566c",
+      "size": 355784,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Elbow_to_Forearm.STL",
+      "sha256": "5fb8ce641d360ba7b330530ab903b615c38cdc261d06a227087abccb01a05e21",
+      "size": 256384,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Forearm_to_Wrist_Upper.STL",
+      "sha256": "a8069f263424c42fb3e031dab532216cfbe6dd6d1cb5eb2050dc6f4ca2d57188",
+      "size": 297084,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper.STL",
+      "sha256": "8f8baad1c8d02a8b9f106c6b9c3db2a2f3076f9b77b6f45c4ce9bd53c62e61e5",
+      "size": 393084,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Finger.STL",
+      "sha256": "27ccc64cde0c23a249a7c6d053b8bab50ff9f3871d863713edc5226de8059bea",
+      "size": 196084,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Inner_Knuckle.STL",
+      "sha256": "af62d6f5a702a2a30f086b0f618ebd2d20df3c47ec09d0a4c68203925edfcf4c",
+      "size": 97184,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Finger.STL",
+      "sha256": "f28cb7d6f18a14c69a2968111ce325e08734d6effd3ccebb378a0306647881a3",
+      "size": 195984,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Inner_Knuckle.STL",
+      "sha256": "38cc69b141f507e5b3c5fd334a89f446739a60373be2feb21af8cf0754a5b628",
+      "size": 94984,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Outer_Knuckle.STL",
+      "sha256": "d0dc2e63078db74699702a3156b1ce68e0bd42ba73310915bb2737c03bd15a5f",
+      "size": 395484,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Inner_to_Shoulder_Outer.STL",
+      "sha256": "1611a990d687a03a0fe7965bdf8d446cd002b471237435230f90c55cbda42808",
+      "size": 433284,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Outer_to_UpperArm.STL",
+      "sha256": "262bc445a67ab1d5604a7be16707a9fd74cf5562c824570e59e4b5590f17b1ef",
+      "size": 539934,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_UpperArm_to_Elbow.STL",
+      "sha256": "6e474b883cdc40d1746b0058464f6bcfa6cba113989ee2da5506b768aef48cae",
+      "size": 380084,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_Single_Gripper.STL",
+      "sha256": "4b3c77e2818d3c9999d189ac60a26b16ebdeb307551d042951f8f538fb622cd3",
+      "size": 442334,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_to_Gripper.STL",
+      "sha256": "d1172404f2dafab6cb92ab574ae199df4e99d65452496d2f32517a594eca4c73",
+      "size": 407934,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Upper_to_Wrist_Lower.STL",
+      "sha256": "71d6e35589da570ba1a6883a6113e0830dc127c9d06be95037a95523e8457a00",
+      "size": 477134,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Waist_Pitch_to_Waist_Yaw.STL",
+      "sha256": "a910641e7fb4abd50823fb0a5934e06fa0a3725d6e670ad6254b4b3fd1cb370e",
+      "size": 300784,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Waist_Yaw_to_Shoulder_Inner.STL",
+      "sha256": "414dc74b9db409b863146e5220614e5dbe9066ae714097325c878db879c45a8d",
+      "size": 709734,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/resource/control_center_joint_control",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size": 1,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/action_bridge_integration.py",
+      "sha256": "ead60591b1aed718d6c0824ed59c7bcfaf2cbca853344212650f7b02135908ed",
+      "size": 8327,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/progressive_bridge_integration.py",
+      "sha256": "7b60f6e4f15e33613bf99e1ac97581caa5ede4ae495b0392eca04f6fb74d238a",
+      "size": 10307,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/render_action_editor_smoke.py",
+      "sha256": "90093ce41507065a7b4b9f97ea390b2cb38526a7b9c3532946072f0273fbbdcb",
+      "size": 4264,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/render_control_panel_smoke.py",
+      "sha256": "02ac9b6e7d7f1bb1911dc38cb4b1b083b8f90a1473b359a38ec996f5176e5bb1",
+      "size": 3587,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/render_pose_library_smoke.py",
+      "sha256": "d3ea94edd653bd8975634bb823028ffc23beb62ff512bf3bce7b3a9acabf3adb",
+      "size": 1833,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/render_robot_view_smoke.py",
+      "sha256": "f48ae9af586f3855b53c9b4cda1b20283b029fe3e944356c2bd3439bb9bf13f1",
+      "size": 3075,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_action_library.py",
+      "sha256": "6d543ddc6da87b013ce05220e40e1504c8f628e07da556b04031487086bb5090",
+      "size": 3444,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_body_height.py",
+      "sha256": "bb122a64bd2035b0902b16bf76fef3c5413c7d9d0a9ea6547fb9bcec0947b87a",
+      "size": 2293,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_height_control_s3.py",
+      "sha256": "9096229deb12f7f387f2e942a7a9f8a0379d36c04c0d5380669431fe494668a2",
+      "size": 4683,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_joint_definitions.py",
+      "sha256": "3deb4b42ad19d8da1c67d8e9771e31b2d01f9e51db809a3f888b8e1d7a40c438",
+      "size": 1297,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_pose_library.py",
+      "sha256": "ae8df8d3cbb6f1557016e46e0ed45cb64cbf895ea8301744b25d7c3095edc0e2",
+      "size": 954,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_robot_view_model.py",
+      "sha256": "f9d8390d86e99e41c21b04f69e11fcaf205d79ed60dd6f390c9028a069fc5725",
+      "size": 2529,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_single_joint_operator.py",
+      "sha256": "624575bcd034b8d3ddecada1843081e51c10d5be60810972bba68b2eaf891481",
+      "size": 5804,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_stable_progressive_target.py",
+      "sha256": "a3e4e1b31125953c5c32cd97511d3d58369406f4ac8e2f4460d7a799ed778f2a",
+      "size": 4294,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_trajectory_pickle.py",
+      "sha256": "48af9e57218ec753cd605e2a8cb33d379c810049e342742e5ff4c785ac33ebcd",
+      "size": 3433,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_vr_reset_pose.py",
+      "sha256": "960302d0d962f7a091a1f96881a1280c748bfd015cecfd48795b36af3d2054f4",
+      "size": 3084,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/test_water_pose_coordination.py",
+      "sha256": "c1f586e409094ec9b027166581a7eb8e74cbd6f47751b8f4976316c34e18c282",
+      "size": 2232,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/test/verify_reference_pickle.py",
+      "sha256": "5d1ce62b9d427145efb32a32890430aa2030562607a1763167cef7fda2f812ac",
+      "size": 2153,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/urdf/robot_v2_2.urdf",
+      "sha256": "0a2c883e19aa1af25c04fa91b6f669a46640f181ceba631fa1b78d2fa138cae0",
+      "size": 58773,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/urdf/robot_v3_1.srdf",
+      "sha256": "31d787a5dc2e616c1daf5820c1a75c420a8719cca578e40428e1cfad47c78a04",
+      "size": 4890,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/urdf/robot_v3_1.urdf",
+      "sha256": "dd0315fd48cb0d3ba7a866399570ab1d600779823c916184d2b216a0017674b1",
+      "size": 58001,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/urdf/robot_v3_1_calibration.urdf",
+      "sha256": "170cdf2af2902033d8698205512c2bd4b0af2640f20c5e6fb06e3da023fcb7aa",
+      "size": 60188,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/urdf/robot_v3_1_simplified.urdf",
+      "sha256": "d4cc055547824d52109942ab93b59cf30c14b3c4439537ebda6c9849b8af7b14",
+      "size": 34680,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/motion_library/saved_joint_actions.yaml",
+      "sha256": "a8c02c244ce316c89c23baba1fc1d3cdddf719e9e18f40e85fc8a253cd9fbeb7",
+      "size": 23,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_joint_control/motion_library/saved_joint_poses.yaml",
+      "sha256": "3d514799590123a922daeb201eb4fc0c6ef3e43f80cae70502e8fecee7d0b5b0",
+      "size": 5538,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_service_manager/README.md",
+      "sha256": "f7b0f342b1aed5b93fd3d8120f28eb5febae8ef027e6d76f9ace8a1d12151e3d",
+      "size": 1075,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_service_manager/package.xml",
+      "sha256": "1747068a27f2ec4a2630308d738f75f5b2e4287d5e935d00153e052c10e26b9b",
+      "size": 605,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_service_manager/setup.cfg",
+      "sha256": "900377d8abbf431c331c3657c4a306bbfe5933b77976d4dac71ce01b1b9f8b59",
+      "size": 129,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_service_manager/setup.py",
+      "sha256": "5a30f6b6c4756bbcd66378c1e9f52393407d7bd0b8b6a7a6145555c51e242aa2",
+      "size": 831,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/__init__.py",
+      "sha256": "eb398e9e111444d00b3e8de75011ed3d7655a1a35b812f62056213be0c68b18b",
+      "size": 52,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/joint_reset_once.py",
+      "sha256": "8b958cde4a3f82fb0475bb20b47188cd1d3c4c301deeb69c73391603132d3aea",
+      "size": 2463,
+      "mode": "0o755"
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/panel.py",
+      "sha256": "c096d83e9f491dac30708e10957e902701d0c051a5dbaf8321bf6d89baa8d493",
+      "size": 90457,
+      "mode": "0o755"
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/speaker_volume.py",
+      "sha256": "6334f79df2878182027f48702fb2fa36ac1b41400a1ddcfe71a1d526788a9faf",
+      "size": 5179,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_service_manager/resource/control_center_service_manager",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size": 1,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_service_manager/test/joint_reset_once_integration.py",
+      "sha256": "f1e109238b0058e02642a6aa216a09b3a9266cf640f0204d5a13262cec408127",
+      "size": 1392,
+      "mode": "0o755"
+    },
+    {
+      "path": "control_center_service_manager/test/service_manager_smoke.py",
+      "sha256": "eedac602dd329561f4c66b0083460689bfcc6bdfc104615aa9091add68b8c351",
+      "size": 6780,
+      "mode": "0o755"
+    },
+    {
+      "path": "control_center_service_manager/test/test_speaker_volume.py",
+      "sha256": "4ccaac00fb76dd5efb7849b26cedfb8e622e5b098f4a4ce00ea7b7e17cc3b8ec",
+      "size": 1964,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/README.md",
+      "sha256": "4c68e5807b6cd9840c5d15a828553f817f27aca1501db635ea382300c97070ae",
+      "size": 1304,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/package.xml",
+      "sha256": "6e641b23b33c7e2def2fb1d21f39261cf56a5ce85b636e214ff324aa4288cb93",
+      "size": 911,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/setup.cfg",
+      "sha256": "39edad7e870caee181ca18aecb5a11ae5f9e5c110f4edb63e8bd11815962090e",
+      "size": 109,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/setup.py",
+      "sha256": "49ac9f6e52dca088ed911217848bb1c35a7b9ce98a3f74fa2627c6265c1dbea3",
+      "size": 791,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/control_center_shell/__init__.py",
+      "sha256": "d7fad4398d85e9397c860ec977387060e661285246e2759f20439e89df082436",
+      "size": 48,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/control_center_shell/app.py",
+      "sha256": "cf2772c04b90bb403c219e0d387ee8fe9617036bfc75aac915b18c6eb7c8d25c",
+      "size": 97595,
+      "mode": "0o755"
+    },
+    {
+      "path": "control_center_shell/control_center_shell/preflight.py",
+      "sha256": "301f3481333e123d746d88db2f19132d2e1e4182c0f424d02961448300a37147",
+      "size": 32078,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/control_center_shell/resource_observer.py",
+      "sha256": "ac0aef8049c7d8585ac4318bda47c908a86342fe467308cf92e784595f1d2543",
+      "size": 14228,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/control_center_shell/resource_repair.py",
+      "sha256": "44071771706e71920709e006138c53d1a47e64a8a9e8e79bb41f43c7ab6b2077",
+      "size": 19916,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/control_center_shell/system_status.py",
+      "sha256": "76e1ecad124a3c613c7cbffd738cb0dc8054b10fa00569c67987acb7f104bbae",
+      "size": 20785,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/control_center_shell/system_status_metrics.py",
+      "sha256": "695edc6edfc3671a3bed91229b6c3a1dc78f7095c7afc960b09561bec1ca2633",
+      "size": 7960,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/launch/control_center.launch.py",
+      "sha256": "fe87a3c19a9e0de322711965d39910ccb5c54d904bbad235bdd89bde14108d19",
+      "size": 1678,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/resource/control_center_shell",
+      "sha256": "0fce6614f8b80d5536d73302d46e3f209fe0756ecc45281400fd5fbab406c638",
+      "size": 21,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/test/service_manager_integration_smoke.py",
+      "sha256": "c545e74afb057563458755300bd38d7eb7cd644b9b06ad4e956c9157a50dd211",
+      "size": 2861,
+      "mode": "0o755"
+    },
+    {
+      "path": "control_center_shell/test/test_map_owner_guard.py",
+      "sha256": "c0aa51c6fa0c920069c029f8010000f3b6108bc471dbd5d7725b0b3970189e8f",
+      "size": 1818,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/test/test_probe_executor.py",
+      "sha256": "b95506bf6c4894ef246a3b9375693890e2256bf95e694ad7a61c41edc72bfe2a",
+      "size": 1823,
+      "mode": "0o644"
+    },
+    {
+      "path": "control_center_shell/test/test_s3_lidar_preflight.py",
+      "sha256": "12f3c433e31a4e319c48e41c1f79be7146f3f4a5c74ac8a3563a213099e68562",
+      "size": 3462,
+      "mode": "0o644"
+    },
+    {
+      "path": "launcher/start_autolife_control_center_300.sh",
+      "sha256": "10f236e848c21c72a9fb747fcc10db03587a5c0d52b8d65dbb4f4802815bb801",
+      "size": 2392,
+      "mode": "0o755"
+    },
+    {
+      "path": "launcher/start_autolife_control_center_306.sh",
+      "sha256": "10f236e848c21c72a9fb747fcc10db03587a5c0d52b8d65dbb4f4802815bb801",
+      "size": 2392,
+      "mode": "0o755"
+    },
+    {
+      "path": "launcher/机器人综合控制中心-300.desktop",
+      "sha256": "0a341c753ad49c4de97cbdc0f2edb5e7a754235f9f22f9838b92c7611af16f1c",
+      "size": 348,
+      "mode": "0o644"
+    },
+    {
+      "path": "launcher/机器人综合控制中心-306.desktop",
+      "sha256": "5aeda07c2cc2882da290d94779937c5887ea85c05649665f813b76902b4ef016",
+      "size": 348,
+      "mode": "0o644"
+    },
+    {
+      "path": "logo/README.md",
+      "sha256": "060cf65ed6ec2e17d8f917e6ddcd4b83599c998a2ad9bd833a184f0727818b4a",
+      "size": 2416,
+      "mode": "0o644"
+    },
+    {
+      "path": "logo/app.js",
+      "sha256": "da72eea91e5713581b2ddfc281fc6421b4295c7521b8da286595de9cd3eb6147",
+      "size": 12021,
+      "mode": "0o644"
+    },
+    {
+      "path": "logo/autolife-logo-display.service",
+      "sha256": "4d2f414308780c81bbaf2bee05adbea5356f16e8431be0678c3bf2587de85f21",
+      "size": 557,
+      "mode": "0o644"
+    },
+    {
+      "path": "logo/index.html",
+      "sha256": "e8e56592dad530f078191ed1b5661acde5e626854f8488a60109f7b24608de04",
+      "size": 2689,
+      "mode": "0o644"
+    },
+    {
+      "path": "logo/install_logo_service.sh",
+      "sha256": "99995c61cef0fd41a98d03a2577cb8962c53f2089c3088bebfb9388517e69516",
+      "size": 435,
+      "mode": "0o755"
+    },
+    {
+      "path": "logo/logo_server.py",
+      "sha256": "af33b6e50131b6169ba7d5c7fc10172b328e20329e2d29e7ba148544d99511d0",
+      "size": 7049,
+      "mode": "0o755"
+    },
+    {
+      "path": "logo/set_display_mode.sh",
+      "sha256": "b68bbe16f40a0569770cc15f58447d6629ff8765b29d3351582718c507557ad3",
+      "size": 1643,
+      "mode": "0o755"
+    },
+    {
+      "path": "logo/start_logo_display.sh",
+      "sha256": "0632b54e00e841692fc6f3d3a12cc94af14de093b87e68fe958a53ce06906ee8",
+      "size": 4631,
+      "mode": "0o755"
+    },
+    {
+      "path": "logo/styles.css",
+      "sha256": "643e0b301388152de78219feea8f9becc31f37a8829052df8e189a30f90dcb24",
+      "size": 11271,
+      "mode": "0o644"
+    },
+    {
+      "path": "logo/yundie.webp",
+      "sha256": "393d8fb74505e74ee5adff648cacf6c36d3a50536174dac62c140235f2a98080",
+      "size": 22830,
+      "mode": "0o644"
+    },
+    {
+      "path": "logo/启动云蝶Logo.desktop",
+      "sha256": "31b984aaabef50f22d1df9de92307f3c5c4a4839e272af955e60d048409ffb7a",
+      "size": 347,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/README_ZH.md",
+      "sha256": "a64c371f2ebe32849c601e9779761e5a526f5f722fba89eb36666bfb3024a448",
+      "size": 5010,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/package.xml",
+      "sha256": "d36527c3e8f3548b31f86e56f5b73ef31f2a932087eed9e4e31b03d7ec86c241",
+      "size": 816,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/setup.cfg",
+      "sha256": "42f9732728c56c60987b0b4c7e89c85853c71db62ea82df5443112e3827f95f0",
+      "size": 105,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/setup.py",
+      "sha256": "bdc481387168e7cea54e30159f0696503c2b0a008c15f6e55b4e77fc16e4a283",
+      "size": 1080,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/config/text_voice_control.yaml",
+      "sha256": "ce72a27fb37f5a2fc3132613600775bc469c8618ea8025b01deada2b437720f6",
+      "size": 387,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/launch/bringup.launch.py",
+      "sha256": "293469581583434d2c3654edc42cede81ef826f51dfdf26b9f1cc071283d2e19",
+      "size": 1509,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/resource/text_voice_control",
+      "sha256": "559c6d099ea0ea3799d178a247f9fc59b0533a016cdd63ce891ae78c3b90022d",
+      "size": 19,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/test/test_command_parser.py",
+      "sha256": "83b688efb8d03fde100d1b74b15021d54118149e8411a87400ee6396c2be864e",
+      "size": 926,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/text_voice_control/__init__.py",
+      "sha256": "e5d65ef3b1f40edaf4ef09a72eaa637bb0a4974f895b790309ed2097e4e42c4b",
+      "size": 34,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/text_voice_control/asr_tts_bridge_node.py",
+      "sha256": "1c52b96c8426b636b585a4bbdc265f84daaa6593a6e42e4b1c924d51de784953",
+      "size": 2316,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/text_voice_control/command_parser.py",
+      "sha256": "bd4773f64687ce17d6b85fc58202b80d5cc55b4c68e48b00dcac8a85d26cfb96",
+      "size": 1623,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/text_voice_control/say_text.py",
+      "sha256": "4db574c5bc8b728c577ec82e36513456dea76677e5f97499bcd4e34b35d44fd0",
+      "size": 1655,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/text_voice_control/text_voice_control_node.py",
+      "sha256": "41180dae5cdb7c6fb50a0215af9534941319e36e060f5369e7f59908c2b90391",
+      "size": 2067,
+      "mode": "0o644"
+    },
+    {
+      "path": "text_voice_control/text_voice_control/topics.py",
+      "sha256": "fd9444b4ddb098af2597d6047b1ecd8a5002d346363018067b80419b99e37e34",
+      "size": 340,
+      "mode": "0o644"
+    },
+    {
+      "path": "tools/fisheye360_test/fisheye360_345",
+      "sha256": "d6e1f650217c2a6bf45d4b2907a107ed25cbc92ae9eda3700c8d6c14cb844106",
+      "size": 2199,
+      "mode": "0o755"
+    },
+    {
+      "path": "tools/fisheye360_test/fisheye360_service.py",
+      "sha256": "85b11b5570da9cee9f28317087642d4b333fe66fa8fa2d3d032ff3c475945d17",
+      "size": 4004,
+      "mode": "0o644"
+    },
+    {
+      "path": "tools/fisheye360_test/fisheye_camera.py",
+      "sha256": "292579f19c98e323b8168874a943d65eb3fe22fa252702c38dfe234539b435d1",
+      "size": 11871,
+      "mode": "0o644"
+    },
+    {
+      "path": "tools/fisheye360_test/fisheye_profile.py",
+      "sha256": "30285f6246425889663bbf6b28a102bc412994b2a48e654750ed257bf86d99c4",
+      "size": 7469,
+      "mode": "0o644"
+    },
+    {
+      "path": "tools/fisheye360_test/web/app.js",
+      "sha256": "ad21052fdcdd844925e4d89feb43e3fabb3152ff3368fe85f613b97ade2f9a9c",
+      "size": 11365,
+      "mode": "0o644"
+    },
+    {
+      "path": "tools/fisheye360_test/web/index.html",
+      "sha256": "67f9936ec8f54c69469217416815f598f9dadee78046632d7534b146d42b3eb7",
+      "size": 69930,
+      "mode": "0o644"
+    },
+    {
+      "path": "tools/fisheye360_test/web/jpeg_stream.js",
+      "sha256": "da2a9aa6829576fb04a744a1866f3d5584ff6ed3142a967a21747663622a18bf",
+      "size": 3554,
+      "mode": "0o644"
+    },
+    {
+      "path": "tools/fisheye360_test/web/profile.json",
+      "sha256": "86af9b3b5c7ddcfd889d28c428c94f8afc271358858d71458435ac8a4a32ec2a",
+      "size": 830,
+      "mode": "0o644"
+    },
+    {
+      "path": "tools/fisheye360_test/web/projection.js",
+      "sha256": "197e9484df9af3925c6dbf4268dac24c608c95b57af932714f6068680583b497",
+      "size": 5169,
+      "mode": "0o644"
+    },
+    {
+      "path": "tools/fisheye360_test/web/projection_renderer.js",
+      "sha256": "bb46c1851766d9840851d4e28fda0ec23729755573f0e75263571a2584902ce1",
+      "size": 4197,
+      "mode": "0o644"
+    }
+  ],
+  "excluded": [
+    "control_center_chassis_guard/__pycache__/",
+    "control_center_chassis_guard/control_center_chassis_guard/__pycache__/",
+    "control_center_chassis_guard/test/__pycache__/",
+    "control_center_joint_control/control_center_joint_control/__pycache__/",
+    "control_center_joint_control/control_center_joint_control/control_panel.py.before_20260810_vr_reset_preview_fix",
+    "control_center_joint_control/control_center_joint_control/joint_bridge.py.before_water_sync_20260807",
+    "control_center_joint_control/control_center_joint_control/vr_reset_pose.py.before_20260810_vr_reset_preview_fix",
+    "control_center_joint_control/test/__pycache__/",
+    "control_center_joint_control/test/test_vr_reset_pose.py.before_20260810_vr_reset_preview_fix",
+    "control_center_service_manager/control_center_service_manager/__pycache__/",
+    "control_center_shell/control_center_shell/__pycache__/",
+    "control_center_shell/control_center_shell/app.py.before_auto_legacy_joint_20260807",
+    "text_voice_control/text_voice_control/__pycache__/",
+    "tools/fisheye360_test/__pycache__/"
+  ]
+}

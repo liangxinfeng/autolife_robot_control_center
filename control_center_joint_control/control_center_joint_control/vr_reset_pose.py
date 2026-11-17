@@ -36,9 +36,9 @@ HOME_KEYS = (
 )
 
 DEFAULT_CONFIG_PATHS = (
-    Path('/home/ubuntu/Documents/AutolifeRobotArm/configs/robot_v2_2.json'),
+    Path('/home/ubuntu/Documents/AutolifeRobotArm/configs/robot_v3_1.json'),
     Path('/home/ubuntu/miniconda3/envs/robot_env/lib/python3.12/site-packages/'
-         'autolife_robot_arm/configs/robot_v2_2.json'),
+         'autolife_robot_arm/configs/autolife_s1/robot_v3_1.json'),
 )
 DEFAULT_SETTINGS_PATHS = (
     Path('/home/ubuntu/Documents/AutolifeRobotArm/src/autolife_robot_arm/settings.toml'),
@@ -127,7 +127,7 @@ class VrResetPoseStore:
         self.settings_paths = _existing(settings_paths or DEFAULT_SETTINGS_PATHS)
         self.state_path = Path(state_path or DEFAULT_STATE_PATH).expanduser().resolve()
         if not self.config_paths:
-            raise FileNotFoundError('未找到厂商 robot_v2_2.json')
+            raise FileNotFoundError('未找到厂商 robot_v3_1.json')
         if not self.settings_paths:
             raise FileNotFoundError('未找到厂商 settings.toml')
         self._ensure_baseline()

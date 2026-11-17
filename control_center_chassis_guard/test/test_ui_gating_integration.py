@@ -17,6 +17,12 @@ from pathlib import Path
 import pytest
 
 CONTROL_CENTER_ROOT = Path(__file__).resolve().parents[2]
+NAVIGATION_ROOT = CONTROL_CENTER_ROOT.parent / 'control_center_navigation'
+if not (NAVIGATION_ROOT / 'package.xml').is_file():
+    NAVIGATION_ROOT = CONTROL_CENTER_ROOT / 'control_center_navigation'
+SLAM_ROOT = CONTROL_CENTER_ROOT.parent / 'control_center_slam'
+if not (SLAM_ROOT / 'package.xml').is_file():
+    SLAM_ROOT = CONTROL_CENTER_ROOT / 'control_center_slam'
 
 
 def _load_module(script_path, module_name):
@@ -28,12 +34,12 @@ def _load_module(script_path, module_name):
 
 try:
     slam_module = _load_module(
-        CONTROL_CENTER_ROOT / 'control_center_slam' / 'scripts'
+        SLAM_ROOT / 'scripts'
         / 'slam_ui_node.py',
         'zcode_test_slam_ui_node',
     )
     nav_module = _load_module(
-        CONTROL_CENTER_ROOT / 'control_center_navigation' / 'scripts'
+        NAVIGATION_ROOT / 'scripts'
         / 'navigation_ui_node.py',
         'zcode_test_navigation_ui_node',
     )
@@ -110,7 +116,7 @@ def ramped(node, clock, tick=TICK):
 def slam_node():
     if not rclpy.ok():
         rclpy.init()
-    node = slam_module.SlamRosNode(topic_suffix='0_306')
+    node = slam_module.SlamRosNode(topic_suffix='0_345')
     yield node
     node.destroy_node()
 

@@ -27,7 +27,7 @@ def test_navigation_placeholder_click_reaches_start_handler(monkeypatch):
     calls = []
     monkeypatch.setattr(app, '_service_is_active', lambda _: False)
     monkeypatch.setattr(app.ControlCenterWindow, 'start_navigation', lambda _: calls.append('start'))
-    parameters = {'robot_id': 300, 'topic_suffix': '0_300', 'start_navigation': False}
+    parameters = {'robot_id': 300, 'topic_suffix': '0_345', 'start_navigation': False}
     node = SimpleNamespace(get_parameter=lambda key: SimpleNamespace(value=parameters[key]))
     window = app.ControlCenterWindow(node)
     window.centralWidget().setEnabled(True)
