@@ -1,0 +1,12 @@
+{
+    "active_map": "4",
+    "maps": {
+        "4": {
+            "yaml_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/4.yaml",
+            "png_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/4.pgm",
+            "description": "",
+            "dock_pose": [],
+            "prepared_positions": []
+        }
+    }
+}

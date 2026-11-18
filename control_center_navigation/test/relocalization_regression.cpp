@@ -151,6 +151,12 @@ struct RelocalizationTest
       auto s=std::make_shared<sensor_msgs::msg::LaserScan>();
       s->header.stamp=n.now()-rclcpp::Duration::from_seconds(age); return s;
     };
+    check(n.scan_wait_detail().find("前后雷达")!=std::string::npos,
+      "empty caches explicitly report both missing lidars");
+    n.scan_callback(make_scan(0.01),false);
+    check(n.scan_wait_detail().find("后雷达无有效数据")!=std::string::npos,
+      "missing rear lidar is not misreported as timestamp synchronization");
+    n.front_scans_.clear();
     // No executor is running: verify caching works even with search disabled/busy.
     n.enabled_=false;n.matching_=true;
     auto front=make_scan(0.02), rear=make_scan(0.03);
@@ -164,9 +170,13 @@ struct RelocalizationTest
     n.scan_pair_max_age_sec_=0.10;
     n.scan_callback(make_scan(0.01),false); n.scan_callback(make_scan(0.4),true);
     check(!n.select_scan_pair(f,r),"similar arrival times do not hide capture timestamp mismatch");
+    check(n.scan_wait_detail().find("时间差过大")!=std::string::npos,
+      "capture mismatch is separately diagnosed without loosening tolerance");
     n.front_scans_.clear();n.rear_scans_.clear();
     n.scan_callback(make_scan(2),false);n.scan_callback(make_scan(2),true);
     check(!n.select_scan_pair(f,r),"stale paired scans are rejected");
+    check(n.scan_wait_detail().find("已过期")!=std::string::npos,
+      "expired scans are reported separately");
     n.front_scans_.clear(); auto fresh=make_scan(0.01);
     n.scan_callback(fresh,false);n.scan_callback(fresh,false);n.scan_callback(make_scan(0.1),false);
     check(n.front_scans_.size()==1,"duplicate and old acquisition frames are ignored");

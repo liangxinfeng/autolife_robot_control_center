@@ -202,8 +202,8 @@ def _stop_legacy_joint_processes():
 class ControlCenterNode(Node):
     def __init__(self):
         super().__init__('control_center_shell')
-        self.declare_parameter('robot_id', 307)
-        self.declare_parameter('topic_suffix', '0_307')
+        self.declare_parameter('robot_id', 283)
+        self.declare_parameter('topic_suffix', '0_283')
         self.declare_parameter('start_navigation', False)
 
 
@@ -222,6 +222,7 @@ class ManagedProcess(QtCore.QObject):
         self.process.finished.connect(self._on_finished)
         self.intentional_stop = False
         self.process_group_id = None
+        self.started_with_setsid = False
 
     @property
     def running(self):
@@ -232,6 +233,7 @@ class ManagedProcess(QtCore.QObject):
             return
         executable = shutil.which('ros2') or '/opt/ros/jazzy/bin/ros2'
         setsid = shutil.which('setsid')
+        self.started_with_setsid = bool(setsid)
         self.intentional_stop = False
         self.state_changed.emit(self.key, 'starting')
         self.output.emit(self.key, '$ ' + executable + ' ' + ' '.join(arguments))
@@ -246,38 +248,58 @@ class ManagedProcess(QtCore.QObject):
             return
         self.intentional_stop = True
         self.output.emit(self.key, '正在停止模块……')
-        if self.process_group_id is not None and os.name == 'posix':
+        # QProcess.finished can clear self.process_group_id inside waitForFinished.
+        # Capture the owned session now; a dead launch parent does not prove
+        # its controller/costmap children have exited.
+        owned_group = self.process_group_id if os.name == 'posix' else None
+        if owned_group == os.getpgrp():
+            owned_group = None
+        deadline = time.monotonic() + timeout_ms / 1000.0
+        if owned_group is not None:
             try:
-                os.killpg(self.process_group_id, signal.SIGINT)
+                os.killpg(owned_group, signal.SIGINT)
             except ProcessLookupError:
                 pass
         else:
             self.process.terminate()
-        if not self.process.waitForFinished(timeout_ms):
-            self.output.emit(self.key, '模块未及时退出，向整个进程组发送 SIGTERM。')
-            if self.process_group_id is not None and os.name == 'posix':
+        parent_exited = self.process.waitForFinished(timeout_ms)
+        if owned_group is not None:
+            def group_alive():
                 try:
-                    os.killpg(self.process_group_id, signal.SIGTERM)
+                    os.killpg(owned_group, 0)
+                    return True
                 except ProcessLookupError:
-                    pass
-            else:
-                self.process.terminate()
+                    return False
+            while group_alive() and time.monotonic() < deadline:
+                time.sleep(0.05)
+            for sig, grace in ((signal.SIGTERM, 1.8), (signal.SIGKILL, 0.5)):
+                if not group_alive():
+                    break
+                self.output.emit(self.key, f'清理本模块残留进程组：{sig.name}。')
+                try:
+                    os.killpg(owned_group, sig)
+                except ProcessLookupError:
+                    break
+                until = time.monotonic() + grace
+                while group_alive() and time.monotonic() < until:
+                    time.sleep(0.05)
+            self.process.waitForFinished(100)
+        elif not parent_exited:
+            self.output.emit(self.key, '模块未及时退出，向启动进程发送 SIGTERM。')
+            self.process.terminate()
             if not self.process.waitForFinished(1800):
-                self.output.emit(self.key, '进程组仍未退出，执行最终 SIGKILL。')
-                if self.process_group_id is not None and os.name == 'posix':
-                    try:
-                        os.killpg(self.process_group_id, signal.SIGKILL)
-                    except ProcessLookupError:
-                        pass
-                else:
-                    self.process.kill()
+                self.output.emit(self.key, '启动进程仍未退出，执行最终 SIGKILL。')
+                self.process.kill()
                 self.process.waitForFinished(1000)
 
     def _on_started(self):
         # The process is started through `setsid`, so its PID is also the
         # session/process-group id. Signalling the group is essential: killing
         # only `ros2 launch` can orphan Nav2, Cartographer or joint nodes.
-        self.process_group_id = int(self.process.processId())
+        pid = int(self.process.processId())
+        # started may be emitted before the setsid utility has called setsid().
+        # QProcess children inherit our group, so setsid does not need to fork.
+        self.process_group_id = pid if os.name == 'posix' and self.started_with_setsid else None
         self.state_changed.emit(self.key, 'running')
 
     def _read_output(self):
@@ -857,7 +879,8 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         if not self._pause_vendor_stack():
             self.nav_host.set_state('error')
             return
-        remaining_amcl = _process_matches('/nav2_amcl/amcl')
+        remaining_amcl = (_process_matches('/nav2_amcl/amcl') +
+                          _process_matches('/control_center_navigation/amcl_startup_compat'))
         if remaining_amcl:
             self.nav_host.set_state('error')
             QtWidgets.QMessageBox.warning(
@@ -950,7 +973,8 @@ class ControlCenterWindow(QtWidgets.QMainWindow):
         if not self._pause_vendor_stack():
             self.slam_host.set_state('error')
             return
-        remaining_amcl = _process_matches('/nav2_amcl/amcl')
+        remaining_amcl = (_process_matches('/nav2_amcl/amcl') +
+                          _process_matches('/control_center_navigation/amcl_startup_compat'))
         if remaining_amcl:
             self.slam_host.set_state('error')
             QtWidgets.QMessageBox.warning(

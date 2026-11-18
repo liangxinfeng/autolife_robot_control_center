@@ -21,6 +21,7 @@ from .action_library import (
     normalize_action_record,
 )
 from .body_height import BODY_HEIGHT_JOINTS, matches_body_height_profile
+from .operator_targets import resolve_operator_targets
 from .joint_definitions import (
     ALL_JOINTS,
     BASE_MODEL_JOINTS,
@@ -41,7 +42,7 @@ from .joint_definitions import (
 class JointBridge(Node):
     def __init__(self):
         super().__init__('whole_body_joint_bridge')
-        self.declare_parameter('robot_id', 307)
+        self.declare_parameter('robot_id', 283)
         self.declare_parameter('topic_suffix', '')
         self.declare_parameter('feedback_timeout_sec', 0.6)
         self.declare_parameter('hardware_unlock_timeout_sec', 180.0)
@@ -334,6 +335,7 @@ class JointBridge(Node):
             group_name, targets, speed_scale, motion_profile = (
                 self._parse_operator_command(message.data)
             )
+            single_joint = json.loads(message.data).get('single_joint')
         except Exception as error:
             self._event(f'发送目标无效：{error}', 'warn')
             return
@@ -362,6 +364,7 @@ class JointBridge(Node):
 
         if (
             group_name == 'leg_waist'
+            and single_joint is None
             and not motion_profile
             and matches_body_height_profile(targets)
             and abs(
@@ -389,6 +392,12 @@ class JointBridge(Node):
             ))
             for joint in targets
         }
+        if single_joint is not None:
+            # Cancel old goals for unedited members of this group. Preserve
+            # the selected joint's progressive command for continuous dragging.
+            for joint in targets:
+                if joint != single_joint:
+                    commanded[joint] = float(self._current[joint])
         if motion_profile == 'body_height':
             commanded['Joint_Waist_Yaw'] = float(
                 self._current['Joint_Waist_Yaw']
@@ -991,14 +1000,10 @@ class JointBridge(Node):
         if group_name not in GROUPS:
             raise ValueError(f'unknown group {group_name}')
         requested = data.get('targets_deg', {})
-        if not isinstance(requested, dict):
-            raise ValueError('targets_deg must be an object')
-        allowed = set(group_joint_names(group_name))
-        if set(requested) != allowed:
-            missing = sorted(allowed - set(requested))
-            extra = sorted(set(requested) - allowed)
-            raise ValueError(f'joint set mismatch; missing={missing}, extra={extra}')
-        targets = {name: clamp_joint(name, requested[name]) for name in allowed}
+        single_joint = data.get('single_joint')
+        targets = resolve_operator_targets(
+            group_name, requested, self._current, single_joint
+        )
         speed_scale = float(data.get('speed_scale', 1.0))
         if not math.isfinite(speed_scale) or not 0.1 <= speed_scale <= 2.0:
             raise ValueError('speed_scale must be between 0.1 and 2.0')
@@ -1007,6 +1012,8 @@ class JointBridge(Node):
             raise ValueError(f'unknown motion profile {motion_profile}')
         if motion_profile == 'body_height' and group_name != 'leg_waist':
             raise ValueError('body_height motion profile requires leg_waist group')
+        if single_joint is not None and motion_profile:
+            raise ValueError('single_joint cannot run a coordinated motion profile')
         return group_name, targets, speed_scale, motion_profile
 
     def _publish_vendor(self, publisher, payload):

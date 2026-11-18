@@ -17,6 +17,7 @@ ROOT=Path(__file__).resolve().parent
 SCRIPTS=ROOT if (ROOT/'waypoint_manager_node.py').exists() else ROOT.parent/'scripts'
 sys.path.insert(0,str(SCRIPTS))
 from short_distance_servo import body_frame_error, reproject_target_pose
+from charger_waypoints import is_charger_waypoint
 def extract(filename, methods):
     tree=ast.parse((SCRIPTS/filename).read_text())
     original=next(n for n in tree.body if isinstance(n,ast.ClassDef))
@@ -29,7 +30,7 @@ Manager=extract('waypoint_manager_node.py',{
     '_navigation_target','_build_goal','_start_navigation','_battery_state_fresh',
     '_start_precise_docking','_complete_short_distance','_handle_docking_goal_response',
     '_complete_goal_by_tolerance','_handle_docking_result','_handle_battery_state',
-    '_check_docking_drift','_finish_dock_abort',
+    '_check_docking_drift','_finish_dock_abort','_clear_occupied_wait','_uses_mppi_only',
 })
 Arbiter=extract('cmd_vel_arbiter_node.py',{'_filter_nav_cmd_vel','_limit_staging_approach_cmd_vel'})
 
@@ -53,6 +54,8 @@ def manager():
     n._quaternion_from_yaw=lambda yaw:Quaternion(z=math.sin(yaw/2),w=math.cos(yaw/2))
     n._navigate_client=Mock();n._dock_client=Mock()
     n._robot_pose_in_frame=lambda frame:(2.55,3.,0.)
+    n._lookup_current_pose=lambda:(2.55,3.,0.)
+    n._dock_verify_xy_tolerance=.08;n._dock_verify_yaw_tolerance=.10
     n._pose_in_frame=lambda waypoint,frame:(waypoint['x'],waypoint['y'],waypoint['yaw'])
     for name in ('_publish_waypoint_markers','_publish_navigation_status','_publish_voice_prompt',
         '_fail_precise_docking','_fallback_short_distance_to_nav2','_stop_sequence','_complete_docking_by_charge_status'):

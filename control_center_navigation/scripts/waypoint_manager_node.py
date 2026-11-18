@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import re
 import tempfile
+import time
 from typing import Dict, List, Optional, Set
 
 from action_msgs.msg import GoalStatus
@@ -13,14 +14,16 @@ from geometry_msgs.msg import PoseStamped, Quaternion, Twist
 from nav2_msgs.msg import Costmap
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy, qos_profile_sensor_data
 from sensor_msgs.msg import BatteryState
-from std_msgs.msg import ColorRGBA, String
+from std_msgs.msg import Bool, ColorRGBA, String
+from nav_msgs.msg import Odometry
 from std_srvs.srv import Trigger
 from visualization_msgs.msg import Marker, MarkerArray
-from nav2_msgs.action import DockRobot, DriveOnHeading, NavigateToPose
+from nav2_msgs.action import ComputePathToPose, DockRobot, DriveOnHeading, NavigateToPose
 from rclpy.action import ActionClient
 from rclpy.node import Node
 from tf2_ros import Buffer, TransformException, TransformListener
 import yaml
+from charger_waypoints import is_charger_waypoint
 
 from short_distance_servo import (
     axis_command,
@@ -70,6 +73,10 @@ class WaypointManagerNode(Node):
         # Final arrival must stay inside the same strict precision envelope
         # even when the local pose-servo corridor is temporarily unavailable.
         self.declare_parameter('arrival_xy_tolerance', 0.06)
+        self.declare_parameter('nav2_settled_arrival_authoritative', False)
+        self.declare_parameter('occupied_goal_wait_enabled', True)
+        self.declare_parameter('occupied_goal_wait_timeout', 60.0)
+        self.declare_parameter('occupied_goal_probe_interval', 3.0)
         self.declare_parameter('arrival_yaw_tolerance', 0.08)
         self.declare_parameter('arrival_settle_time', 0.60)
         self.declare_parameter('final_refine_handoff_distance', 0.25)
@@ -82,6 +89,7 @@ class WaypointManagerNode(Node):
         # remains available only for the post-Nav2 final pose refinement.
         self.declare_parameter('short_distance_direct_start_enabled', False)
         self.declare_parameter('far_navigation_auto_refine_enabled', True)
+        self.declare_parameter('normal_navigation_mppi_only', False)
         self.declare_parameter('short_distance_threshold', 2.0)
         self.declare_parameter('short_distance_cmd_vel_topic', '/nav_cmd_vel')
         self.declare_parameter('short_distance_costmap_topic', '/local_costmap/costmap_raw')
@@ -90,9 +98,9 @@ class WaypointManagerNode(Node):
         self.declare_parameter('short_distance_robot_half_length', 0.25)
         self.declare_parameter('short_distance_robot_half_width', 0.25)
         self.declare_parameter('short_distance_front_extension', 0.0)
-        # Match local/global Nav2 footprint and its retained 4 cm padding.
+        # Match local/global Nav2: 50 cm body plus 2.5 cm per side = 55 cm.
         # 307 uses the original base length without an extra front extension.
-        self.declare_parameter('short_distance_safety_margin', 0.04)
+        self.declare_parameter('short_distance_safety_margin', 0.025)
         self.declare_parameter('short_distance_lethal_cost', 254)
         self.declare_parameter('short_distance_xy_tolerance', 0.04)
         self.declare_parameter('short_distance_axis_tolerance', 0.020)
@@ -131,14 +139,20 @@ class WaypointManagerNode(Node):
         self.declare_parameter('dock_max_staging_time', 120.0)
         self.declare_parameter('dock_navigate_to_staging_pose', True)
         self.declare_parameter('dock_prealign_enabled', True)
-        self.declare_parameter('dock_staging_distance', 0.55)
+        self.declare_parameter('dock_staging_distance', 0.35)
         self.declare_parameter('dock_max_lateral_drift', 0.06)
         self.declare_parameter('dock_max_heading_drift', 0.14)
         self.declare_parameter('dock_verify_xy_tolerance', 0.05)
         self.declare_parameter('dock_verify_yaw_tolerance', 0.06)
+        # Charger-waypoint arrival rescue: an abnormally ended docking attempt
+        # is still judged as arrival when the robot is provably at the pile
+        # (charging feedback, or pose within these wider bounds). Motion,
+        # control and all successful docking paths are untouched.
+        self.declare_parameter('charger_rescue_xy_tolerance', 0.12)
+        self.declare_parameter('charger_rescue_yaw_tolerance', 0.15)
         self.declare_parameter('dock_cmd_vel_topic', '/nav_cmd_vel')
         self.declare_parameter('dock_telemetry_period', 0.5)
-        self.declare_parameter('battery_topic', '/topic_gv_battery_0_307')
+        self.declare_parameter('battery_topic', '/topic_gv_battery_0_283')
         self.declare_parameter('charging_status_confirm_samples', 2)
         self.declare_parameter('voice_feedback_enabled', False)
         self.declare_parameter('voice_command_topic', '/text_voice_command')
@@ -163,6 +177,18 @@ class WaypointManagerNode(Node):
         self._marker_scale = self.get_parameter('waypoint_marker_scale').get_parameter_value().double_value
         self._status_topic = self.get_parameter('navigation_status_topic').get_parameter_value().string_value
         self._arrival_xy_tolerance = self.get_parameter('arrival_xy_tolerance').get_parameter_value().double_value
+        self._nav2_settled_arrival_authoritative = self.get_parameter('nav2_settled_arrival_authoritative').value
+        self._occupied_wait_enabled = bool(self.get_parameter('occupied_goal_wait_enabled').value)
+        self._occupied_wait_timeout = max(5.0, float(self.get_parameter('occupied_goal_wait_timeout').value))
+        self._occupied_probe_interval = max(1.0, float(self.get_parameter('occupied_goal_probe_interval').value))
+        self._occupied_wait = None
+        self._occupied_deadline = None
+        self._arrival_odom = None
+        self._manual_control_active = False
+        self._occupied_probe_client = ActionClient(self, ComputePathToPose, '/compute_path_to_pose')
+        self.create_subscription(Odometry, '/odom', self._on_arrival_odom, qos_profile_sensor_data)
+        self.create_subscription(Bool, '/manual_cmd_vel_active', self._on_manual_control, 10)
+        self.create_timer(0.25, self._tick_occupied_wait)
         self._arrival_yaw_tolerance = self.get_parameter('arrival_yaw_tolerance').get_parameter_value().double_value
         self._arrival_settle_time = self.get_parameter('arrival_settle_time').get_parameter_value().double_value
         self._refine_handoff_distance = min(0.4, max(0.06, float(self.get_parameter('final_refine_handoff_distance').value)))
@@ -174,6 +200,9 @@ class WaypointManagerNode(Node):
         )
         self._far_navigation_auto_refine_enabled = bool(
             self.get_parameter('far_navigation_auto_refine_enabled').value
+        )
+        self._normal_navigation_mppi_only = bool(
+            self.get_parameter('normal_navigation_mppi_only').value
         )
         self._short_servo_enabled = bool(self.get_parameter('short_distance_servo_enabled').value)
         self._short_direct_start_enabled = bool(
@@ -299,6 +328,12 @@ class WaypointManagerNode(Node):
         self._last_battery_status_time = None
         self._battery_is_charging = False
         self._dock_verify_yaw_tolerance = self.get_parameter('dock_verify_yaw_tolerance').value
+        self._charger_rescue_xy_tolerance = float(
+            self.get_parameter('charger_rescue_xy_tolerance').value
+        )
+        self._charger_rescue_yaw_tolerance = float(
+            self.get_parameter('charger_rescue_yaw_tolerance').value
+        )
         dock_cmd_vel_topic = self.get_parameter('dock_cmd_vel_topic').value
         self._dock_telemetry_period = self.get_parameter('dock_telemetry_period').value
         battery_topic = self.get_parameter('battery_topic').value
@@ -444,6 +479,11 @@ class WaypointManagerNode(Node):
         self.create_service(Trigger, 'pause_navigation', self._handle_pause_navigation)
         self.create_service(Trigger, 'resume_navigation', self._handle_resume_navigation)
         self.create_service(Trigger, 'cancel_navigation', self._handle_cancel_navigation)
+        self._pause_stop_futures = []
+        self._operator_stopped_since = None
+        self._arrival_odom_stamp = None
+        self.create_service(Trigger, 'navigation_stop_ready', self._handle_stop_ready)
+        self.create_service(NavigateToWaypoint, 'operator_confirm_arrival', self._handle_operator_arrival)
 
         self.create_timer(2.0, self._publish_waypoint_markers)
         self.create_timer(0.25, self._check_active_goal_arrival)
@@ -746,7 +786,7 @@ class WaypointManagerNode(Node):
 
     def _navigation_target(self, name: str):
         waypoint = dict(self._waypoints[name])
-        if getattr(self, '_dock_staging_active', False) and name == self._charger_waypoint_name:
+        if getattr(self, '_dock_staging_active', False) and is_charger_waypoint(name, self._charger_waypoint_name):
             # Saved pose is the robot pose WHILE CHARGING. Stand in front,
             # facing away from the dock, then reverse. Never edit the library.
             yaw = float(waypoint['yaw'])
@@ -763,6 +803,12 @@ class WaypointManagerNode(Node):
         goal.pose.pose.position.x = float(waypoint['x'])
         goal.pose.pose.position.y = float(waypoint['y'])
         goal.pose.pose.orientation = self._quaternion_from_yaw(float(waypoint['yaw']))
+        # Docking staging and strict feasibility probes retain the original planner.
+        if self._uses_mppi_only():
+            from ament_index_python.packages import get_package_share_directory
+            goal.behavior_tree = os.path.join(
+                get_package_share_directory('control_center_navigation'),
+                'config', 'occupied_approach.xml')
         return goal
 
     def _handle_short_costmap(self, msg: Costmap) -> None:
@@ -1132,7 +1178,7 @@ class WaypointManagerNode(Node):
         goal_name = self._active_goal_name
         if not self._short_servo_active or not goal_name:
             return
-        if getattr(self, '_dock_staging_active', False) and goal_name == self._charger_waypoint_name:
+        if getattr(self, '_dock_staging_active', False) and is_charger_waypoint(goal_name, self._charger_waypoint_name):
             # Nav2 has terminated before the servo starts; stop the servo before
             # giving DockRobot exclusive output ownership. Not an arrival yet.
             error = self._waypoint_pose_error(goal_name)
@@ -1522,11 +1568,12 @@ class WaypointManagerNode(Node):
         self.get_logger().info(f'已发布语音提示: {text}')
 
     def _should_auto_undock(self, target_name: str) -> bool:
-        if not self._auto_undock_enabled or target_name == self._charger_waypoint_name:
+        if not self._auto_undock_enabled or is_charger_waypoint(target_name, self._charger_waypoint_name):
             return False
 
-        charger = self._waypoints.get(self._charger_waypoint_name)
-        if charger is None:
+        chargers = [waypoint for name, waypoint in self._waypoints.items()
+                    if is_charger_waypoint(name, self._charger_waypoint_name)]
+        if not chargers:
             return False
 
         try:
@@ -1535,6 +1582,9 @@ class WaypointManagerNode(Node):
             self.get_logger().warning(f'自动离桩位姿查询失败，将直接尝试导航: {exc}')
             return False
 
+        # Depart from the charger actually nearest the robot, not always the
+        # unnumbered dock; each numbered dock retains its own saved pose.
+        charger = min(chargers, key=lambda p: math.hypot(x-float(p['x']), y-float(p['y'])))
         distance = math.hypot(x - float(charger['x']), y - float(charger['y']))
         yaw_error = abs(self._normalize_angle(yaw - float(charger.get('yaw', 0.0))))
         if distance > self._undock_trigger_distance:
@@ -1760,6 +1810,22 @@ class WaypointManagerNode(Node):
             )
 
     def _check_docking_drift(self) -> None:
+        # Arrival at the saved dock and electrical charging are separate facts.
+        # Stop first; arrival may be verified from fresh, stable odometry.
+        wait_until = getattr(self, '_dock_charge_wait_until', None)
+        if wait_until is not None:
+            if not self._precise_docking_active:
+                self._dock_charge_wait_until = None
+                return
+            self._short_cmd_vel_pub.publish(Twist())
+            if self._dock_contact_pose_settled():
+                self._complete_docking_by_charge_status(charging_confirmed=False)
+                return
+            if self.get_clock().now().nanoseconds >= wait_until:
+                self._dock_charge_wait_until = None
+                self._fail_precise_docking(self._active_goal_name,
+                    '入桩已停止，但位置、角度或停稳反馈未通过确认；请检查后重试')
+            return
         if (not self._precise_docking_active or self._dock_target_odom_pose is None
                 or self._active_dock_goal_handle is None
                 or self._last_docking_feedback_state != DockRobot.Feedback.CONTROLLING):
@@ -1774,7 +1840,8 @@ class WaypointManagerNode(Node):
             elif abs(lateral) > self._dock_max_lateral_drift or abs(heading) > self._dock_max_heading_drift:
                 reason = f'倒车偏离对接走廊: 横向{lateral:.3f}m, 角度{math.degrees(heading):.1f}°'
             elif longitudinal < -0.03:
-                reason = '已越过保存的充电接触位置但未确认充电'
+                self._wait_for_charge_at_contact()
+                return
         except TransformException as exc:
             reason = f'入桩里程计反馈不可用: {exc}'
         if reason is None:
@@ -1789,6 +1856,54 @@ class WaypointManagerNode(Node):
         except Exception as exc:
             self.get_logger().error(f'入桩取消未确认，禁止启动新目标: {exc}')
         self._fail_precise_docking(name, reason + '；已停车，请重新对准后重试回充')
+
+    def _wait_for_charge_at_contact(self) -> None:
+        handle = self._active_dock_goal_handle
+        self._active_goal_id += 1
+        self._active_dock_goal_handle = None
+        self._dock_cancel_pending = True
+        self._dock_charge_wait_until = self.get_clock().now().nanoseconds + 5_000_000_000
+        self._dock_contact_stable_since = None
+        self._dock_contact_stable_pose = None
+        self._last_docking_feedback_state = DockRobot.Feedback.WAIT_FOR_CHARGE
+        self._short_cmd_vel_pub.publish(Twist())
+        self._publish_navigation_status('docking_charge_wait',
+            '已停止倒车，正在确认充电桩位置和停稳状态', waypoint_name=self._active_goal_name)
+        self.get_logger().info('回充已停止倒车：以位置和持续停稳确认到达，充电状态单独确认')
+        try:
+            handle.cancel_goal_async()
+            handle.get_result_async().add_done_callback(self._finish_dock_abort)
+        except Exception as exc:
+            self.get_logger().error(f'入桩停止确认失败，禁止新目标: {exc}')
+
+    def _dock_contact_pose_settled(self) -> bool:
+        """Only called after the contact-boundary stop, never for arbitrary stops."""
+        valid = False
+        pose = None
+        if (not self._dock_cancel_pending and self._dock_target_odom_pose is not None
+                and self._occupied_stopped() and not self._manual_control_active):
+            try:
+                pose = self._robot_pose_in_frame(self._odom_frame)
+                dx, dy, yaw = body_frame_error(self._dock_target_odom_pose, pose)
+                valid = (all(math.isfinite(v) for v in pose)
+                         and math.hypot(dx, dy) <= self._dock_verify_xy_tolerance
+                         and abs(yaw) <= self._dock_verify_yaw_tolerance)
+            except TransformException:
+                pass
+        if not valid:
+            self._dock_contact_stable_since = None
+            self._dock_contact_stable_pose = None
+            return False
+        now = self.get_clock().now().nanoseconds
+        anchor = getattr(self, '_dock_contact_stable_pose', None)
+        since = getattr(self, '_dock_contact_stable_since', None)
+        if (anchor is None or since is None or now < since
+                or math.hypot(pose[0]-anchor[0], pose[1]-anchor[1]) > .005
+                or abs(self._normalize_angle(pose[2]-anchor[2])) > .01):
+            self._dock_contact_stable_pose = pose
+            self._dock_contact_stable_since = now
+            return False
+        return now - since >= 1_000_000_000
 
     def _finish_dock_abort(self, future) -> None:
         try:
@@ -1805,6 +1920,10 @@ class WaypointManagerNode(Node):
             BatteryState.POWER_SUPPLY_STATUS_CHARGING,
             BatteryState.POWER_SUPPLY_STATUS_FULL,
         )
+        if status_charging != self._battery_is_charging:
+            self.get_logger().info(
+                f'充电反馈变化: status={msg.power_supply_status}, current={msg.current:.2f}A, '
+                f'voltage={msg.voltage:.2f}V, docking={self._precise_docking_active}')
         self._battery_is_charging = status_charging
         if not status_charging:
             self._charging_status_count = 0
@@ -1834,7 +1953,8 @@ class WaypointManagerNode(Node):
         stamp = getattr(self, '_last_battery_status_time', None)
         return stamp is not None and 0 <= (self.get_clock().now() - stamp).nanoseconds / 1e9 <= 3.0
 
-    def _complete_docking_by_charge_status(self) -> None:
+    def _complete_docking_by_charge_status(self, charging_confirmed=True) -> None:
+        self._dock_charge_wait_until = None
         goal_name = self._active_goal_name
         if not goal_name:
             return
@@ -1856,16 +1976,61 @@ class WaypointManagerNode(Node):
                 self.get_logger().warning(f'充电后取消 DockRobot 目标失败: {exc}')
 
         self._publish_waypoint_markers()
-        self.get_logger().info(f'检测到稳定充电状态，点位 {goal_name} 入桩完成')
+        message = (f'已到达{goal_name}，已确认正在充电' if charging_confirmed else
+                   f'已到达{goal_name}并停稳；充电状态待电池反馈确认')
+        self.get_logger().info(message)
         self._publish_navigation_status(
-            'docked_by_charge_status',
-            f'docking completed by battery charging status at {goal_name}',
+            'docked_by_charge_status' if charging_confirmed else 'docked_pose',
+            message,
             waypoint_name=goal_name,
         )
         self._publish_voice_prompt(self._voice_arrival_template, goal_name)
         self._advance_sequence_after_arrival(goal_name)
 
+    def _charger_pose_within_rescue_tolerance(self, goal_name: str) -> bool:
+        waypoint = self._waypoints.get(goal_name)
+        if waypoint is None:
+            return False
+        try:
+            x, y, yaw = self._lookup_current_pose()
+        except TransformException:
+            return False
+        xy_error = math.hypot(x - float(waypoint['x']), y - float(waypoint['y']))
+        yaw_error = abs(self._normalize_angle(yaw - float(waypoint.get('yaw', 0.0))))
+        return (
+            xy_error <= self._charger_rescue_xy_tolerance
+            and yaw_error <= self._charger_rescue_yaw_tolerance
+        )
+
+    def _try_charger_arrival_rescue(self, goal_name: str) -> bool:
+        """充电桩航点到达判据放宽：入桩异常收尾时，已充上电或位姿停在
+        航点容差内，任一成立即判到达；都不成立才按原样报失败。
+        不改变任何运动行为，只改最终状态上报。"""
+        if not is_charger_waypoint(goal_name, self._charger_waypoint_name):
+            return False
+        if self._battery_state_fresh() and self._battery_is_charging:
+            self._active_goal_name = goal_name
+            self._active_dock_goal_handle = None
+            self._complete_docking_by_charge_status(charging_confirmed=True)
+            self.get_logger().info(
+                f'充电桩 {goal_name} 入桩未正常收尾，但已确认充电，判定为已到达'
+            )
+            return True
+        if self._charger_pose_within_rescue_tolerance(goal_name):
+            self._active_goal_name = goal_name
+            self._active_dock_goal_handle = None
+            self._complete_docking_by_charge_status(charging_confirmed=False)
+            self.get_logger().info(
+                f'充电桩 {goal_name} 入桩未正常收尾，但机器人已停在航点容差内，'
+                '判定为已到达；充电状态待电池反馈确认'
+            )
+            return True
+        return False
+
     def _fail_precise_docking(self, goal_name: str, message: str) -> None:
+        if self._try_charger_arrival_rescue(goal_name):
+            return
+        self._dock_charge_wait_until = None
         self._dock_staging_active = False
         self._active_goal_name = None
         self._active_dock_goal_handle = None
@@ -1970,13 +2135,21 @@ class WaypointManagerNode(Node):
         self._publish_voice_prompt(self._voice_arrival_template, goal_name)
         self._advance_sequence_after_arrival(goal_name)
 
+    def _uses_mppi_only(self) -> bool:
+        # Normal waypoints/manual targets use one Nav2 action all the way.
+        # The charging dock retains its separately validated prealignment.
+        return bool(getattr(self, '_normal_navigation_mppi_only', False)) and not getattr(self, '_dock_staging_active', False)
+
     def _start_navigation(
         self,
         name: str,
         skip_undock: bool = False,
         force_normal: bool = False,
         precision_retry: bool = False,
+        occupied_retry: bool = False,
     ) -> (bool, str):
+        if not occupied_retry:
+            self._clear_occupied_wait()
         if getattr(self, '_dock_cancel_pending', False):
             return False, '正在等待入桩控制器停止确认，暂不能启动新目标'
         if getattr(self, '_precise_docking_active', False):
@@ -1984,6 +2157,7 @@ class WaypointManagerNode(Node):
         if name not in self._waypoints:
             return False, f'未找到点位 {name}'
 
+        self._dock_charge_wait_until = None
         self._arrival_refine_pending = False
         if not precision_retry:
             self._final_precision_retry_count = 0
@@ -1991,7 +2165,7 @@ class WaypointManagerNode(Node):
         if self._short_servo_active:
             self._deactivate_short_distance()
 
-        if self._precise_docking_enabled and name == self._charger_waypoint_name:
+        if self._precise_docking_enabled and is_charger_waypoint(name, self._charger_waypoint_name):
             if not self._dock_prealign_enabled:
                 return self._start_precise_docking(name)
             if not self._short_servo_enabled or not self._far_navigation_auto_refine_enabled:
@@ -1999,7 +2173,18 @@ class WaypointManagerNode(Node):
             if not self._battery_state_fresh():
                 return False, '未收到新鲜电池状态，请检查电池反馈后回充'
             if self._battery_is_charging:
-                return False, '机器人当前已在充电，无需重复回充'
+                waypoint = self._waypoints[name]
+                try:
+                    x, y, yaw = self._lookup_current_pose()
+                except TransformException:
+                    return False, '已在充电但定位不可用，无法确认是否为所选充电桩'
+                if (math.hypot(x-float(waypoint['x']), y-float(waypoint['y'])) <= self._dock_verify_xy_tolerance
+                        and abs(self._normalize_angle(yaw-float(waypoint['yaw']))) <= self._dock_verify_yaw_tolerance):
+                    self._active_goal_name = name
+                    self._active_dock_goal_handle = None
+                    self._complete_docking_by_charge_status()
+                    return True, '已在所选充电桩稳定充电，已确认到达'
+                return False, '机器人已在其他位置充电，请先确认所选充电桩与定位'
             self._dock_staging_active = True
             force_normal = True
             skip_undock = True
@@ -2012,7 +2197,7 @@ class WaypointManagerNode(Node):
         # Direct short-distance dispatch and post-Nav2 final refinement are
         # deliberately separate.  Some front ends always use Nav2 for the
         # main leg, while retaining this servo only as the final pose trim.
-        if not force_normal and self._short_direct_start_enabled:
+        if not force_normal and self._short_direct_start_enabled and not self._uses_mppi_only():
             short_started, short_distance = self._try_start_short_distance(name)
             if short_started:
                 return True, (
@@ -2023,6 +2208,7 @@ class WaypointManagerNode(Node):
             return False, 'navigate_to_pose action server 未就绪'
 
         goal = self._build_goal(name)
+        self._active_goal_pose = goal.pose
         self._active_goal_id += 1
         goal_id = self._active_goal_id
         future = self._navigate_client.send_goal_async(
@@ -2113,6 +2299,7 @@ class WaypointManagerNode(Node):
             self._fail_automatic_undock(target_name, f'离桩后启动导航失败: {message}')
 
     def _stop_sequence(self) -> None:
+        self._clear_occupied_wait()
         self._cancel_sequence_dwell()
         self._active_sequence = []
         self._active_sequence_dwell_times = []
@@ -2262,7 +2449,10 @@ class WaypointManagerNode(Node):
         self._completed_waypoints.clear()
         self._failed_goal_name = None
         name = request.name.strip()
+        self.get_logger().info(f'收到航点导航请求：{name}')
         response.success, response.message = self._start_navigation(name)
+        if not response.success:
+            self.get_logger().warning(f'航点导航未启动：{name}；{response.message}')
         return response
 
     def _handle_navigate_waypoint_sequence(self, request, response):
@@ -2323,12 +2513,20 @@ class WaypointManagerNode(Node):
         self._paused_goal_name = None
 
     def _handle_pause_navigation(self, _request, response):
+        if (self._active_goal_name and self._active_goal_handle is None
+                and self._active_dock_goal_handle is None and self._active_undock_goal_handle is None
+                and self._occupied_wait is None and not self._short_servo_active):
+            response.success = False
+            response.message = '导航请求尚在确认，请稍候再暂停'
+            return response
+        self._clear_occupied_wait()
         if self._navigation_paused:
             response.success = True
             response.message = f'导航已暂停，当前目标: {self._paused_goal_name}'
             return response
 
-        goal_name = self._active_goal_name
+        # A failed waypoint is still the same destination for manual escape.
+        goal_name = self._active_goal_name or self._failed_goal_name
         if not goal_name:
             response.success = False
             response.message = '当前没有正在执行的导航目标'
@@ -2354,6 +2552,15 @@ class WaypointManagerNode(Node):
         self._active_dock_goal_handle = None
         self._precise_docking_active = False
         self._last_docking_feedback_state = None
+
+        self._pause_stop_futures = []
+        self._operator_stopped_since = None
+        for handle in (goal_handle, undock_goal_handle, dock_goal_handle):
+            if handle is not None:
+                try:
+                    self._pause_stop_futures.append(handle.get_result_async())
+                except Exception:
+                    self._pause_stop_futures.append(None)  # Cannot certify termination.
 
         if goal_handle is not None:
             try:
@@ -2386,6 +2593,11 @@ class WaypointManagerNode(Node):
             return response
 
         goal_name = self._paused_goal_name
+        ready, reason = self._navigation_stop_ready()
+        if not ready:
+            response.success = False
+            response.message = reason
+            return response
         if goal_name not in self._waypoints:
             self._clear_paused_navigation()
             response.success = False
@@ -2487,6 +2699,188 @@ class WaypointManagerNode(Node):
         except (TransformException, KeyError, ValueError):
             return None
 
+    def _clear_occupied_wait(self):
+        # Invalidate callbacks; a completed old probe must never restart a goal.
+        self._occupied_wait = None
+        self._occupied_deadline = None
+
+    def _on_arrival_odom(self, msg):
+        v = msg.twist.twist
+        now = time.monotonic()
+        old = self._arrival_odom
+        self._arrival_odom = (now, math.hypot(v.linear.x, v.linear.y), abs(v.angular.z))
+        self._arrival_odom_stamp = rclpy.time.Time.from_msg(msg.header.stamp)
+        age = (self.get_clock().now() - self._arrival_odom_stamp).nanoseconds / 1e9
+        if (not -.1 <= age <= .25 or self._arrival_odom[1] > .015
+                or self._arrival_odom[2] > .025 or not all(math.isfinite(x) for x in self._arrival_odom)):
+            self._operator_stopped_since = None
+        elif self._operator_stopped_since is None or old is None or now-old[0] > .25:
+            self._operator_stopped_since = now
+
+    def _navigation_stop_ready(self):
+        if self._active_goal_name or self._manual_control_active or self._short_servo_active:
+            return False, '请先停止导航并退出底盘接管'
+        for future in self._pause_stop_futures:
+            if future is None or not future.done():
+                return False, '等待原导航动作停止'
+            try:
+                result = future.result()
+                if result is None or result.status not in (4, 5, 6):
+                    return False, '原导航动作停止状态未确认'
+            except Exception:
+                return False, '原导航动作停止状态未确认'
+        now = time.monotonic()
+        odom = self._arrival_odom
+        stamp = self._arrival_odom_stamp
+        if (odom is None or stamp is None or self._operator_stopped_since is None
+                or not 0 <= now-odom[0] <= .25
+                or not -.1 <= (self.get_clock().now()-stamp).nanoseconds/1e9 <= .25
+                or now-self._operator_stopped_since < 1.0):
+            return False, '等待新鲜底盘反馈并连续停稳1秒'
+        return True, '底盘已停稳'
+
+    def _handle_stop_ready(self, _request, response):
+        response.success, response.message = self._navigation_stop_ready()
+        return response
+
+    def _handle_operator_arrival(self, request, response):
+        name = request.name.strip()
+        target = self._paused_goal_name or self._failed_goal_name
+        if not name or name != target or name not in self._waypoints:
+            response.success, response.message = False, '当前目标已改变，不能确认旧航点'
+            return response
+        response.success, response.message = self._navigation_stop_ready()
+        if not response.success:
+            return response
+        self._clear_paused_navigation()
+        self._complete_confirmed_arrival(name, self._active_goal_id, None, operator=True)
+        response.message = f'人工确认到达：{name}（非自动精确到位）'
+        return response
+
+    def _on_manual_control(self, msg):
+        self._manual_control_active = bool(msg.data)
+        if msg.data and self._occupied_wait is not None:
+            self._handle_pause_navigation(None, Trigger.Response())
+
+    def _begin_occupied_wait(self, goal_name, goal_id):
+        if not getattr(self, '_occupied_wait_enabled', False) or not self._uses_mppi_only():
+            return False
+        now = time.monotonic()
+        deadline = self._occupied_deadline or now + self._occupied_wait_timeout
+        if now >= deadline:
+            return False
+        self._occupied_deadline = deadline
+        self._active_goal_handle = None  # Nav2 has already returned ABORTED and stopped.
+        self._active_goal_name = goal_name
+        self._failed_goal_name = None
+        self._occupied_wait = dict(name=goal_name, token=goal_id, deadline=deadline,
+                                   next_probe=now+self._occupied_probe_interval, inflight=False,
+                                   pose=self._active_goal_pose, probe_started=0.0)
+        if self._manual_control_active:
+            self._handle_pause_navigation(None, Trigger.Response())
+            return True
+        # Only zero here, after the old action terminated. Do not keep sending
+        # zero commands while waiting, which could interfere with manual control.
+        self._short_cmd_vel_pub.publish(Twist())
+        self.get_logger().info(f'{goal_name}目标暂时被占用：停止并等待，最多{deadline-now:.0f}秒')
+        self._publish_navigation_status('running', f'{goal_name}目标暂时被占用，已停止，等待清空后自动继续',
+                                        waypoint_name=goal_name)
+        return True
+
+    def _occupied_wait_failed(self, wait, message):
+        if self._occupied_wait is not wait:
+            return
+        self._clear_occupied_wait()
+        self._active_goal_name = None
+        self._active_goal_handle = None
+        self._failed_goal_name = wait['name']
+        self._publish_navigation_status('failed', message, waypoint_name=wait['name'])
+        self.get_logger().warning(message)
+        self._stop_sequence()
+
+    def _occupied_wait_current(self, wait):
+        return (self._occupied_wait is wait and wait['token'] == self._active_goal_id
+                and self._active_goal_name == wait['name'] and not self._navigation_paused
+                and not self._manual_control_active)
+
+    def _occupied_stopped(self):
+        odom = self._arrival_odom
+        return (odom is not None and time.monotonic()-odom[0] < .5
+                and odom[1] <= .02 and odom[2] <= .04)
+
+    def _tick_occupied_wait(self):
+        wait = self._occupied_wait
+        if wait is None or not self._occupied_wait_current(wait):
+            return
+        now = time.monotonic()
+        if now >= wait['deadline']:
+            self._occupied_wait_failed(wait, f'{wait["name"]}等待目标可达超时，当前任务未完成，请检查后重试')
+            return
+        if wait['inflight']:
+            if now-wait['probe_started'] > 8.0:
+                self._occupied_wait_failed(wait, '规划检查响应超时，已停止自动重试，请检查导航服务')
+            return
+        if now < wait['next_probe'] or not self._occupied_stopped():
+            return
+        wait['next_probe'] = now+self._occupied_probe_interval
+        if not self._occupied_probe_client.server_is_ready():
+            return
+        probe = ComputePathToPose.Goal()
+        probe.goal = wait['pose']
+        probe.goal.header.stamp = self.get_clock().now().to_msg()
+        probe.planner_id = 'GridBased'
+        probe.use_start = False
+        wait['inflight'] = True
+        wait['probe_started'] = now
+        try:
+            future = self._occupied_probe_client.send_goal_async(probe)
+            future.add_done_callback(lambda f: self._occupied_probe_accepted(f, wait))
+        except Exception as exc:
+            wait['inflight'] = False
+            self.get_logger().warning(f'暂时无法发起目标可达性检查: {exc}')
+
+    def _occupied_probe_accepted(self, future, wait):
+        try:
+            handle = future.result()
+            if not self._occupied_wait_current(wait):
+                if handle.accepted:
+                    handle.cancel_goal_async()  # planning only, not a motion action
+                return
+            if not handle.accepted:
+                wait['inflight'] = False
+                return
+            handle.get_result_async().add_done_callback(lambda f: self._occupied_probe_done(f, wait))
+        except Exception as exc:
+            if self._occupied_wait_current(wait):
+                wait['inflight'] = False
+                self.get_logger().warning(f'目标可达性检查暂未完成: {exc}')
+
+    def _occupied_probe_done(self, future, wait):
+        if not self._occupied_wait_current(wait):
+            return
+        wait['inflight'] = False
+        try:
+            result = future.result()
+            if result.status != GoalStatus.STATUS_SUCCEEDED or result.result.error_code != 0 or not result.result.path.poses:
+                return
+            if time.monotonic() >= wait['deadline'] or not self._occupied_stopped():
+                return
+            current = self._build_goal(wait['name']).pose
+            if current.header.frame_id != wait['pose'].header.frame_id or current.pose != wait['pose'].pose:
+                self._occupied_wait_failed(wait, '等待期间航点已修改，请重新确认后发起导航')
+                return
+            # Keep the original waiting deadline across repeated 206 failures.
+            self._occupied_wait = None
+            started, message = self._start_navigation(wait['name'], skip_undock=True,
+                                                     force_normal=True, occupied_retry=True)
+            if not started:
+                self._occupied_wait = wait
+                self.get_logger().warning(f'目标已可规划，导航暂未启动: {message}')
+            else:
+                self.get_logger().info(f'目标恢复可达，自动继续同一航点 {wait["name"]}')
+        except Exception as exc:
+            self.get_logger().warning(f'检查目标恢复状态失败: {exc}')
+
     def _handle_navigation_result(self, future, goal_name: str, goal_id: int) -> None:
         if goal_id != self._active_goal_id:
             self.get_logger().info(f'Ignoring stale navigation result: {goal_name}, goal_id={goal_id}')
@@ -2507,6 +2901,11 @@ class WaypointManagerNode(Node):
             return
 
         status = result.status
+        detail = getattr(result, 'result', None)
+        if (status == GoalStatus.STATUS_ABORTED
+                and getattr(detail, 'error_code', 0) == ComputePathToPose.Result.GOAL_OCCUPIED
+                and self._begin_occupied_wait(goal_name, goal_id)):
+            return
         if self._arrival_refine_pending:
             self._arrival_refine_pending = False
             self._active_goal_handle = None
@@ -2518,7 +2917,7 @@ class WaypointManagerNode(Node):
                 self._active_goal_name = None
                 self._active_goal_handle = None
                 self._goal_reached_since = None
-            if self._far_navigation_auto_refine_enabled:
+            if self._far_navigation_auto_refine_enabled and not self._uses_mppi_only():
                 refine_started, refine_distance = self._try_start_short_distance(
                     goal_name,
                     announce_departure=False,
@@ -2544,6 +2943,11 @@ class WaypointManagerNode(Node):
                 )
                 self._stop_sequence()
                 return
+            if self._uses_mppi_only() and getattr(self, '_nav2_settled_arrival_authoritative', False):
+                # SettledGoalChecker already verified fresh pose + stopped feedback
+                # for .35s. Consume that result once; do not re-judge a later frame.
+                self._complete_confirmed_arrival(goal_name, goal_id, status)
+                return
             final_error = self._waypoint_pose_error(goal_name)
             if final_error is None:
                 self._failed_goal_name = goal_name
@@ -2557,7 +2961,7 @@ class WaypointManagerNode(Node):
                     and yaw_error <= self._arrival_yaw_tolerance
                 )
                 if not within_precision:
-                    if self._final_precision_retry_count < self._final_precision_nav2_retries:
+                    if not self._uses_mppi_only() and self._final_precision_retry_count < self._final_precision_nav2_retries:
                         self._final_precision_retry_count += 1
                         started, message = self._start_navigation(
                             goal_name,
@@ -2582,6 +2986,9 @@ class WaypointManagerNode(Node):
                         )
                     self._failed_goal_name = goal_name
                     self._publish_waypoint_markers()
+                    self.get_logger().warning(
+                        f'Final arrival check failed at {goal_name}: '
+                        f'xy={xy_error:.3f}m, yaw={yaw_error:.3f}rad; no repeated correction')
                     self._publish_navigation_status(
                         'failed',
                         f'Nav2 stopped outside final precision for {goal_name}',
@@ -2605,11 +3012,40 @@ class WaypointManagerNode(Node):
                 self._goal_reached_since = None
             self._failed_goal_name = goal_name
             self._publish_waypoint_markers()
-            self.get_logger().warning(f'点位 {goal_name} 导航未成功结束，status={status}')
-            self._publish_navigation_status('failed', f'navigation to {goal_name} finished with status {status}', waypoint_name=goal_name, result_status=status)
+            detail = getattr(result, 'result', None)
+            error_code = getattr(detail, 'error_code', 0)
+            error_msg = getattr(detail, 'error_msg', '')
+            message = (
+                f'{goal_name}目标位置被占用或安全间距不足，请检查周围障碍及定位，清空后重试'
+                if error_code == ComputePathToPose.Result.GOAL_OCCUPIED
+                else f'navigation to {goal_name} finished with status {status}')
+            self.get_logger().warning(
+                f'点位 {goal_name} 导航未成功结束，status={status}, '
+                f'error_code={error_code}, detail={error_msg}')
+            self._publish_navigation_status('failed', message, waypoint_name=goal_name, result_status=status)
             self._stop_sequence()
             return
 
+        self._advance_sequence_after_arrival(goal_name)
+
+    def _complete_confirmed_arrival(self, goal_name, goal_id, status, operator=False):
+        if goal_id != self._active_goal_id or getattr(self, '_announced_arrival_goal_id', None) == goal_id:
+            return
+        self._announced_arrival_goal_id = goal_id
+        self._clear_occupied_wait()
+        self._active_goal_name = None
+        self._active_goal_handle = None
+        self._goal_reached_since = None
+        self._failed_goal_name = None
+        self._final_precision_retry_count = 0
+        self._completed_waypoints.add(goal_name)
+        self._publish_waypoint_markers()
+        detail = '人工确认到达（非自动精确到位）' if operator else 'Nav2已完成5cm内停稳确认'
+        self.get_logger().info(f'已到达点位 {goal_name}：{detail}，goal_id={goal_id}')
+        self._publish_navigation_status('operator_arrived' if operator else 'succeeded',
+                                        f'人工确认到达：{goal_name}' if operator else f'arrived at waypoint {goal_name}',
+                                        waypoint_name=goal_name, result_status=status)
+        self._publish_voice_prompt(self._voice_arrival_template, goal_name)
         self._advance_sequence_after_arrival(goal_name)
 
     def _advance_sequence_after_arrival(self, goal_name: str) -> None:
@@ -2697,6 +3133,11 @@ class WaypointManagerNode(Node):
             self._stop_sequence()
 
     def _check_active_goal_arrival(self) -> None:
+        if self._uses_mppi_only():
+            # Do not cancel MPPI at 25cm, or accept a 6cm timer shortcut.
+            # Its stopped-goal checker owns completion; result is verified below.
+            self._goal_reached_since = None
+            return
         if self._navigation_paused:
             self._goal_reached_since = None
             return
@@ -2775,6 +3216,8 @@ class WaypointManagerNode(Node):
     def _handover_arrival_to_refine(
         self, goal_name: str, xy_error: float, yaw_error: float
     ) -> None:
+        if self._uses_mppi_only():
+            return
         goal_handle = self._active_goal_handle
         if (
             not self._far_navigation_auto_refine_enabled

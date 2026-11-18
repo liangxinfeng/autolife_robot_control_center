@@ -3,6 +3,7 @@
 
 from dataclasses import dataclass
 import ipaddress
+import json
 from pathlib import Path
 import re
 import signal
@@ -239,9 +240,9 @@ def speaker_mixer_command(volume, cards_content=None):
     if cards_content is None:
         cards_content = ALSA_CARDS_PATH.read_text(encoding='utf-8')
     card = parse_pch_card_index(cards_content)
-    switch = 'mute' if level == 0 else 'unmute'
-    return 'amixer', [
-        '-M', '-c', str(card), 'sset', 'Master', f'{level}%', switch,
+    return sys.executable, [
+        str(Path(__file__).with_name('speaker_volume.py')),
+        '--card', str(card), '--volume', str(level),
     ], card
 
 
@@ -426,7 +427,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self,
         action_guard=None,
         auto_refresh=True,
-        topic_suffix='0_307',
+        topic_suffix='0_283',
         parent=None,
     ):
         super().__init__(parent)
@@ -684,6 +685,8 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self.voice_feedback_off_button.setEnabled(not busy)
 
     def refresh_voice_volume(self):
+        if self._voice_volume_busy or getattr(self, '_voice_volume_read_pending', False):
+            return None
         try:
             content = VISION_ROBOT_CONFIG_PATH.read_text(encoding='utf-8')
             volume = parse_speaker_volume(content)
@@ -691,11 +694,27 @@ class ServiceManagerPanel(QtWidgets.QWidget):
             self.voice_volume_value.setText('读取失败')
             self.voice_volume_value.setToolTip(str(error))
             return None
-        self.voice_volume_slider.blockSignals(True)
-        self.voice_volume_slider.setValue(volume)
-        self.voice_volume_slider.blockSignals(False)
-        self.voice_volume_value.setText(f'{volume}%')
-        self.voice_volume_value.setToolTip(str(VISION_ROBOT_CONFIG_PATH))
+        self._voice_volume_read_pending = True
+        def received(success, text, _code):
+            self._voice_volume_read_pending = False
+            if self._voice_volume_busy:
+                return
+            try:
+                if not success:raise RuntimeError(text)
+                actual=json.loads(text)
+                measured=int(actual['volume'])
+                if not self.voice_volume_slider.isSliderDown() and not self.voice_volume_slider.hasFocus():
+                    self.voice_volume_slider.blockSignals(True)
+                    self.voice_volume_slider.setValue(measured)
+                    self.voice_volume_slider.blockSignals(False)
+                self.voice_volume_value.setText(f'{measured}%')
+                self.voice_volume_value.setToolTip(
+                    f"实际Master {actual['master']['percent']}%，PCM {actual['pcm']['percent']}%；保存值{volume}%")
+            except Exception as error:
+                self.voice_volume_value.setText(f'保存{volume}% / 实际未知')
+                self.voice_volume_value.setToolTip(str(error))
+        self._run_command(sys.executable,[str(Path(__file__).with_name('speaker_volume.py')),'--read'],
+                          received,label='读取扬声器实际音量')
         return volume
 
     def _set_voice_volume_busy(self, busy):
@@ -730,19 +749,6 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._set_voice_volume_busy(True)
         self.event_label.setText(f'正在应用导航语音音量 {requested}%……')
 
-        def restarted(success):
-            self._set_voice_volume_busy(False)
-            self.refresh_voice_volume()
-            if success:
-                self.event_label.setText(
-                    f'导航语音音量已调整为 {requested}% 并立即生效'
-                    f'（PCH 声卡 {mixer_card}）'
-                )
-            else:
-                self._show_error(
-                    f'音量已保存为 {requested}%，但视觉语音服务重启失败'
-                )
-
         def mixer_applied(success, text, code):
             if not success:
                 try:
@@ -754,9 +760,10 @@ class ServiceManagerPanel(QtWidgets.QWidget):
                 detail = text or f'amixer 退出码 {code}'
                 self._show_error(f'设置实际扬声器音量失败：{detail}')
                 return
-            self._execute_action(
-                'restart', 'vision-service.service', restarted
-            )
+            self._set_voice_volume_busy(False)
+            self.refresh_voice_volume()
+            self.event_label.setText(
+                f'扬声器音量已调整为 {requested}%，实际输出已读回确认（PCH {mixer_card}）')
 
         self._run_command(
             mixer_program,
@@ -935,7 +942,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         layout.addWidget(self.relay_ip_status)
 
         self.relay_ip_edit = QtWidgets.QLineEdit()
-        self.relay_ip_edit.setPlaceholderText('例如 192.168.8.68')
+        self.relay_ip_edit.setPlaceholderText('例如 192.168.8.186')
         self.relay_ip_edit.setClearButtonEnabled(True)
         self.relay_ip_edit.setMaximumWidth(190)
         self.relay_ip_edit.returnPressed.connect(self.save_relay_ip)

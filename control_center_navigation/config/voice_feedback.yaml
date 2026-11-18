@@ -1,5 +1,15 @@
 waypoint_manager:
   ros__parameters:
+    # 307 ordinary navigation: MPPI owns approach, alignment and stopped arrival.
+    # DockRobot staging remains separate; no direct short servo or automatic retry.
+    normal_navigation_mppi_only: true
+    arrival_xy_tolerance: 0.05
+    # Only enable together with SettledMPPIController + SettledGoalChecker.
+    nav2_settled_arrival_authoritative: true
+    occupied_goal_wait_enabled: true
+    occupied_goal_wait_timeout: 60.0
+    occupied_goal_probe_interval: 3.0
+    arrival_yaw_tolerance: 0.06
     # 从充电桩附近前往其它航点时，先使用 Nav2 DriveOnHeading 低速前移离桩。
     auto_undock_enabled: true
     charger_waypoint_name: "充电桩"
@@ -21,13 +31,13 @@ waypoint_manager:
     # Saved charger waypoint is the robot pose when electrically docked.
     # Nav2 -> existing odom/map refinement -> DockRobot (skip its coarse staging).
     dock_prealign_enabled: true
-    dock_staging_distance: 0.55
+    dock_staging_distance: 0.35
     dock_max_lateral_drift: 0.06
     dock_max_heading_drift: 0.14
 
     # Docking Server 成功后，再使用 map -> base_link 位姿复核位置和方向。
     dock_verify_xy_tolerance: 0.05
-    battery_topic: "/topic_gv_battery_0_307"
+    battery_topic: "/topic_gv_battery_0_283"
     charging_status_confirm_samples: 2
     dock_verify_yaw_tolerance: 0.06
     dock_cmd_vel_topic: "/nav_cmd_vel"

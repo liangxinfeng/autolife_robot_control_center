@@ -156,6 +156,32 @@ poses:
       Joint_Waist_Yaw: 0.0
       Joint_Left_Gripper: 182.5928671901617
       Joint_Right_Gripper: 181.74044657483776
+  洗衣房:
+    saved_at: '2026-11-02T15:38:14+08:00'
+    joints_deg:
+      Joint_Neck_Roll: 0.01092846942723013
+      Joint_Neck_Pitch: -30.020505516601265
+      Joint_Neck_Yaw: 0.01092846942723013
+      Joint_Left_Shoulder_Inner: 40.00065132647942
+      Joint_Left_Shoulder_Outer: 0.010986171745810382
+      Joint_Left_UpperArm: 10.008402460429187
+      Joint_Left_Elbow: 137.99730329906845
+      Joint_Left_Forearm: -0.01092846942723013
+      Joint_Left_Wrist_Upper: 0.01092846942723013
+      Joint_Left_Wrist_Lower: -0.01092846942723013
+      Joint_Right_Shoulder_Inner: -40.00065132647942
+      Joint_Right_Shoulder_Outer: -0.032958515237431145
+      Joint_Right_UpperArm: -9.986430116937566
+      Joint_Right_Elbow: -137.99730329906845
+      Joint_Right_Forearm: 0.03278540828169039
+      Joint_Right_Wrist_Upper: 0.01092846942723013
+      Joint_Right_Wrist_Lower: -0.01092846942723013
+      Joint_Ankle: 0.0
+      Joint_Knee: 0.0
+      Joint_Waist_Pitch: -0.0012257473527892563
+      Joint_Waist_Yaw: -0.001498135653409091
+      Joint_Left_Gripper: 18.6439688428547
+      Joint_Right_Gripper: 29.113442554141166
   爱心:
     saved_at: '2026-07-30T18:49:33+08:00'
     joints_deg:

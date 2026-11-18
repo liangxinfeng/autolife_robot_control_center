@@ -49,7 +49,7 @@ docking_server:
       docking_threshold: 0.001
       # Dock frame 与机器人最终朝向相差 pi。负 X 是桩前方，yaw + pi
       # 让机器人在预备位面朝离桩方向，随后沿 base_link -X 直线倒入。
-      staging_x_offset: -0.55
+      staging_x_offset: -0.35
       staging_yaw_offset: 3.141592653589793
 
 cmd_vel_arbiter:
@@ -71,7 +71,7 @@ cmd_vel_arbiter:
     staging_final_heading_distance: 0.25
     staging_final_max_linear_speed: 0.05
     staging_final_max_angular_speed: 0.10
-    battery_topic: "/topic_gv_battery_0_307"
+    battery_topic: "/topic_gv_battery_0_283"
     charging_current_threshold: 0.10
     charging_use_current: false
     charging_confirm_samples: 1

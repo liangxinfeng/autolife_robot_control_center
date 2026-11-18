@@ -39,7 +39,7 @@ class MappingKeyboardTeleop(Node):
 
         self.declare_parameter(
             'output_topic',
-            '/topic_gv_target_cmd_vel_0_307',
+            '/topic_gv_target_cmd_vel_0_283',
         )
         self.declare_parameter('linear_speed', 0.18)
         self.declare_parameter('lateral_speed', 0.12)

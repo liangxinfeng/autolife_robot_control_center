@@ -1,0 +1,122 @@
+map_yaml: /home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/5.yaml
+waypoints:
+  丢垃圾:
+    description: ''
+    frame_id: map
+    x: -3.535357
+    y: 8.852454
+    yaw: 1.5859271271325035
+  充电桩:
+    description: ''
+    frame_id: map
+    x: 0.031381
+    y: 0.101432
+    yaw: 0.0264270424954123
+  前台:
+    description: ''
+    frame_id: map
+    x: 4.563742
+    y: 5.875566
+    yaw: 0.0028946983776026755
+  取衣处:
+    description: ''
+    frame_id: map
+    x: -11.190853
+    y: -0.720382
+    yaw: -3.086856841865931
+  垃圾桶:
+    description: ''
+    frame_id: map
+    x: -4.033853
+    y: 7.505625
+    yaw: -2.576904533889588
+  垃圾桶中继点:
+    description: ''
+    frame_id: map
+    x: -3.531232
+    y: 7.933985
+    yaw: -2.450709846227662
+  放衣服1:
+    description: ''
+    frame_id: map
+    x: -10.353892
+    y: -2.659346
+    yaw: -1.572857630454672
+  桌子1:
+    description: ''
+    frame_id: map
+    x: 1.379817
+    y: 7.096709
+    yaw: -1.2279881798961312
+  桌子1中继点:
+    description: ''
+    frame_id: map
+    x: 1.269
+    y: 7.42543
+    yaw: -1.1882477833197986
+  桌子2:
+    description: ''
+    frame_id: map
+    x: -1.118133
+    y: 7.041605
+    yaw: -1.3217554878140434
+  桌子2中继点:
+    description: ''
+    frame_id: map
+    x: -1.160331
+    y: 7.362444
+    yaw: -1.3192143233297249
+  桌子3:
+    description: ''
+    frame_id: map
+    x: 1.058307
+    y: 2.776003
+    yaw: 1.4123714641411398
+  桌子3中继点:
+    description: ''
+    frame_id: map
+    x: 0.915782
+    y: 2.42107
+    yaw: 1.425553063316827
+  桌子4:
+    description: ''
+    frame_id: map
+    x: -0.759894
+    y: 2.805873
+    yaw: 1.802745016784629
+  桌子4中继点:
+    description: ''
+    frame_id: map
+    x: -0.708386
+    y: 2.403746
+    yaw: 1.8104328779803989
+  洗衣机1:
+    description: ''
+    frame_id: map
+    x: -10.211555
+    y: -2.4766
+    yaw: -1.5449318562772796
+  洗衣机2:
+    description: ''
+    frame_id: map
+    x: -9.555528
+    y: -2.550113
+    yaw: -1.530316294588154
+  洗衣篮:
+    description: ''
+    frame_id: map
+    x: -10.097297
+    y: -0.741488
+    yaw: 0.03920257336733047
+  等候处:
+    description: ''
+    frame_id: map
+    x: -9.63558
+    y: -1.934927
+    yaw: -3.1397796753759915
+  观察点:
+    description: ''
+    frame_id: map
+    x: 4.150006
+    y: 4.896835
+    yaw: -3.0833821705778903

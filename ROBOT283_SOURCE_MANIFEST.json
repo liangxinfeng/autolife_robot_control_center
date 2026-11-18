@@ -1,0 +1,2460 @@
+{
+  "robot": "283",
+  "source_package": "autolife_robot_control_center",
+  "date": "2026-11-18",
+  "source_host": "10.10.1.30",
+  "files": [
+    {
+      "path": "AI_MIGRATION_GUIDE.md",
+      "bytes": 13293,
+      "sha256": "7a352428cb89bdc7a704b1e389b4916e331ac882abafd634b37b75b4e2408d53",
+      "mode": 436
+    },
+    {
+      "path": "HANDOFF_307.md",
+      "bytes": 5840,
+      "sha256": "f00ede70b758c69863cae5c6e9990016f28777a21c2f485d31f8d27ac7376711",
+      "mode": 420
+    },
+    {
+      "path": "README.md",
+      "bytes": 1364,
+      "sha256": "46fe2da7828bf74cd354cd3dfd94163ab77c1246810c95b6d550f2db87a64d63",
+      "mode": 436
+    },
+    {
+      "path": "control_center_chassis_guard/README.md",
+      "bytes": 5706,
+      "sha256": "c2a741385a7a2f93edfe67760a929cbc23648cbfd3e43ef2a44891e26fa00565",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/conftest.py",
+      "bytes": 622,
+      "sha256": "7ad47fb8b81f165d91427d0b281ea17c83fed477c42cab8329fa9cd1abdf0854",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/__init__.py",
+      "bytes": 689,
+      "sha256": "6c486dcfa951afee713cc2195baf03c5a02a41610c2aae75a336c1ed2bddd3b9",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/chassis_control_lease.py",
+      "bytes": 12833,
+      "sha256": "12f4846bdad9d455bdbd0f34c9114cb0cc2ff80ad8663a304afd93f7562cd86d",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/chassis_teleop_smoothing.yaml",
+      "bytes": 4922,
+      "sha256": "8bff6c0b7e1125cbd45f16f496612378106405e25461aabea7412e1e77d0a4e6",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/manual_key_filter.py",
+      "bytes": 6044,
+      "sha256": "5b494ec211e2b09992e809c18639061bd7f509269e5204ec0be0ad690b605d40",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/control_center_chassis_guard/velocity_ramp.py",
+      "bytes": 12818,
+      "sha256": "4a52e41f6553d809ac6b84a408e029f7b0e40ead99cccce3df3a7430e42ad5ff",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/package.xml",
+      "bytes": 635,
+      "sha256": "6448f3504e1982746c1bbfdf9da7de77d0053e169b8285ad472b9deec2f94195",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/resource/control_center_chassis_guard",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/setup.cfg",
+      "bytes": 125,
+      "sha256": "2437d8285e35b8ccd6fbd357399a17f16f2edd16484d1d02c05c8b062fa59254",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/setup.py",
+      "bytes": 871,
+      "sha256": "8fd362e9161d5f5387fd736e8691b6805ead051033cb8a348cefca1d0dc34833",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/test/fake_redis.py",
+      "bytes": 3483,
+      "sha256": "19202a6e948e9102b1ab5bab4abeb220f4d9f2489e234e4125a6462df56bacd7",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_chassis_control_lease.py",
+      "bytes": 6726,
+      "sha256": "9a421702b0b3c63eb5bd261a182b4654bdc474c16ed2614c6c1be62695243582",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_identity.py",
+      "bytes": 1850,
+      "sha256": "ddb9c94621b2f14766dfe62db9e6c9897cf4b7bc5e6b992cdad4b3e66aed94c5",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_manual_key_filter.py",
+      "bytes": 7014,
+      "sha256": "edec4959d88c505592fc8d015756e7fa4cb3992f37f7071872ae214c9a531a7d",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_redis_integration.py",
+      "bytes": 2323,
+      "sha256": "0d5342236326b968fd74a0cd24fad864958780116763a4894f16de11ad3695ce",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_ui_gating_integration.py",
+      "bytes": 8547,
+      "sha256": "f9f002e6c982259583e9a6f47c9a0c6e70714db6084a1093488e095913789f36",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_ui_key_debounce_integration.py",
+      "bytes": 11607,
+      "sha256": "ecb1fe3d3eb11b9ee6a38fdb9ad3f6507d8352bd29cf81e0cad2d739fc6ec740",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_ui_ramp_integration.py",
+      "bytes": 22990,
+      "sha256": "20a059ca49084d5f17e7e0df0ae65ba2c8590d3c1781b1d0e40523553b81a146",
+      "mode": 420
+    },
+    {
+      "path": "control_center_chassis_guard/test/test_velocity_ramp.py",
+      "bytes": 14437,
+      "sha256": "3ced950f298035c11181c4ec7e25cab7b103ef14d60d6b38616b7b2d26aa4a58",
+      "mode": 420
+    },
+    {
+      "path": "control_center_joint_control/AI_MIGRATION_GUIDE.md",
+      "bytes": 3927,
+      "sha256": "81516c51e488565b5e98e5c2d55e4c2cb3613c6a12dce9c7de463e07c7719b76",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/README.md",
+      "bytes": 11925,
+      "sha256": "78eb93493a3cbed1edc577e9b1ba8c0eabbe8ab96faf7d7f5a9cf3284c4c275d",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/config/saved_joint_actions.yaml",
+      "bytes": 23,
+      "sha256": "a8c02c244ce316c89c23baba1fc1d3cdddf719e9e18f40e85fc8a253cd9fbeb7",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/config/saved_joint_poses.yaml",
+      "bytes": 3407,
+      "sha256": "5e083521d6590cd029d0aa5db4ceca87deb30c98198880ee265c27920b4f7d3c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/__init__.py",
+      "bytes": 55,
+      "sha256": "44ecd1c24b4d407b72dfbd8e1901331778e6deef561fcf132da251aa080312a9",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/action_editor.py",
+      "bytes": 20685,
+      "sha256": "221d7ee759efad24cbf900e5ff9126bc780579189ebb01b21775254331363b9a",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/action_library.py",
+      "bytes": 5742,
+      "sha256": "0b1cbbd1424375929f8760c01d56c7be01ada3ddd533ec20c8a037dd142122e7",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/body_height.py",
+      "bytes": 2216,
+      "sha256": "0a09b433130aa38db750af4215296f00b62958635cea9acfb8f860703f8e7f55",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/control_panel.py",
+      "bytes": 92330,
+      "sha256": "fc80f45da412a776700535f8e23961689c890f19b436274bae5f42c7d17904dd",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/joint_bridge.py",
+      "bytes": 68228,
+      "sha256": "67d5eeebc7ae1da955e916ef2f61c126f7f86506234c7303dc9373a368ad67dc",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/joint_definitions.py",
+      "bytes": 4526,
+      "sha256": "4fe22758350f4ba664af2df89dfb404d5626ec37b6ac32908bca3f334e030560",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/motion_storage.py",
+      "bytes": 2156,
+      "sha256": "8d4b312c6602c23b8ff8ad035160194840d6863afcc22ef3de8a4755a2c37e48",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/operator_targets.py",
+      "bytes": 1093,
+      "sha256": "c4424f4dd3ef4ffa65ca9b00ede059bca86cd59461b3e7a939da55174aa4b123",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/pose_library.py",
+      "bytes": 2431,
+      "sha256": "db8c16f3902cd7736ae83548452b65b4597ca612b45e0700939ea586d5018257",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/robot_view.py",
+      "bytes": 35445,
+      "sha256": "7d58894c3ac97f7f690f9da7969de807efea9c0b2e8fccc0ebfe8396632f5327",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/trajectory_pickle.py",
+      "bytes": 6255,
+      "sha256": "182aabfa0043f96f84ac7d3c1f81cb1ee80622648f6e0cd921df9e42f95e22fa",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/control_center_joint_control/vr_reset_pose.py",
+      "bytes": 11466,
+      "sha256": "e5a5adc4f9bd0b139f8cf3545285e4de60d017ce36c27e4a0149e0235bc007d1",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/launch/whole_body_joint_control.launch.py",
+      "bytes": 4982,
+      "sha256": "d034f05337b46585edf9fcd6c374786a27dc860f77bee4d4acc0ae6a8a6528eb",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Ankle_to_Knee.STL",
+      "bytes": 277984,
+      "sha256": "1afc2714313f183d12ee0d68850950baec95ea286ab26f2f61d82290df4cc000",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Left.STL",
+      "bytes": 8484,
+      "sha256": "9f3690b61c343a496bd7d209e7bb289357efa3fb0ac9abd02c8f324cca954215",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Right.STL",
+      "bytes": 8484,
+      "sha256": "80642a3e4708a29316d34ec9bdbd11d98a0dc121ea7069da09cf7884f0bab65b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Back.STL",
+      "bytes": 61884,
+      "sha256": "18003a8af0a5483b607753f0de981f7ccb7851432cef18f87045fea6680156d3",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Forehead.STL",
+      "bytes": 65784,
+      "sha256": "9c16bd112c09fe8476be06acddd7ade7df53f18f555aa89cc80449264e0a6fb6",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Left_Eye.STL",
+      "bytes": 60984,
+      "sha256": "c742d0e313ce92af131ccdabb16f901557583b912ef4544125ff0b5052876f23",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Right_Eye.STL",
+      "bytes": 60984,
+      "sha256": "da735a9cb7b2ef12fd15afc024b974642d904b96a0573d45d73d23be292b5359",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Ground_Vehicle.STL",
+      "bytes": 1140134,
+      "sha256": "8dd85b2d8c0b5ea2df730c99c355f99e635b77c73fae48ceaf4b82ba5ad7bc77",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_IMU.STL",
+      "bytes": 24284,
+      "sha256": "05036f7d6f9b338be55325e3572720600e2a4e28184f19877f0ffda5db103447",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Knee_to_Waist_Pitch.STL",
+      "bytes": 475584,
+      "sha256": "ca18902a232322f9d963fa4ea02d14d56ab3c6fed29ec871d649668d64f6748e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Elbow_to_Forearm.STL",
+      "bytes": 511484,
+      "sha256": "7240a7aff0b85e0e51d9bf66b8e8e13836eb688e8e5ab10e9f45a6a82f0b9585",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Forearm_to_Wrist_Upper.STL",
+      "bytes": 594334,
+      "sha256": "c460d5a89bc871575bb9b4603cff24b68a8d87e3344630f6cbd213b63a0a2f68",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper.STL",
+      "bytes": 393084,
+      "sha256": "014f18e9a0fa0c2e1089ba9c17d30345d50dc1f108054baf85cdaff93bcc69bd",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Finger.STL",
+      "bytes": 196084,
+      "sha256": "aa7acd7ba602993674bbbcd3699dc3e9e291363cf6f7b9ac7690d592e3e8c644",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Inner_Knuckle.STL",
+      "bytes": 97184,
+      "sha256": "b81196b9763fc4a153aff14c20bab37f31e59aee557f58f06510e1990d915e3f",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Finger.STL",
+      "bytes": 195984,
+      "sha256": "13e28d9bb3a25e5d1d53d201df588c2c8419c07e6b74ea841fa828c5a1b95029",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Inner_Knuckle.STL",
+      "bytes": 94984,
+      "sha256": "64e60a8a38025453b4e9a28aa9966d79f2d1f9adbcb1d71a8598e9791fdee98d",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Outer_Knuckle.STL",
+      "bytes": 395484,
+      "sha256": "a0dcbae9fcfce99c2e30fa974ac0ba4c9c29ac0ba61eb7160c0ff584c3ea8c2f",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Inner_to_Shoulder_Outer.STL",
+      "bytes": 428534,
+      "sha256": "4331eb7c039e2dd9b7ed81e2beedbdebd5bca110330f040b2c641dab2769fdd0",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Outer_to_UpperArm.STL",
+      "bytes": 537784,
+      "sha256": "c553ee859be2c47264c81015b4d077851f6b3ff784965a2b3ff2380ca5dd5f52",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_UpperArm_to_Elbow.STL",
+      "bytes": 378384,
+      "sha256": "9e4d5f6aba352a0d2bc6eed2396aa7c6886edae40c0f6eebc96ae1267c2c4aa7",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_Single_Gripper.STL",
+      "bytes": 442334,
+      "sha256": "d9cc18ace17758aed771a0a92bdd2dba79bcdc2efa7ec0e0f25416b78e6935e4",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_to_Gripper.STL",
+      "bytes": 407934,
+      "sha256": "c4280ad4a7eef277135794ee803edc9f82e19fb78c5201f5a29b70dc7cc57aad",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Upper_to_Wrist_Lower.STL",
+      "bytes": 477434,
+      "sha256": "369d0ebb7748aede577fe36ea4822e7055fb98176790dd8fa18093659f1ace3c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Back.STL",
+      "bytes": 429684,
+      "sha256": "14f867027da347efc9c54242ddae2e743d3856905f6298dfefa5f4898fe0d67e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Front.STL",
+      "bytes": 430284,
+      "sha256": "a6f4a8d2b158f4cfce625faeece402a5f4d07a6075950b541bdc2e91290fe6f0",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Pitch_to_Neck_Yaw.STL",
+      "bytes": 350084,
+      "sha256": "d64045307b47bdf0512a18d89f30356145ca35a0a02fecbc4a096ea9f1750b98",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Roll_to_Neck_Pitch.STL",
+      "bytes": 540284,
+      "sha256": "3337c06dbbe6fc775c2e9234faf60112c84fbca02e5bb6d88fa384ebd7554ae0",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Yaw_to_Head.STL",
+      "bytes": 355784,
+      "sha256": "e215dc5af7a2199106ec33bd68976365f705825408c91b50812a2cbfc361566c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Elbow_to_Forearm.STL",
+      "bytes": 256384,
+      "sha256": "5fb8ce641d360ba7b330530ab903b615c38cdc261d06a227087abccb01a05e21",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Forearm_to_Wrist_Upper.STL",
+      "bytes": 297084,
+      "sha256": "a8069f263424c42fb3e031dab532216cfbe6dd6d1cb5eb2050dc6f4ca2d57188",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper.STL",
+      "bytes": 393084,
+      "sha256": "8f8baad1c8d02a8b9f106c6b9c3db2a2f3076f9b77b6f45c4ce9bd53c62e61e5",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Finger.STL",
+      "bytes": 196084,
+      "sha256": "27ccc64cde0c23a249a7c6d053b8bab50ff9f3871d863713edc5226de8059bea",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Inner_Knuckle.STL",
+      "bytes": 97184,
+      "sha256": "af62d6f5a702a2a30f086b0f618ebd2d20df3c47ec09d0a4c68203925edfcf4c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Finger.STL",
+      "bytes": 195984,
+      "sha256": "f28cb7d6f18a14c69a2968111ce325e08734d6effd3ccebb378a0306647881a3",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Inner_Knuckle.STL",
+      "bytes": 94984,
+      "sha256": "38cc69b141f507e5b3c5fd334a89f446739a60373be2feb21af8cf0754a5b628",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Outer_Knuckle.STL",
+      "bytes": 395484,
+      "sha256": "d0dc2e63078db74699702a3156b1ce68e0bd42ba73310915bb2737c03bd15a5f",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Inner_to_Shoulder_Outer.STL",
+      "bytes": 433284,
+      "sha256": "1611a990d687a03a0fe7965bdf8d446cd002b471237435230f90c55cbda42808",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Outer_to_UpperArm.STL",
+      "bytes": 539934,
+      "sha256": "262bc445a67ab1d5604a7be16707a9fd74cf5562c824570e59e4b5590f17b1ef",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_UpperArm_to_Elbow.STL",
+      "bytes": 380084,
+      "sha256": "6e474b883cdc40d1746b0058464f6bcfa6cba113989ee2da5506b768aef48cae",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_Single_Gripper.STL",
+      "bytes": 442334,
+      "sha256": "4b3c77e2818d3c9999d189ac60a26b16ebdeb307551d042951f8f538fb622cd3",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_to_Gripper.STL",
+      "bytes": 407934,
+      "sha256": "d1172404f2dafab6cb92ab574ae199df4e99d65452496d2f32517a594eca4c73",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Upper_to_Wrist_Lower.STL",
+      "bytes": 477134,
+      "sha256": "71d6e35589da570ba1a6883a6113e0830dc127c9d06be95037a95523e8457a00",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Waist_Pitch_to_Waist_Yaw.STL",
+      "bytes": 300784,
+      "sha256": "a910641e7fb4abd50823fb0a5934e06fa0a3725d6e670ad6254b4b3fd1cb370e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/meshes/robot_v2_2/Link_Waist_Yaw_to_Shoulder_Inner.STL",
+      "bytes": 709734,
+      "sha256": "414dc74b9db409b863146e5220614e5dbe9066ae714097325c878db879c45a8d",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/shake_hand_example.pkl",
+      "bytes": 4793179,
+      "sha256": "667b92a4da956a1bccc14ab40e02bfdc1b25513b8351d3028ed7ac445c5307b6",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/打招呼.pkl",
+      "bytes": 1071387,
+      "sha256": "22abad61ac4e7f0f69713faf232101938f7ca40d884b07db0ed9de6ed77acc37",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/比心.pkl",
+      "bytes": 217154,
+      "sha256": "f414e271645c1e0daa46523f57d484b728fef26e91be426767d1ecd5e8605b0c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/爱心.pkl",
+      "bytes": 396075,
+      "sha256": "7977b0317d53dc490a3c22ebe0b31d063f3fa2d7fbb561e870bcbe687dffdc50",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/motion_library/action_pkls/鞠躬.pkl",
+      "bytes": 1160362,
+      "sha256": "6dcef5552e7778fc81a4361d45a4aabfcf919cf25637a92070ac70e55a82ab14",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/motion_library/saved_joint_actions.yaml",
+      "bytes": 3553,
+      "sha256": "d0558ae50ca9ab1c40ac4a2f28344b715469a2a700359dd038498dacec2e6edc",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/motion_library/saved_joint_poses.yaml",
+      "bytes": 11362,
+      "sha256": "c744aa2a5619bdbc007d327aeb136f8930ce67efbdfe5184f467f911789fde03",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/package.xml",
+      "bytes": 1084,
+      "sha256": "4ce0819d01f58cd69ca68ac2892e00fb345f8fc6eb9dacda9017c0090bb342ad",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/resource/control_center_joint_control",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/setup.cfg",
+      "bytes": 125,
+      "sha256": "29bbbaf4d256ab94dfd0c1089235ba32569c18e4945481281a9f97e7a7cf6c3e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/setup.py",
+      "bytes": 1495,
+      "sha256": "b1756a306560b12b6d99268d568e516b9bbd2d1673f8e6fe36b618609126954d",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/shake_hand_example.pkl",
+      "bytes": 4793179,
+      "sha256": "667b92a4da956a1bccc14ab40e02bfdc1b25513b8351d3028ed7ac445c5307b6",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/action_bridge_integration.py",
+      "bytes": 8327,
+      "sha256": "ead60591b1aed718d6c0824ed59c7bcfaf2cbca853344212650f7b02135908ed",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/progressive_bridge_integration.py",
+      "bytes": 10307,
+      "sha256": "7b60f6e4f15e33613bf99e1ac97581caa5ede4ae495b0392eca04f6fb74d238a",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/render_action_editor_smoke.py",
+      "bytes": 4264,
+      "sha256": "90093ce41507065a7b4b9f97ea390b2cb38526a7b9c3532946072f0273fbbdcb",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/render_control_panel_smoke.py",
+      "bytes": 3587,
+      "sha256": "02ac9b6e7d7f1bb1911dc38cb4b1b083b8f90a1473b359a38ec996f5176e5bb1",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/render_pose_library_smoke.py",
+      "bytes": 1833,
+      "sha256": "d3ea94edd653bd8975634bb823028ffc23beb62ff512bf3bce7b3a9acabf3adb",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/render_robot_view_smoke.py",
+      "bytes": 3075,
+      "sha256": "31630243ed532738f3e360adbc4f034cecf40f932dcd093838de2d790cd47fd0",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_action_library.py",
+      "bytes": 3444,
+      "sha256": "6d543ddc6da87b013ce05220e40e1504c8f628e07da556b04031487086bb5090",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_body_height.py",
+      "bytes": 2130,
+      "sha256": "239bfd9b86d4666a2d60413c9ce9631315ea653d29e75c50972cc6677a5bb647",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_joint_definitions.py",
+      "bytes": 1297,
+      "sha256": "3deb4b42ad19d8da1c67d8e9771e31b2d01f9e51db809a3f888b8e1d7a40c438",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_pose_library.py",
+      "bytes": 954,
+      "sha256": "ae8df8d3cbb6f1557016e46e0ed45cb64cbf895ea8301744b25d7c3095edc0e2",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_robot_view_model.py",
+      "bytes": 2529,
+      "sha256": "ae735ffaa156e1874bd71624565813d877040c7656fe4c721b2d3f22ac8caaab",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_single_joint_operator.py",
+      "bytes": 5804,
+      "sha256": "624575bcd034b8d3ddecada1843081e51c10d5be60810972bba68b2eaf891481",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_stable_progressive_target.py",
+      "bytes": 4294,
+      "sha256": "a3e4e1b31125953c5c32cd97511d3d58369406f4ac8e2f4460d7a799ed778f2a",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_trajectory_pickle.py",
+      "bytes": 3433,
+      "sha256": "48af9e57218ec753cd605e2a8cb33d379c810049e342742e5ff4c785ac33ebcd",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_vr_reset_pose.py",
+      "bytes": 3084,
+      "sha256": "083c4ea9cae878c5c05523c48b81ea2742d81cc79a3357a408e97cb55a7c14f4",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/test_water_pose_coordination.py",
+      "bytes": 2232,
+      "sha256": "c1f586e409094ec9b027166581a7eb8e74cbd6f47751b8f4976316c34e18c282",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/test/verify_reference_pickle.py",
+      "bytes": 2153,
+      "sha256": "5d1ce62b9d427145efb32a32890430aa2030562607a1763167cef7fda2f812ac",
+      "mode": 436
+    },
+    {
+      "path": "control_center_joint_control/urdf/robot_v2_2.urdf",
+      "bytes": 58773,
+      "sha256": "0a2c883e19aa1af25c04fa91b6f669a46640f181ceba631fa1b78d2fa138cae0",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/.gitignore",
+      "bytes": 179,
+      "sha256": "78b9eef2fa0aeff124454fbe00f66e75dd6dd88fd42fab0cf37f27081e311a22",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/AI_MIGRATION_GUIDE.md",
+      "bytes": 19832,
+      "sha256": "d525bc2aea7a209a82d9ef18742a22aa73fb42b2ecaf11e191f694354bc5eae8",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/ARRIVAL_CONVERGENCE_307.md",
+      "bytes": 2868,
+      "sha256": "6a839c8b2678e4603a1a910f2fd850c7ea3a905d21f975489516c51eb12ee904",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/CMakeLists.txt",
+      "bytes": 10700,
+      "sha256": "01abee88cc393769662521b22132daf3d06566689b50bef29cdc3b0fdec3b999",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/DOCKING_SYNC_20260909.md",
+      "bytes": 1159,
+      "sha256": "710e66435225fa79b1f080b8d0fb953f0168048fe3885126bae3242b3f5767d1",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/DOCKING_UPDATE_20260909.md",
+      "bytes": 1593,
+      "sha256": "4297b772357c8e353a319fe39d6626759946005d76bfb8adadcf71be7ce4b218",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/FIX_NOT_EXECUTABLE_20260914.md",
+      "bytes": 1226,
+      "sha256": "13ae407ab242bc52f3e1c1f40e2c3faf9301db897a2d32f448752b90c24de48c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/GIT_USAGE.md",
+      "bytes": 1486,
+      "sha256": "718a0918d315779a64c9a12d890d85c9f884caee3d2745a6ed7c82100bd43c73",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/MAP_EDITOR_MIGRATION.md",
+      "bytes": 1176,
+      "sha256": "777deb10fbfa5f8388335ea47153005daf25e5f63e472e307d94081bd3c444e3",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/MPPI_ONLY_307.md",
+      "bytes": 3646,
+      "sha256": "f6bbbad827a66bb1fede9033e55d57bcfac643dafb1e9a4df4417f4f62b8af5d",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/NAV_RGB.md",
+      "bytes": 1491,
+      "sha256": "31f7eefb65d5eab93b339b8e494f5faffec0b13f381370c610ee5661025c844d",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/NAV_SYNC_20260914.md",
+      "bytes": 1804,
+      "sha256": "1f4a79866adbd6e777ac978f6f533f565bbcf00a0a64603aa203cb14f6c36d3b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/NAV_SYNC_FROM307.md",
+      "bytes": 2497,
+      "sha256": "4683b57bb2d77984fe204c0c77a51df2ff4d62414ce19edcda541d5a50ee676c",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/NAV_SYNC_LATEST_307.md",
+      "bytes": 1608,
+      "sha256": "124f8c00785878744acc347804effbf18898517928b49177d8c97a26c3b49ab1",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/OCCUPIED_APPROACH_306.md",
+      "bytes": 2194,
+      "sha256": "35dac2f63e6ce06e9bfc6bebecd2f26d66a53be5c108f1b6af7305269dfead74",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/OCCUPIED_GOAL_WAIT_307.md",
+      "bytes": 1473,
+      "sha256": "8ec7e7f89ba25d4ee360aac0f00b8aba51021be897fa95079725b481426b543a",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/README.md",
+      "bytes": 4003,
+      "sha256": "1279654024d8fff236ddbf2051ae50df7a3d66e3908a913e6afad1573c0c236c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/RELOCALIZATION_NEAR_WALL_307.md",
+      "bytes": 2969,
+      "sha256": "39cc9aa7abb708929ae1f300d6c8d1518fce42a8fa0a4419fcfa8d76c9ad30bf",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/UNIFIED_ARRIVAL_307.md",
+      "bytes": 2000,
+      "sha256": "179c773899ad297a9f69a8ad9ca06d3417ee920876dc1724c809398029bf79b5",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/USAGE.md",
+      "bytes": 2437,
+      "sha256": "b3653c3bfcdb850a0c01f24a007887a827ee9e3ca8a741dabf9d4bcc0495adb7",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/active_map.yaml",
+      "bytes": 75,
+      "sha256": "2eca319d1e0daa3a42d15f0218a8f77f7df7b3f1e2feee43586e7e9ac92f1627",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/docking_params.yaml",
+      "bytes": 2995,
+      "sha256": "913d596cae5df6501375be9a07ceb47f3ecf1f9ccfe1e6c18d1d3127934784e7",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/global_relocalization.yaml",
+      "bytes": 1793,
+      "sha256": "efb38d9a131993ed371762a6cfadb4ba0fcf2816b3e3af73b77d037224a2d42a",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/laser_filter.yaml",
+      "bytes": 289,
+      "sha256": "2e3af833620e4bc1bcfdc6b848abaadb08f8198db059e71ff7cbc77e3ac6c758",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/nav2_params.yaml",
+      "bytes": 11038,
+      "sha256": "66e2f6206fbf9d121b9ad8a1f10df9ec4d32e9f20d56e066a4c88f7643a5e442",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/nav2_tuning_notes.md",
+      "bytes": 14125,
+      "sha256": "38e80c69a0bda0cc714e9f01bf84843b78a9ae163e1f3aac752e879061351ec0",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/navigation_self_filter.yaml",
+      "bytes": 763,
+      "sha256": "cb62477a8b61c0e91e56874413c05b3924274cc7063e536685fdff975585d819",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/occupied_approach.xml",
+      "bytes": 3295,
+      "sha256": "ed2f8a71b7b6f66b6851755a08f9c027ead370dd6bac43723a1c58ef6ed11ad1",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/proximity_voice_alert.yaml",
+      "bytes": 915,
+      "sha256": "87d5ca0a890ed4d378fdec250e441930a9662aea10663f4c765e7e342a74216b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/voice_feedback.yaml",
+      "bytes": 2455,
+      "sha256": "ed77eed20f056f8678a2620a74984fbf67d476ed96a17847d62d4058d0401706",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/config/waypoints.yaml",
+      "bytes": 560,
+      "sha256": "569abbce6d58ed71bce1e56980c2d17bca21c584ef72289e57fb91b609de65ac",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/docs/NEAR_GOAL_FIX.md",
+      "bytes": 1704,
+      "sha256": "b19777a461f333609840eccafd69971d8919e030aa5418ff9dfc368b9c72520e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/docs/WALL_TAIL_FILTER.md",
+      "bytes": 2578,
+      "sha256": "82b3f5830bbb60f05de1a77b27aa5e978b67eb8f9abdebda4ab42075990befb9",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/launch/bringup_all.launch.py",
+      "bytes": 19960,
+      "sha256": "990ac213069c4d7975a047fa2f71494368d0e4dcb5e71cb2ad025288db56175d",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/launch/bringup_localization.launch.py",
+      "bytes": 7280,
+      "sha256": "b23a37a1b7fea7bf2134357c35aedd72bc22c8737da16be2d3020a5caf752f10",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/launch/bringup_navigation.launch.py",
+      "bytes": 4504,
+      "sha256": "3978f4f48967880bea514d649a00f910489cafeac8122467cd270a67487c86cf",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/.gitkeep",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/1.pbstream",
+      "bytes": 6367361,
+      "sha256": "0cb8b64ab7b2c0f165367b75f584c3628757856ddafec6a6043f1ae459b5af2c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/1.pgm",
+      "bytes": 2278817,
+      "sha256": "35eada31742050e2439ffb6ed0c068fa02c0896449720406c2cf324983e61aba",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/1.yaml",
+      "bytes": 125,
+      "sha256": "4733389a68c066fd2530f09a0ae9c4a9daee21ed3eb1d87ff44887f2dcb45b53",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/2.pbstream",
+      "bytes": 9237303,
+      "sha256": "878cf60415e3eeeca2449fd7b3e5741852fec6bb6f21899184e36653b3020c63",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/2.pgm",
+      "bytes": 3249985,
+      "sha256": "ecd6ce3e362b74e99223a61374eddbdf53206ed86b0cec082b71fea67daeeb62",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/2.yaml",
+      "bytes": 125,
+      "sha256": "14e3eac2da836c3369f6f8e55c2e651a29cc5f20f51131333f0f61cb79276811",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/3.pbstream",
+      "bytes": 10587101,
+      "sha256": "e15791d86d0da3fbd781b62c75bf890c3a38ac5178a2363dda8cd26877913e79",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/3.pgm",
+      "bytes": 3271342,
+      "sha256": "384bb4c63efd838ca4407c7d42779a78730eb89dde25bfae3c8011c643fd7a2a",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/3.yaml",
+      "bytes": 127,
+      "sha256": "36e1d41eb8666dfb0ed8466d6a68e43c4a49413bca1b1e3cfa35a09b11b93406",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/4.pgm",
+      "bytes": 3271380,
+      "sha256": "a6e08927e6ebc0b8e529898f9bdb4ea82239bee8257483c4190797f0baee9427",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/4.yaml",
+      "bytes": 145,
+      "sha256": "868b8901a0570912afd7a4e3f2967096a6ba74294ba3f9b419b14d76fd907475",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/5.pbstream",
+      "bytes": 13270101,
+      "sha256": "29c8f7295a8de68b2f8b30375ae67d006ef5750cef1cab6d7518046425978d39",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/5.pgm",
+      "bytes": 3889042,
+      "sha256": "0722cb4f8a3c6b9d1f86364db1bf64b9cab6868431f31f92d2ecba44512f508f",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/5.yaml",
+      "bytes": 127,
+      "sha256": "38bcb57ce337240bfc421aa254fce4c1abcbed238666f5ed175e2a1323276e1f",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/1/1.yaml",
+      "bytes": 117,
+      "sha256": "eb31b2428c3caf187d7399bdbbe92695f29f435aa09e750e6469d545f8a59bc0",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/1/maps_index.json",
+      "bytes": 409,
+      "sha256": "152d266427dc955e3f04e0866e601f43b400243b1ab6bc0eceedbfc454ce0734",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/3/3.yaml",
+      "bytes": 1577,
+      "sha256": "e78e57fdb7a95bc996d4cd548ee87a26f00d5053450a3055c16109acddbf7a3d",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/3/maps_index.json",
+      "bytes": 4939,
+      "sha256": "a7b5b8da806d128341a73a845b843dea36c7314d82703d3dc1ed7c0b415bc6c7",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/4/4.yaml",
+      "bytes": 117,
+      "sha256": "788022a923ffa0ec19a3ea5566194e8bacba7c13f9c9173908f558e92a7e142c",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/4/maps_index.json",
+      "bytes": 409,
+      "sha256": "6b882bad5bd78f313ee7f468add19681a3e2fce1e040c8371c16054dddaa4fcf",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/5/5.yaml",
+      "bytes": 2387,
+      "sha256": "2fa9a3109933c12b0b12f6562a896c9a3b6c31779d3aa33e6d478c896320c6dc",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/5/maps_index.json",
+      "bytes": 7350,
+      "sha256": "571fc4e636808db179f3e6bcf2014be2a830b9643bb63b5769720ed34f387ab4",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundie_2f/maps_index.json",
+      "bytes": 4637,
+      "sha256": "305ecba28d7a2aece439d96da93f741350cb00009c90cf9b1f0433d2d7c4020f",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundie_2f/yundie_2f.yaml",
+      "bytes": 1481,
+      "sha256": "d66d3d737e8661615c882fe00839f62f8c4508da20bc001676ac30ca3b3ab1ad",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundie_2f_01/maps_index.json",
+      "bytes": 453,
+      "sha256": "76f24c5fcf6c1a0fa25bd53e5fb6b12f84302f92d73f7f2229f265c478e690cb",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundie_2f_01/yundie_2f_01.yaml",
+      "bytes": 128,
+      "sha256": "34d5de5d16085058691c6ff68b25374d90c1cde7e0594fb18574e3398e3a2b36",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundiezhanting/maps_index.json",
+      "bytes": 1843,
+      "sha256": "2f9e89e0efc543ea7adc1ac6c10b349a92034d8e8a13030a622ec87fbe32e3ef",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/waypoints/yundiezhanting/yundiezhanting.yaml",
+      "bytes": 579,
+      "sha256": "c8c03b0cf4152025a33958b3241e011de380cd25bd669b0a5d9b035544900692",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/yundie_2f_01.pgm",
+      "bytes": 502409,
+      "sha256": "b24868304e1990767fbec8308bc5d7dad39226e1e01997db5838a8af9de43aad",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/yundie_2f_01.yaml",
+      "bytes": 153,
+      "sha256": "83cec09651cd3ba03f6e6cabc434dec3ffd4fcf8520c3ddf820a8c50bc4b1ac5",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/maps/yundiezhanting.png",
+      "bytes": 6294,
+      "sha256": "c47109208a5409368a6d0b54f72e688aa765c6952082a3883da09b32107b6963",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/maps/yundiezhanting.yaml",
+      "bytes": 136,
+      "sha256": "01df2ecb176401b72d479ad5679cd6712284951941d15b35264f3d176873b73f",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/navigation_plugins.xml",
+      "bytes": 312,
+      "sha256": "63b22cbb983b393b4d0f9d0d3dd0e342ca818466f7f7c7dc9197b2b2847110e5",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/package.xml",
+      "bytes": 2764,
+      "sha256": "ea70f0ca912de2fcf01a080b5e1d6e8798a1f1733a161bc400625093f1579fb6",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/scripts/arm_control_service_wrapper.py",
+      "bytes": 332,
+      "sha256": "d66896dd4908f8a5b447091092a4d59023fcc7a453c3968d37552e4db794f677",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/charger_waypoints.py",
+      "bytes": 456,
+      "sha256": "2d678d1268c96f0b3c013f03d39c189849fbdcb91656aca4ef12841e1dd61cbe",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/scripts/cmd_vel_arbiter_node.py",
+      "bytes": 20531,
+      "sha256": "1208d61feb32c89678bad8084d1f932673d22d9dc034bff8267e5e658d6b1bfb",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/dual_scan_tail_core.py",
+      "bytes": 5443,
+      "sha256": "d9dd9c7b1ac2c0a3ccdb49f3e70160dd431a27e5aeb8a32eef45f93dd138dae9",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/scripts/dual_scan_tail_node.py",
+      "bytes": 5579,
+      "sha256": "5d88a7620d69e16967a7374e40232b9ef8d30f11a980fbc8b52079845aff436a",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/head_rgb_panel.py",
+      "bytes": 9698,
+      "sha256": "6ea0d4320107004e7a788ec6582fc9b29e0d595cee779d9adf54449d5ff3b55a",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/scripts/keyboard_waypoint_control_node.py",
+      "bytes": 32420,
+      "sha256": "9d6820c8123a9389b9f9a8dfa6220b99eb606d898ee4bfd3055faa0118c67e05",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/nav_cmd_vel_relay_node.py",
+      "bytes": 1252,
+      "sha256": "bcf151bd8918d8a00d6d6de520470f1889f98a20547330982f55df09137651aa",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/navigation_startup_on_initialpose_node.py",
+      "bytes": 9815,
+      "sha256": "c59fccdce46931cc96dc27fa01b2b76c62a4576ab9ea40dcae453c9228e40a80",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/navigation_status_overlay_node.py",
+      "bytes": 5439,
+      "sha256": "c68eec811eeb77781c107d9cb358c03787fbd17a8f33041c67cf661eb084c694",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/navigation_ui_node.py",
+      "bytes": 130830,
+      "sha256": "62c8b375b08c9c62be7298022b773ce1ecf39d5a20fc6e61a52c828e76233eef",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/odom_topic_relay_node.py",
+      "bytes": 1242,
+      "sha256": "db7382c01e12ed364b2437c6e21b5d6787716a4ed713daeac9b679877f4d4097",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/pose_continuity.py",
+      "bytes": 4852,
+      "sha256": "d6ba852dd49bc0c4954b22fdd430f6addc6280bce7616e433297e48f2a7753f7",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/scripts/proximity_voice_alert_node.py",
+      "bytes": 8148,
+      "sha256": "3a74dc59ec5895941cecb8da8aa48e7cdd797845df1277e40a37bbabe80b51ce",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/short_distance_servo.py",
+      "bytes": 7771,
+      "sha256": "18df876637c09cb58b44e0dcb56dea97e5219d2b8e97dcd2ecf3358803932eec",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/scripts/waypoint_manager_node.py",
+      "bytes": 161175,
+      "sha256": "6754dcc665bea82d824661a211bc33b255f93ef52e4d744bdce0cd26172c5799",
+      "mode": 509
+    },
+    {
+      "path": "control_center_navigation/scripts/waypoint_manager_node.py.orig",
+      "bytes": 106502,
+      "sha256": "1be438fef135687b3118629a7af84af37fbd49353375f2d5bca1735d108e5abd",
+      "mode": 493
+    },
+    {
+      "path": "control_center_navigation/settled_plugins.xml",
+      "bytes": 518,
+      "sha256": "6c08cf4291f7cb812d7e3be00607b5fe5b19f7de8a811218dfbd3a7065171dcf",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/amcl_startup_compat.cpp",
+      "bytes": 964,
+      "sha256": "1ba7e39f08d2e20e53178e22ff5670b92672afe2fdb9a58cd57fff9977a56ec2",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/arrival_settle_policy.hpp",
+      "bytes": 977,
+      "sha256": "6bdab09265b1cba54f7d256e860f7637a09e7278eec467228c442eae51dc3808",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/cartographer_global_relocalization.cpp",
+      "bytes": 60701,
+      "sha256": "2e0edd21dd01652b639e1767a92e007438c795ffbf8e1a954ff3d58ddd5febf7",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/README.md",
+      "bytes": 1427,
+      "sha256": "6ac6418e7737b1f2216443769b24cbd3e3ecd16c40e46ec4dc0a762b69d62936",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/dock_database.cpp",
+      "bytes": 7121,
+      "sha256": "c1dd53395e0b73de5f20c8e89a493d2ac740f691ac00db9cbcd8cfadb665fd3f",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/dock_projection.hpp",
+      "bytes": 735,
+      "sha256": "77eba4f7c9df52c74e9e45872235b5d77e59d4070c2ff1335bdb1c398756b1a0",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/docking_server.cpp",
+      "bytes": 27332,
+      "sha256": "2d2a8b113e22f871789138959ada5b6a022cc9cb6e0d689fe9f0a2c859c0aed3",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/main.cpp",
+      "bytes": 911,
+      "sha256": "7ab1496838b436a56e87dbc38adffc0ceb2f98ba4accc3e0e06661c4f28515da",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/docking_compat/navigator.cpp",
+      "bytes": 3957,
+      "sha256": "dfb3049bada61fe4fce16aef74f10003195cef22aac96062bf1f5fdc53794d37",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/exact_goal_endpoint.hpp",
+      "bytes": 1382,
+      "sha256": "a70e2419784dbdea28c449778874e3967c1dbd5d4a851994a06a0c563db41ab4",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/exact_goal_planner.cpp",
+      "bytes": 9139,
+      "sha256": "ffcce0a46591071beb4ff92da2bc06200353b56983ffdbd771f42af782d3a197",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/exact_near_goal.hpp",
+      "bytes": 2119,
+      "sha256": "efe38b3656e827a967a44edc8207862d73173e788670268fa7f0e2361e3bab85",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/settled_mppi.cpp",
+      "bytes": 5472,
+      "sha256": "74dafaf723043297c1baa66a38634a209abcc9a8d659381be7b6c197f2b78308",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/terminal_approach.hpp",
+      "bytes": 3166,
+      "sha256": "34199174a64b9982add60418e236bc492cc6f68fad9c52a8dbcc1143749d0de4",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/wall_tail_filter.cpp",
+      "bytes": 923,
+      "sha256": "ceb00a3567793f021ab29ea69f2c386ae535cf98f6474a00d159afc88422e6a8",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/src/wall_tail_filter_core.hpp",
+      "bytes": 10613,
+      "sha256": "08e725513a086f6908973e38efb078de8b832cc2d3fff1e4ccf6cead643f9ef1",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/srv/DeleteWaypoint.srv",
+      "bytes": 44,
+      "sha256": "958c8bbde5d2ba0f66a4a9d986a8df216e5baa29a89af0e6daf1c52edb043317",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/srv/ListWaypoints.srv",
+      "bytes": 47,
+      "sha256": "268af13b8912ff0908503b9d97bded9d4753822be03f693ec579f3f15bc920e9",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/srv/NavigateToPoseRefined.srv",
+      "bytes": 80,
+      "sha256": "b2d6692325041c8dc72664241e1d8ed92f12ff192ffbc16c27a47105c239dc6f",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/srv/NavigateToWaypoint.srv",
+      "bytes": 44,
+      "sha256": "958c8bbde5d2ba0f66a4a9d986a8df216e5baa29a89af0e6daf1c52edb043317",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/srv/NavigateWaypointSequence.srv",
+      "bytes": 79,
+      "sha256": "f95e66042d7278cdeb95ad30e5df6f56afda20726b1d03d1ceaa81371d57dde5",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/srv/RenameWaypoint.srv",
+      "bytes": 64,
+      "sha256": "70e3fa2d6171506923c61a0e210a16a5bbe594af2fdc5d40d2d7586c737100a5",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/srv/SaveWaypoint.srv",
+      "bytes": 44,
+      "sha256": "958c8bbde5d2ba0f66a4a9d986a8df216e5baa29a89af0e6daf1c52edb043317",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/srv/SwitchWaypointMap.srv",
+      "bytes": 85,
+      "sha256": "31fb07be72a72784f791f1e112bc1cc5bc05edb480cecb19f9963656d81ead64",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/support/lidar_startup_283/README.md",
+      "bytes": 1925,
+      "sha256": "155cbdb7f3a3990c05af6c10d0a2612137687153c8bcb64f6dd4605e09f99ebe",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/support/lidar_startup_283/lidar_startup.py",
+      "bytes": 3246,
+      "sha256": "6f85158926f26b25f5ead85ffb3b3471a4bb5f33d59a0409c9531dcfb437dab9",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/support/lidar_startup_283/main.py",
+      "bytes": 697,
+      "sha256": "3ddfbd5be1b0a263b78ad5a189b387526e2d3af5d5d3d1d03b0ef27b948047ef",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/support/lidar_startup_283/test_lidar_startup.py",
+      "bytes": 2315,
+      "sha256": "6049f040e1d78cb8714e5c3cd0c81b815fd76e50a171bc53971bf20a8436456c",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/test/amcl_configure_probe.py",
+      "bytes": 1505,
+      "sha256": "b1b359aa2884f76e2afe22c8417438fb67f2f5217cdac93b929a62340c8673d6",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/amcl_startup_regression.cpp",
+      "bytes": 549,
+      "sha256": "08624c20a7b5b2cbad160416b2bc0e8bd70a13df4ad3acd8c29cba543baf0ad4",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/arrival_settle_regression.cpp",
+      "bytes": 904,
+      "sha256": "cef72d6e5299f709ba26dc2d98de066e7ea71ca3d1c76258c39b140db64f0d5c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/baseline_relocalization.cpp",
+      "bytes": 33903,
+      "sha256": "c2a526d0caddffbfe293595ffadfc370975cbfcac533b8d29f73479043633ab9",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/docking_lifecycle_smoke.py",
+      "bytes": 1620,
+      "sha256": "90470d8ca25accb3bba0a160ce0aebba85f7431a3e14158e92c091bdb6cd530e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/docking_projection_regression.cpp",
+      "bytes": 2856,
+      "sha256": "9afe50c571da486bf5456f1acec4785b2f17009edb5bc07ff6cbc836b1df2465",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/entrypoint_smoke.py",
+      "bytes": 1823,
+      "sha256": "cea3949657efd86961f10d1d594ebdf3445fd153b5ddb361d25d7129b33d2cdb",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/exact_goal_endpoint_regression.cpp",
+      "bytes": 1377,
+      "sha256": "68d7f9f3b307f39818c4380d323f9ce8560e095da2071c8ca79dc8074bbdd4bc",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/exact_near_goal_regression.cpp",
+      "bytes": 1578,
+      "sha256": "7845d407ed28166b935bab4de4d5ad35282890e8aca4859c229bb89fc19a5c20",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/export_bag_fixture.py",
+      "bytes": 2882,
+      "sha256": "81f9f076239771e90c1cdbaf154ba871ef7f86d5707889a2401f509b480c77da",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/map_server_load_smoke.py",
+      "bytes": 3929,
+      "sha256": "904cbed68f0542d3fb1ff0fe1aeb24fdb949ae21d07c03e9c84149a464023d00",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/navigation_ui_smoke.py",
+      "bytes": 6623,
+      "sha256": "a7b8092610a416e9e6212ffa492c7e153424ee9f669869ab87a2274964e5dd22",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/navigation_window_smoke.py",
+      "bytes": 6665,
+      "sha256": "5a6b93b75c36719cb850e04eb5de44ae0dbeab8bb2374998d77c711cbe7823e3",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/occupied_approach_bt_test.cpp",
+      "bytes": 4187,
+      "sha256": "f087702676a23b42ad63dd36cc9b4b3579cf156f2f4d962781c03f82cbc4eee2",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/occupied_approach_planner_test.cpp",
+      "bytes": 2792,
+      "sha256": "5a47ba64a80f365fa1680d036b924690a84da7e806ec5eda2cd91b8c50517a31",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/offline_benchmark.cpp",
+      "bytes": 2004,
+      "sha256": "679366cdeb5dcad6735591b64259452589ffc92d1f4b206940779412a9ec4ea4",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/proximity_voice_alert_smoke.py",
+      "bytes": 2911,
+      "sha256": "737f32fbb4b5978eade934b249effb16d69c808ab028fedae77054f10593a7ad",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/relocalization_regression.cpp",
+      "bytes": 12169,
+      "sha256": "128ed312f21650206a70ebc106263543bd121ec09b1c88f8ae519eefa57e27c8",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/test/settled_checker_regression.cpp",
+      "bytes": 1640,
+      "sha256": "d6d3e99b02fed03b8f2d7a8b48d6f6d0b44a4e28525a102c0677d8cab7d1b492",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/terminal_approach_regression.cpp",
+      "bytes": 1703,
+      "sha256": "7305fadb20b7a29b288059cba53904e6b209edd8e94e99b0af2c93982d2e21d8",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_arrival_configuration.py",
+      "bytes": 1570,
+      "sha256": "7bd6ec9a1e8c013ad56b1d083f68f45a8ac8c183da6311b584d875d962c3d390",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_asymmetric_footprint.py",
+      "bytes": 2130,
+      "sha256": "794a55d814526aa371788e30b9a7ebb72894bebc151be7ed56efac5eca6cd2d9",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/test/test_cmd_vel_arbiter_manual_override.py",
+      "bytes": 3074,
+      "sha256": "578f38a3f0e49597de78f522e268bb1712612f5714f0a5f8d0fa39a0628ab22b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_crisp_refinement.py",
+      "bytes": 2393,
+      "sha256": "c5cf3d7a7f083a68c53e468122f523b7b1faaa027dc3ab1ab589ada7c1f30ad5",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_crowd_refinement.py",
+      "bytes": 5743,
+      "sha256": "3c1a20381afbc6d68b87312dfd86891e179bea22aa7d9752711a2d54b54ddb48",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/test/test_dock_prealignment.py",
+      "bytes": 11173,
+      "sha256": "256a858e462753f3a9af8f210f5d9b15261bf140eddad72b13ee1c82581ada4e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_laser_display_timestamp.py",
+      "bytes": 2039,
+      "sha256": "f99fe36ef0b7347752ecded0a6469f358f85d2e21027365a02bb5f64aacb2401",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_manual_goal_refinement.py",
+      "bytes": 3746,
+      "sha256": "c888d07d1abb7dcd069a7d85ef57d531c40d6e41fef5372099ff05ca6b73beb4",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/test/test_map_editor_storage.py",
+      "bytes": 6670,
+      "sha256": "956fd62fcf0f9a919d5340596dc30df376f64e681e959c7c23cca8f0099a9419",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_mppi_only_navigation.py",
+      "bytes": 3999,
+      "sha256": "46ad56ccb409a6dd90cced94a6c94b3f15bdf589d4b60ca2bc52af2f30781dc3",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_nav_rgb.py",
+      "bytes": 6876,
+      "sha256": "ef96598a4eefb64f27af8dc721c9daac72580154900f606abd5a373c9ed18b33",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/test/test_no_direct_short_distance_default.py",
+      "bytes": 716,
+      "sha256": "4138ff898623e806baa19707a8e35a7faab29fc1f765752a5e0351faf187edd9",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_numbered_docks.py",
+      "bytes": 2508,
+      "sha256": "7a159993e842a9be6b67e8d0e66ca40e14da4aa862e0db5aab4c875863e7321c",
+      "mode": 384
+    },
+    {
+      "path": "control_center_navigation/test/test_occupied_approach_config.py",
+      "bytes": 1672,
+      "sha256": "96ceffc2cd15a8ea77d0c65ddcfbd179d3e498d0eb84ed2aa141407e065cd286",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_occupied_wait.py",
+      "bytes": 4120,
+      "sha256": "3bfdb0425193e023da1ce2e5003e5d2a32f8b4e9c4bbca7181767eb37c30ee79",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_short_distance_servo.py",
+      "bytes": 4074,
+      "sha256": "3c4f475deca9de3e28570903218f4fa84f86647f2b038c00d93ffcef4791138f",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/test/test_smooth_arrival.py",
+      "bytes": 703,
+      "sha256": "6a5cfeeb344d46c6ad3ace0606be0e8ea4afbfeef1753d0d9ae3a75d02cf52f3",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_source_map_catalog.py",
+      "bytes": 1219,
+      "sha256": "cbd07086ee1e21b37e60f1a16e905a46df1cb6a90547617433f0467130d9120e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/test_staged_short_servo_logic.py",
+      "bytes": 5102,
+      "sha256": "15b07b057dffa980366da887512faceb1bc8cf97d3f2d3162cb2585085343cd4",
+      "mode": 420
+    },
+    {
+      "path": "control_center_navigation/test/wall_tail_regression.cpp",
+      "bytes": 9991,
+      "sha256": "93dc0ae6ff30fbdcb92178a1c4fc28fd61648974f4e2dcd97c8871d1bb24fecd",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/test/waypoint_sequence_dwell_smoke.py",
+      "bytes": 1431,
+      "sha256": "458ebb941c62c2e2248583f7e8bc761aa96c1a7df0731a3d462b7694f8cf2dfa",
+      "mode": 436
+    },
+    {
+      "path": "control_center_navigation/wall_tail_plugins.xml",
+      "bytes": 396,
+      "sha256": "f1e532cf4c38b5623778dbd09d63ca869a840febdf29ca1088c02882394b5369",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/README.md",
+      "bytes": 1075,
+      "sha256": "f7b0f342b1aed5b93fd3d8120f28eb5febae8ef027e6d76f9ace8a1d12151e3d",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/__init__.py",
+      "bytes": 52,
+      "sha256": "eb398e9e111444d00b3e8de75011ed3d7655a1a35b812f62056213be0c68b18b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/joint_reset_once.py",
+      "bytes": 2463,
+      "sha256": "9329c1f95dfcfeb214bb4cbd55991d4165bc2c8edb7ed114ba473a76310d46a1",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/panel.py",
+      "bytes": 68086,
+      "sha256": "9af932b91f91f6ffe1df5a02c8194062c0cfc44000b6b0cf3c70bb186599f112",
+      "mode": 493
+    },
+    {
+      "path": "control_center_service_manager/control_center_service_manager/speaker_volume.py",
+      "bytes": 3878,
+      "sha256": "e92a7ebcb3f602853f4e510e2ccc99d8885d528f3f8a3a7446dd04a37e0e788f",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/package.xml",
+      "bytes": 605,
+      "sha256": "1747068a27f2ec4a2630308d738f75f5b2e4287d5e935d00153e052c10e26b9b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/resource/control_center_service_manager",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/setup.cfg",
+      "bytes": 129,
+      "sha256": "900377d8abbf431c331c3657c4a306bbfe5933b77976d4dac71ce01b1b9f8b59",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/setup.py",
+      "bytes": 831,
+      "sha256": "5a30f6b6c4756bbcd66378c1e9f52393407d7bd0b8b6a7a6145555c51e242aa2",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/test/joint_reset_once_integration.py",
+      "bytes": 1392,
+      "sha256": "f1e109238b0058e02642a6aa216a09b3a9266cf640f0204d5a13262cec408127",
+      "mode": 436
+    },
+    {
+      "path": "control_center_service_manager/test/service_manager_smoke.py",
+      "bytes": 6780,
+      "sha256": "8b99655ff51d834374e0e4a49d6953ec113542048f0f1a67eedf223db0e4856d",
+      "mode": 493
+    },
+    {
+      "path": "control_center_service_manager/test/test_speaker_volume.py",
+      "bytes": 1964,
+      "sha256": "4ccaac00fb76dd5efb7849b26cedfb8e622e5b098f4a4ce00ea7b7e17cc3b8ec",
+      "mode": 436
+    },
+    {
+      "path": "control_center_shell/README.md",
+      "bytes": 1304,
+      "sha256": "4c68e5807b6cd9840c5d15a828553f817f27aca1501db635ea382300c97070ae",
+      "mode": 436
+    },
+    {
+      "path": "control_center_shell/control_center_shell/__init__.py",
+      "bytes": 48,
+      "sha256": "d7fad4398d85e9397c860ec977387060e661285246e2759f20439e89df082436",
+      "mode": 436
+    },
+    {
+      "path": "control_center_shell/control_center_shell/app.py",
+      "bytes": 48637,
+      "sha256": "94fee4e0395d796660e4b663f9629a4410bbf625b7a2b95be0a61d189d86f17a",
+      "mode": 420
+    },
+    {
+      "path": "control_center_shell/launch/control_center.launch.py",
+      "bytes": 1678,
+      "sha256": "bef7f22978be90a057ea013d51ea694959bd5852b6436a0fec4bb027fd605b17",
+      "mode": 436
+    },
+    {
+      "path": "control_center_shell/package.xml",
+      "bytes": 870,
+      "sha256": "a458e91551f1601d3efd50bdc3e312920fd542fc70aef83006b881f9e3c4f082",
+      "mode": 436
+    },
+    {
+      "path": "control_center_shell/resource/control_center_shell",
+      "bytes": 21,
+      "sha256": "0fce6614f8b80d5536d73302d46e3f209fe0756ecc45281400fd5fbab406c638",
+      "mode": 436
+    },
+    {
+      "path": "control_center_shell/setup.cfg",
+      "bytes": 109,
+      "sha256": "39edad7e870caee181ca18aecb5a11ae5f9e5c110f4edb63e8bd11815962090e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_shell/setup.py",
+      "bytes": 791,
+      "sha256": "49ac9f6e52dca088ed911217848bb1c35a7b9ce98a3f74fa2627c6265c1dbea3",
+      "mode": 436
+    },
+    {
+      "path": "control_center_shell/test/service_manager_integration_smoke.py",
+      "bytes": 2861,
+      "sha256": "c545e74afb057563458755300bd38d7eb7cd644b9b06ad4e956c9157a50dd211",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/20260920建图大地图性能优化.md",
+      "bytes": 4644,
+      "sha256": "d4da17c9e029e1ac96bfefb907126e39b51c78f556fbdff299fa6ee838d157a3",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/20260920建图实时性优化.md",
+      "bytes": 3103,
+      "sha256": "e44afdd2c9ddee1351bb92d21165433a72c49608b1db2ac8634179bd1339566f",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/20260920建图局部更新性能优化.md",
+      "bytes": 3072,
+      "sha256": "21ae6d5a3360f950ea1fa717620439afaec214f28d955695458ce16c9df79773",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/328增量建图使用说明.md",
+      "bytes": 5587,
+      "sha256": "3c67fbb5cc86f6d8458182f49ba338ed911571b6fc7584bb213ff40e984c838d",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/AI_MIGRATION_GUIDE.md",
+      "bytes": 16457,
+      "sha256": "e414eb32694e58ddcdc1c455118e8a35974560396d66d29130100bc90409fef4",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/CMakeLists.txt",
+      "bytes": 2081,
+      "sha256": "8e7603d93a45a49b02c5b68411867b3012b80c6d8e1b06fdcd84c2539010133b",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/README.md",
+      "bytes": 10341,
+      "sha256": "52a52de23cf117c9ed56693a2d47c80be495f2385d492e62ad40b2dac33eac15",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/SYNC_FROM_328_20260907.md",
+      "bytes": 1663,
+      "sha256": "c3f31397b020862f256759b10320f465215e391c9529374dc0be9e0554533da1",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/config/multi_lidar_incremental.lua",
+      "bytes": 412,
+      "sha256": "99fd7d4e9a92d052fbb3f6f155a41286d32580ca64a371f2905c9f074510bcd5",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/config/multi_lidar_optimized.lua",
+      "bytes": 6202,
+      "sha256": "7b27a8054a548674dfab3ac58ccab44d8099d91efcca8ea58b442c1912e66836",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/config/multi_lidar_quality.lua",
+      "bytes": 2143,
+      "sha256": "765469be6c057b9bcabd13b392bfd264d96a027c0bb62d04c43b7c9be0731abf",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/include/control_center_slam/map_save_panel.hpp",
+      "bytes": 1778,
+      "sha256": "148441ef5bdcfb24e490aba25e68045c7152cddd89b5e1d31168d39368e9de3b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/launch/multi_lidar_slam_optimized.launch.py",
+      "bytes": 8578,
+      "sha256": "8479f77617c5b4082226db7cdf0321a49f45e5aa8d7cdb24c4e41921e47eae4d",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/maps/.gitkeep",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/1.pbstream",
+      "bytes": 6367361,
+      "sha256": "0cb8b64ab7b2c0f165367b75f584c3628757856ddafec6a6043f1ae459b5af2c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/1.pgm",
+      "bytes": 2278817,
+      "sha256": "35eada31742050e2439ffb6ed0c068fa02c0896449720406c2cf324983e61aba",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/1.yaml",
+      "bytes": 125,
+      "sha256": "4733389a68c066fd2530f09a0ae9c4a9daee21ed3eb1d87ff44887f2dcb45b53",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/2.pbstream",
+      "bytes": 9237303,
+      "sha256": "878cf60415e3eeeca2449fd7b3e5741852fec6bb6f21899184e36653b3020c63",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/2.pgm",
+      "bytes": 3249985,
+      "sha256": "ecd6ce3e362b74e99223a61374eddbdf53206ed86b0cec082b71fea67daeeb62",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/2.yaml",
+      "bytes": 125,
+      "sha256": "14e3eac2da836c3369f6f8e55c2e651a29cc5f20f51131333f0f61cb79276811",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/3.pbstream",
+      "bytes": 10587101,
+      "sha256": "e15791d86d0da3fbd781b62c75bf890c3a38ac5178a2363dda8cd26877913e79",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/3.pgm",
+      "bytes": 3271342,
+      "sha256": "63212d7901aea2d9d5445b6e8883e98261633db0e48d7ef8d0676481a2370c34",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/3.yaml",
+      "bytes": 125,
+      "sha256": "4e33234ca1d8b21e1b80b5aaa7bf5f29804574d709a405713038401cc593201e",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/5.pbstream",
+      "bytes": 13270101,
+      "sha256": "29c8f7295a8de68b2f8b30375ae67d006ef5750cef1cab6d7518046425978d39",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/5.pgm",
+      "bytes": 3889042,
+      "sha256": "085aa2c9eceb30ad58bf1ea023a4333d33ce05100d2ab796ccc06e865dfce152",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/5.yaml",
+      "bytes": 125,
+      "sha256": "189a09bb107ea668ce83b1a65bbeff24c93e96fd0d9f20ab8f45cc5cbf11c1b1",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/map_20260803_191825.pbstream",
+      "bytes": 1035774,
+      "sha256": "4fa87d6e825a15b6bd2dc7a2926633790f34c4d33d6c388388cd39338cda227c",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/map_20260803_191825.pgm",
+      "bytes": 221367,
+      "sha256": "611e05ef16705460a9d5245a7974185fbf351f4a61fb90fc69adccd45754c6af",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/map_20260803_191825.yaml",
+      "bytes": 142,
+      "sha256": "eba04e1a70eaea747d90fc4b7de2467e13f37270387447a88c2d423480141418",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/optimized_map.pgm",
+      "bytes": 412196,
+      "sha256": "91b398d136d39a12de07d5a8518123f090d3806d25bd0598fea6b1c689ac289f",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/maps/optimized_map.yaml",
+      "bytes": 137,
+      "sha256": "f7522546563301a7461dca55bdea7a9b53a7442ecdaea23cec7f50ef076cf915",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/package.xml",
+      "bytes": 1476,
+      "sha256": "48a78686366ff176996034e6130c210c067e06f1628dbbc9d88b0b45c762ce1a",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/runtime/cartographer_multi_origin_node",
+      "bytes": 8640600,
+      "sha256": "8927742b4137e1e256c42e276538783413ebbdf4d7b5a0cf292139f40f66c268",
+      "mode": 493
+    },
+    {
+      "path": "control_center_slam/runtime/cartographer_occupancy_grid_node",
+      "bytes": 2674960,
+      "sha256": "2d59e37a3af70822afaa77613d75ef2fd5d654658f11975fac851f58dfc75f58",
+      "mode": 493
+    },
+    {
+      "path": "control_center_slam/rviz/slam.rviz",
+      "bytes": 3958,
+      "sha256": "578d0aadee070442814f51eac676ec82984ff0c57f513ab8ae676cff8668e271",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/rviz_plugins.xml",
+      "bytes": 278,
+      "sha256": "196eac694d456adb850b61ac8b45304ff55936030ef2c19a85c3e89b3625a120",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/scripts/build_multi_origin_cartographer.sh",
+      "bytes": 3058,
+      "sha256": "489190f2a5d0f60b808e912b0bb46e3976b1250b8fc58856a667f01af95cc12b",
+      "mode": 493
+    },
+    {
+      "path": "control_center_slam/scripts/incremental_mapping.py",
+      "bytes": 9929,
+      "sha256": "01c9d311d963e0bc8d46014f14ac97218db155e5458889a3e37c6bc3eb376158",
+      "mode": 493
+    },
+    {
+      "path": "control_center_slam/scripts/mapping_keyboard_teleop.py",
+      "bytes": 13024,
+      "sha256": "2f4d236d7958ae0691b7ea480d02c5e762ef2ba035badb6ab4ff5640bd496fef",
+      "mode": 493
+    },
+    {
+      "path": "control_center_slam/scripts/mapping_scan_adapter.py",
+      "bytes": 7155,
+      "sha256": "9ba7ca6a4c9c53a889f21d95cd20c318d1ad9d3f7cebf8ed72f4a2a41eaea1a7",
+      "mode": 493
+    },
+    {
+      "path": "control_center_slam/scripts/slam_ui_node.py",
+      "bytes": 80920,
+      "sha256": "0645b9911eb69ec7f1f14484331ae239612eac2d6fd17c63fe82437c925ab787",
+      "mode": 493
+    },
+    {
+      "path": "control_center_slam/src/map_save_panel.cpp",
+      "bytes": 11668,
+      "sha256": "82bb0210d9491e08f52a027a778ac7a81fd5034b0677c7542d5b9c20f3657db2",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/test/test_incremental_mapping.py",
+      "bytes": 4556,
+      "sha256": "ed44303806596c9ab4fbee95319b8a217057d8c5369a808abdfeff3d92d9b967",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/test/test_initial_alignment.py",
+      "bytes": 4275,
+      "sha256": "5c76f8fd693d9e7381732abdcfa5d04609741ab894e27d12df5bd7cb51f555ee",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/test/test_stationary_denoise.py",
+      "bytes": 2109,
+      "sha256": "111dbed7ea2f0222e54e5a2d5a2e830b1f65247493b8a29b6c30ba5edc14dfe7",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/vendor/328建图架构分析与第二轮优化.md",
+      "bytes": 5076,
+      "sha256": "0a5cecbc05b53c1abdd2513804bd9574d3b1203655be31d27f34977e42452aa4",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/vendor/328雷达外参与细障碍物保留优化.md",
+      "bytes": 5976,
+      "sha256": "0e1c31919d6dafeb3898543c234756ad0867b7b3123b7beb9e8006ff987cf055",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/vendor/README.md",
+      "bytes": 5910,
+      "sha256": "489ee038161d2b890bbb42e1ebc49d672b93924c2d0104a3cbed98b85a7c966b",
+      "mode": 436
+    },
+    {
+      "path": "control_center_slam/vendor/SOURCES.sha256",
+      "bytes": 207,
+      "sha256": "b2354698bfd3d0e2c6ebc7bee7eca4895f342677766b1b538b1f366d60c401c4",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/vendor/cartographer-multi-origin-2.0.9004.tar.gz",
+      "bytes": 1499472,
+      "sha256": "35153ef6e7837153aee873724a4ff26a0e8b0cc59fef1916dfdbd51cd04cb362",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/vendor/cartographer-ros-2.0.9003.tar.gz",
+      "bytes": 79212,
+      "sha256": "1fcf55c38c6225d2e28922a125caf133e8fc96c985cc4b83b1758c51f812e002",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/增量建图空状态修复说明.md",
+      "bytes": 1569,
+      "sha256": "e66b5e8fd50c13e567fd233f7a91788b78bdeb3659051b28bbdc6c5b2a8a193e",
+      "mode": 420
+    },
+    {
+      "path": "control_center_slam/走廊定位连续性优化说明.md",
+      "bytes": 2014,
+      "sha256": "24bd02b8e8f6c1db39e80c071878e27ae32c541a31a131a8d8547f63712b42b8",
+      "mode": 420
+    },
+    {
+      "path": "launcher/start_autolife_control_center_300.sh",
+      "bytes": 2392,
+      "sha256": "4f29587433a993523ab984719467111662452b95dd5b5224858ca79b2de81f62",
+      "mode": 493
+    },
+    {
+      "path": "launcher/start_autolife_control_center_306.sh",
+      "bytes": 2392,
+      "sha256": "93eeb9796748a3ba6efc0558cb40d7089c64cc14cadca629df7980f1659eb73f",
+      "mode": 493
+    },
+    {
+      "path": "launcher/机器人综合控制中心-300.desktop",
+      "bytes": 348,
+      "sha256": "059a027dc89f0087b8fd52efe89e795fb7beb515a43e50cb28fa6e3ff6b04910",
+      "mode": 493
+    },
+    {
+      "path": "launcher/机器人综合控制中心-306.desktop",
+      "bytes": 348,
+      "sha256": "5aeda07c2cc2882da290d94779937c5887ea85c05649665f813b76902b4ef016",
+      "mode": 493
+    },
+    {
+      "path": "logo/README.md",
+      "bytes": 2416,
+      "sha256": "060cf65ed6ec2e17d8f917e6ddcd4b83599c998a2ad9bd833a184f0727818b4a",
+      "mode": 420
+    },
+    {
+      "path": "logo/app.js",
+      "bytes": 12021,
+      "sha256": "da72eea91e5713581b2ddfc281fc6421b4295c7521b8da286595de9cd3eb6147",
+      "mode": 420
+    },
+    {
+      "path": "logo/autolife-logo-display.service",
+      "bytes": 557,
+      "sha256": "4d2f414308780c81bbaf2bee05adbea5356f16e8431be0678c3bf2587de85f21",
+      "mode": 420
+    },
+    {
+      "path": "logo/index.html",
+      "bytes": 2689,
+      "sha256": "e8e56592dad530f078191ed1b5661acde5e626854f8488a60109f7b24608de04",
+      "mode": 420
+    },
+    {
+      "path": "logo/install_logo_service.sh",
+      "bytes": 435,
+      "sha256": "99995c61cef0fd41a98d03a2577cb8962c53f2089c3088bebfb9388517e69516",
+      "mode": 493
+    },
+    {
+      "path": "logo/logo_server.py",
+      "bytes": 7049,
+      "sha256": "af33b6e50131b6169ba7d5c7fc10172b328e20329e2d29e7ba148544d99511d0",
+      "mode": 509
+    },
+    {
+      "path": "logo/set_display_mode.sh",
+      "bytes": 1643,
+      "sha256": "b68bbe16f40a0569770cc15f58447d6629ff8765b29d3351582718c507557ad3",
+      "mode": 493
+    },
+    {
+      "path": "logo/start_logo_display.sh",
+      "bytes": 4631,
+      "sha256": "0632b54e00e841692fc6f3d3a12cc94af14de093b87e68fe958a53ce06906ee8",
+      "mode": 493
+    },
+    {
+      "path": "logo/styles.css",
+      "bytes": 11271,
+      "sha256": "643e0b301388152de78219feea8f9becc31f37a8829052df8e189a30f90dcb24",
+      "mode": 420
+    },
+    {
+      "path": "logo/yundie.webp",
+      "bytes": 22830,
+      "sha256": "393d8fb74505e74ee5adff648cacf6c36d3a50536174dac62c140235f2a98080",
+      "mode": 420
+    },
+    {
+      "path": "logo/启动云蝶Logo.desktop",
+      "bytes": 347,
+      "sha256": "31b984aaabef50f22d1df9de92307f3c5c4a4839e272af955e60d048409ffb7a",
+      "mode": 493
+    },
+    {
+      "path": "multi_lidar_slam/CMakeLists.txt",
+      "bytes": 766,
+      "sha256": "99f4d290249535c99b51bbb5412abfda8a02ffba0d22e4088d177e58ee4a8821",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/README.md",
+      "bytes": 4012,
+      "sha256": "9d3a14bdb92ebe07390e702b84233e5c2b4d7fdfae447a2b4fac363df90c5cfe",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/config/multi_lidar_cloud.lua",
+      "bytes": 3408,
+      "sha256": "f49ffc440b66046d5b5c709a403cc0a353f0aad8072c78fc6251f175bdaecc02",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/launch/multi_lidar_slam.launch.py",
+      "bytes": 3352,
+      "sha256": "bc2abcb2bf5ea8ec10a75283014c1a004f9a411817e4e4312b7211309c7f804a",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map.pgm",
+      "bytes": 186012,
+      "sha256": "5d7ab61106fbc5923ed10c7c114061497fc2e58f14db43fc6225d94b70385842",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map.yaml",
+      "bytes": 135,
+      "sha256": "fb32b2bbb9d691d76a1386efae40540ca0c7ce5a2be3e3d251a562a801cf014b",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map2.pbstream",
+      "bytes": 195089,
+      "sha256": "8fed3386a5435a89edd2f1c0e52640860ef00c721dadf67d4b821b9ca2c7252f",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map2.pgm",
+      "bytes": 374144,
+      "sha256": "947c7f5e569f06f84c5f39a282b4f76c73db847d8315ce4d3facc4b6972bb0e3",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/maps/my_first_map2.yaml",
+      "bytes": 136,
+      "sha256": "dafd478d875d1df895e627f575188b2f11479965f21bc966390856b23925c617",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/maps/yundie_2f.png",
+      "bytes": 18069,
+      "sha256": "e6d1fc1497d071c47fb0b0bbcb9c65457f9eba199caf45ffed2bf8122d678ca0",
+      "mode": 384
+    },
+    {
+      "path": "multi_lidar_slam/maps/yundie_2f.yaml",
+      "bytes": 132,
+      "sha256": "4ed7e7f9fabbb5fbc4fd329f3b224661603b81899555fd1aba181e2a4a4346b4",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/package.xml",
+      "bytes": 928,
+      "sha256": "d3e44e8713d18faf68cd163ab1f4c06a94ac3bba471775f60a46f35387546012",
+      "mode": 436
+    },
+    {
+      "path": "multi_lidar_slam/src/lidar_fusion_node.cpp",
+      "bytes": 9582,
+      "sha256": "4b3bfc118e182d775c6891a8da349e12c2a002d0940311b2704a5dad959836a1",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/README_ZH.md",
+      "bytes": 5010,
+      "sha256": "f577fdb9c7b497068b9df79c58d6f784d2b431ffafa40232bf374436661e4695",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/config/text_voice_control.yaml",
+      "bytes": 387,
+      "sha256": "9626a7c6c0535a78b3e1edb2dfb88a8f1d5c587ffeb72aecf002907efd869db6",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/launch/bringup.launch.py",
+      "bytes": 1509,
+      "sha256": "97aef21ac4d2843d0c6546a80564d5542b71dc528a738b554e8c57c118a3ddb0",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/package.xml",
+      "bytes": 816,
+      "sha256": "d36527c3e8f3548b31f86e56f5b73ef31f2a932087eed9e4e31b03d7ec86c241",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/resource/text_voice_control",
+      "bytes": 19,
+      "sha256": "559c6d099ea0ea3799d178a247f9fc59b0533a016cdd63ce891ae78c3b90022d",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/setup.cfg",
+      "bytes": 105,
+      "sha256": "42f9732728c56c60987b0b4c7e89c85853c71db62ea82df5443112e3827f95f0",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/setup.py",
+      "bytes": 1080,
+      "sha256": "bdc481387168e7cea54e30159f0696503c2b0a008c15f6e55b4e77fc16e4a283",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/test/test_command_parser.py",
+      "bytes": 926,
+      "sha256": "83b688efb8d03fde100d1b74b15021d54118149e8411a87400ee6396c2be864e",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/text_voice_control/__init__.py",
+      "bytes": 34,
+      "sha256": "e5d65ef3b1f40edaf4ef09a72eaa637bb0a4974f895b790309ed2097e4e42c4b",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/text_voice_control/asr_tts_bridge_node.py",
+      "bytes": 2316,
+      "sha256": "ea7effe043787c3806899fa88a9b22ac419ec2259c9b59762da3bcd6f72d3aeb",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/text_voice_control/command_parser.py",
+      "bytes": 1623,
+      "sha256": "bd4773f64687ce17d6b85fc58202b80d5cc55b4c68e48b00dcac8a85d26cfb96",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/text_voice_control/say_text.py",
+      "bytes": 1655,
+      "sha256": "4db574c5bc8b728c577ec82e36513456dea76677e5f97499bcd4e34b35d44fd0",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/text_voice_control/text_voice_control_node.py",
+      "bytes": 2067,
+      "sha256": "33429f28c25a58dbff4b1e37006c295a68b1ec5c2ab982047a0ff9422d279ea4",
+      "mode": 436
+    },
+    {
+      "path": "text_voice_control/text_voice_control/topics.py",
+      "bytes": 340,
+      "sha256": "d0fd43b73f8e0595c7ce3a08627d8440d8d63d4afbc837c53dd5aeb2531a475b",
+      "mode": 436
+    }
+  ],
+  "excluded": [
+    "control_center_chassis_guard\\control_center_chassis_guard\\__pycache__\\__init__.cpython-312.pyc",
+    "control_center_chassis_guard\\control_center_chassis_guard\\__pycache__\\chassis_control_lease.cpython-312.pyc",
+    "control_center_chassis_guard\\control_center_chassis_guard\\__pycache__\\manual_key_filter.cpython-312.pyc",
+    "control_center_chassis_guard\\control_center_chassis_guard\\__pycache__\\velocity_ramp.cpython-312.pyc",
+    "control_center_joint_control\\.pytest_cache\\.gitignore",
+    "control_center_joint_control\\.pytest_cache\\CACHEDIR.TAG",
+    "control_center_joint_control\\.pytest_cache\\README.md",
+    "control_center_joint_control\\.pytest_cache\\v\\cache\\nodeids",
+    "control_center_joint_control\\.pytest_cache\\v\\cache\\stepwise",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\__init__.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\action_editor.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\action_library.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\body_height.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\control_panel.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\joint_bridge.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\joint_definitions.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\motion_storage.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\operator_targets.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\pose_library.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\robot_view.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\trajectory_pickle.cpython-312.pyc",
+    "control_center_joint_control\\control_center_joint_control\\__pycache__\\vr_reset_pose.cpython-312.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_action_library.cpython-312-pytest-7.4.4.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_body_height.cpython-312-pytest-7.4.4.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_joint_definitions.cpython-312-pytest-7.4.4.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_pose_library.cpython-312-pytest-7.4.4.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_robot_view_model.cpython-312-pytest-7.4.4.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_single_joint_operator.cpython-312-pytest-7.4.4.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_stable_progressive_target.cpython-312-pytest-7.4.4.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_trajectory_pickle.cpython-312-pytest-7.4.4.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_vr_reset_pose.cpython-312-pytest-7.4.4.pyc",
+    "control_center_joint_control\\test\\__pycache__\\test_water_pose_coordination.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\config\\__pycache__\\lattice_primitives.cpython-312.pyc",
+    "control_center_navigation\\maps\\.map_backups\\3_1790139492105165813\\3.pgm",
+    "control_center_navigation\\maps\\.map_backups\\3_1790139492105165813\\3.yaml",
+    "control_center_navigation\\maps\\.map_backups\\3_1790221534254684432\\3.pgm",
+    "control_center_navigation\\maps\\.map_backups\\3_1790221534254684432\\3.yaml",
+    "control_center_navigation\\maps\\.map_backups\\5_1793179389832530340\\5.pgm",
+    "control_center_navigation\\maps\\.map_backups\\5_1793179389832530340\\5.yaml",
+    "control_center_navigation\\maps\\.map_backups\\5_1793179771199787353\\5.pgm",
+    "control_center_navigation\\maps\\.map_backups\\5_1793179771199787353\\5.yaml",
+    "control_center_navigation\\maps\\.map_backups\\5_1793261017743042867\\5.pgm",
+    "control_center_navigation\\maps\\.map_backups\\5_1793261017743042867\\5.yaml",
+    "control_center_navigation\\maps\\.map_backups\\5_1793585871343406401\\5.pgm",
+    "control_center_navigation\\maps\\.map_backups\\5_1793585871343406401\\5.yaml",
+    "control_center_navigation\\scripts\\__pycache__\\charger_waypoints.cpython-312.pyc",
+    "control_center_navigation\\scripts\\__pycache__\\navigation_ui_node.cpython-312.pyc",
+    "control_center_navigation\\scripts\\__pycache__\\pose_continuity.cpython-312.pyc",
+    "control_center_navigation\\scripts\\__pycache__\\short_distance_servo.cpython-312.pyc",
+    "control_center_navigation\\scripts\\__pycache__\\waypoint_manager_node.cpython-312.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_arrival_configuration.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_asymmetric_footprint.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_cmd_vel_arbiter_manual_override.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_crisp_refinement.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_crowd_refinement.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_dock_prealignment.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_heading_dispatch.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_laser_display_timestamp.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_manual_goal_refinement.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_map_editor_storage.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_mppi_only_navigation.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_mppi_only_navigation.cpython-312.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_narrow_navigation_config.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_no_direct_short_distance_default.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_occupied_approach_config.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_occupied_wait.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_occupied_wait.cpython-312.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_se2_configuration.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_short_distance_servo.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_smooth_arrival.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_source_map_catalog.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_staged_short_servo_logic.cpython-312-pytest-7.4.4.pyc",
+    "control_center_navigation\\test\\__pycache__\\test_staged_short_servo_logic.cpython-312.pyc",
+    "control_center_service_manager\\control_center_service_manager\\__pycache__\\__init__.cpython-312.pyc",
+    "control_center_service_manager\\control_center_service_manager\\__pycache__\\panel.cpython-312.pyc",
+    "control_center_service_manager\\control_center_service_manager\\__pycache__\\speaker_volume.cpython-312.pyc",
+    "control_center_shell\\control_center_shell\\__pycache__\\__init__.cpython-312.pyc",
+    "control_center_shell\\control_center_shell\\__pycache__\\app.cpython-312.pyc",
+    "control_center_slam\\scripts\\__pycache__\\incremental_mapping.cpython-312.pyc",
+    "control_center_slam\\scripts\\__pycache__\\mapping_scan_adapter.cpython-312.pyc",
+    "control_center_slam\\scripts\\__pycache__\\slam_ui_node.cpython-312.pyc",
+    "control_center_slam\\test\\__pycache__\\test_incremental_mapping.cpython-312-pytest-7.4.4.pyc",
+    "control_center_slam\\test\\__pycache__\\test_initial_alignment.cpython-312-pytest-7.4.4.pyc",
+    "control_center_slam\\test\\__pycache__\\test_stationary_denoise.cpython-312-pytest-7.4.4.pyc",
+    "text_voice_control\\text_voice_control\\__pycache__\\__init__.cpython-312.pyc",
+    "text_voice_control\\text_voice_control\\__pycache__\\command_parser.cpython-312.pyc",
+    "text_voice_control\\text_voice_control\\__pycache__\\text_voice_control_node.cpython-312.pyc",
+    "text_voice_control\\text_voice_control\\__pycache__\\topics.cpython-312.pyc",
+    "text_voice_control\\resource\\text_voice_control",
+    "text_voice_control\\text_voice_control\\command_parser.py",
+    "text_voice_control\\text_voice_control\\__init__.py",
+    "text_voice_control\\test\\test_command_parser.py",
+    "text_voice_control\\config\\text_voice_control.yaml",
+    "text_voice_control\\text_voice_control\\say_text.py",
+    "text_voice_control\\text_voice_control\\text_voice_control_node.py",
+    "text_voice_control\\text_voice_control\\asr_tts_bridge_node.py",
+    "text_voice_control\\text_voice_control\\topics.py",
+    "text_voice_control\\launch\\bringup.launch.py"
+  ]
+}

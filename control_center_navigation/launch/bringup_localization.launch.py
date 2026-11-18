@@ -71,7 +71,7 @@ def generate_launch_description():
             '--frame-id', 'base_link',
             '--child-frame-id', 'front_laser_frame',
             '--x', '0.215', '--y', '0.0', '--z', '0.1515',
-            '--roll', '3.145926', '--pitch', '0.0', '--yaw', '3.145926',
+            '--roll', '3.141592653589793', '--pitch', '0.0', '--yaw', '3.141592653589793',
         ],
         output='screen',
     )
@@ -84,7 +84,7 @@ def generate_launch_description():
             '--frame-id', 'base_link',
             '--child-frame-id', 'rear_laser_frame',
             '--x', '-0.215', '--y', '0.0', '--z', '0.1515',
-            '--roll', '3.145926', '--pitch', '0.0', '--yaw', '0.0',
+            '--roll', '3.141592653589793', '--pitch', '0.0', '--yaw', '0.0',
         ],
         output='screen',
     )
@@ -92,11 +92,11 @@ def generate_launch_description():
     dual_laser_merger = Node(
         package='dual_laser_merger',
         executable='dual_laser_merger_node',
-        name='dual_laser_merger_0_307',
+        name='dual_laser_merger_0_283',
         output='screen',
         parameters=[{
-            'laser_1_topic': '/topic_gv_front_lidar_0_307',
-            'laser_2_topic': '/topic_gv_rear_lidar_0_307',
+            'laser_1_topic': '/topic_gv_front_lidar_0_283',
+            'laser_2_topic': '/topic_gv_rear_lidar_0_283',
             'merged_scan_topic': '/origin_merged',
             'target_frame': 'base_link',
             'laser_1_x_offset': 0.0,
@@ -106,8 +106,8 @@ def generate_launch_description():
             'laser_2_y_offset': 0.0,
             'laser_2_yaw_offset': 0.0,
             'tolerance': 0.01,
-            'queue_size': 5,
-            'angle_increment': 0.0174,
+            'queue_size': 2,
+            'angle_increment': 0.008738783,
             'scan_time': 0.067,
             'range_min': 0.01,
             'range_max': 25.0,
@@ -134,6 +134,26 @@ def generate_launch_description():
         ],
     )
 
+    # Keep both original ray origins and the existing chassis / wall-tail filter.
+    # A separate navigation-only gate can suppress weak near-tail fragments only
+    # with fresh, time-compensated positive returns from the opposite scanner.
+    navigation_scan_filters = [
+        Node(
+            package='laser_filters', executable='scan_to_scan_filter_chain',
+            name=f'navigation_{side}_self_filter', output='screen',
+            parameters=[os.path.join(nav_pkg_share, 'config', 'navigation_self_filter.yaml'),
+                        {'use_sim_time': use_sim_time}],
+            remappings=[('scan', f'/topic_gv_{side}_lidar_0_283'),
+                        ('scan_filtered', f'/navigation/{side}_scan_before_crosscheck')],
+        ) for side in ('front', 'rear')
+    ]
+
+    navigation_dual_scan_gate = Node(
+        package='control_center_navigation', executable='dual_scan_tail_node.py',
+        name='navigation_dual_scan_tail_gate', output='screen',
+        parameters=[{'use_sim_time': use_sim_time}],
+    )
+
     map_server = Node(
         package='nav2_map_server',
         executable='map_server',
@@ -149,8 +169,8 @@ def generate_launch_description():
     )
 
     amcl = Node(
-        package='nav2_amcl',
-        executable='amcl',
+        package='control_center_navigation',
+        executable='amcl_startup_compat',
         name='amcl',
         output='screen',
         parameters=[params_file, {'use_sim_time': use_sim_time}],
@@ -181,6 +201,8 @@ def generate_launch_description():
         static_tf_rear,
         dual_laser_merger,
         merged_scan_filter,
+        *navigation_scan_filters,
+        navigation_dual_scan_gate,
         map_server,
         amcl,
         lifecycle_manager_localization,

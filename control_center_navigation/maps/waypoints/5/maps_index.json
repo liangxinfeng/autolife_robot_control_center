@@ -1,0 +1,237 @@
+{
+    "active_map": "5",
+    "maps": {
+        "5": {
+            "yaml_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/5.yaml",
+            "png_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/5.pgm",
+            "description": "",
+            "dock_pose": [
+                0.031381,
+                0.101432,
+                1.514158
+            ],
+            "prepared_positions": [
+                {
+                    "name": "丢垃圾",
+                    "description": "",
+                    "position": [
+                        [
+                            -3.535357,
+                            8.852454,
+                            90.866931
+                        ]
+                    ]
+                },
+                {
+                    "name": "充电桩",
+                    "description": "",
+                    "position": [
+                        [
+                            0.031381,
+                            0.101432,
+                            1.514158
+                        ]
+                    ]
+                },
+                {
+                    "name": "前台",
+                    "description": "",
+                    "position": [
+                        [
+                            4.563742,
+                            5.875566,
+                            0.165854
+                        ]
+                    ]
+                },
+                {
+                    "name": "取衣处",
+                    "description": "",
+                    "position": [
+                        [
+                            -11.190853,
+                            -0.720382,
+                            -176.863869
+                        ]
+                    ]
+                },
+                {
+                    "name": "垃圾桶",
+                    "description": "",
+                    "position": [
+                        [
+                            -4.033853,
+                            7.505625,
+                            -147.645754
+                        ]
+                    ]
+                },
+                {
+                    "name": "垃圾桶中继点",
+                    "description": "",
+                    "position": [
+                        [
+                            -3.531232,
+                            7.933985,
+                            -140.415331
+                        ]
+                    ]
+                },
+                {
+                    "name": "放衣服1",
+                    "description": "",
+                    "position": [
+                        [
+                            -10.353892,
+                            -2.659346,
+                            -90.118104
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子1",
+                    "description": "",
+                    "position": [
+                        [
+                            1.379817,
+                            7.096709,
+                            -70.35854
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子1中继点",
+                    "description": "",
+                    "position": [
+                        [
+                            1.269,
+                            7.42543,
+                            -68.081583
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子2",
+                    "description": "",
+                    "position": [
+                        [
+                            -1.118133,
+                            7.041605,
+                            -75.731011
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子2中继点",
+                    "description": "",
+                    "position": [
+                        [
+                            -1.160331,
+                            7.362444,
+                            -75.585413
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子3",
+                    "description": "",
+                    "position": [
+                        [
+                            1.058307,
+                            2.776003,
+                            80.922924
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子3中继点",
+                    "description": "",
+                    "position": [
+                        [
+                            0.915782,
+                            2.42107,
+                            81.678174
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子4",
+                    "description": "",
+                    "position": [
+                        [
+                            -0.759894,
+                            2.805873,
+                            103.289681
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子4中继点",
+                    "description": "",
+                    "position": [
+                        [
+                            -0.708386,
+                            2.403746,
+                            103.730163
+                        ]
+                    ]
+                },
+                {
+                    "name": "洗衣机1",
+                    "description": "",
+                    "position": [
+                        [
+                            -10.211555,
+                            -2.4766,
+                            -88.518075
+                        ]
+                    ]
+                },
+                {
+                    "name": "洗衣机2",
+                    "description": "",
+                    "position": [
+                        [
+                            -9.555528,
+                            -2.550113,
+                            -87.680665
+                        ]
+                    ]
+                },
+                {
+                    "name": "洗衣篮",
+                    "description": "",
+                    "position": [
+                        [
+                            -10.097297,
+                            -0.741488,
+                            2.246142
+                        ]
+                    ]
+                },
+                {
+                    "name": "等候处",
+                    "description": "",
+                    "position": [
+                        [
+                            -9.63558,
+                            -1.934927,
+                            -179.896124
+                        ]
+                    ]
+                },
+                {
+                    "name": "观察点",
+                    "description": "",
+                    "position": [
+                        [
+                            4.150006,
+                            4.896835,
+                            -176.664785
+                        ]
+                    ]
+                }
+            ]
+        }
+    }
+}

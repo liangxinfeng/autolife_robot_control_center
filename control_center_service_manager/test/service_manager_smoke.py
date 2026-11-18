@@ -115,12 +115,11 @@ def main():
     )
     assert module.parse_pch_card_index(cards) == 4
     program, arguments, card = module.speaker_mixer_command(85, cards)
-    assert program == 'amixer' and card == 4
-    assert arguments == [
-        '-M', '-c', '4', 'sset', 'Master', '85%', 'unmute'
-    ]
+    assert program == sys.executable and card == 4
+    assert arguments[0].endswith('speaker_volume.py')
+    assert arguments[1:] == ['--card','4','--volume','85']
     _, zero_arguments, _ = module.speaker_mixer_command(0, cards)
-    assert zero_arguments[-1] == 'mute'
+    assert zero_arguments[-1] == '0'
     print('PASS: physical PCH speaker mixer command is safe and card-index independent')
 
     application = (
@@ -144,7 +143,7 @@ def main():
     assert panel.logo_display_start_button.text() == '开启 Logo 网页'
     assert panel.logo_display_stop_button.text() == '关闭 Logo 网页'
     assert module.LOGO_SERVICE_UNIT == 'autolife-logo-display.service'
-    assert '/control_reset_0_307' in panel.joint_reset_button.toolTip()
+    assert '/control_reset_0_283' in panel.joint_reset_button.toolTip()
     for card in panel._core_cards.values():
         card.apply_state({
             'active': 'active', 'sub': 'running', 'enabled': 'enabled'

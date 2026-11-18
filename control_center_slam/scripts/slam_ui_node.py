@@ -32,9 +32,116 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from incremental_mapping import resolve_state_file, relative_initial_pose, scan_map_support, refine_initial_pose, validate_state_submaps
 
+try:
+    from control_center_chassis_guard import (
+        ChassisControlLease,
+        KeyEventDiagnostics,
+        ManualKeyFilter,
+        VelocityRamp,
+        VelocityRampDiagnostics,
+    )
+except ImportError:  # deployment safety net; manual driving stays fail-closed
+    ChassisControlLease = None
+
+    class ManualKeyFilter:  # no-debounce fallback, matches pre-fix behaviour
+        def __init__(self, release_delay_sec=0.0, clock=None):
+            self._keys = set()
+
+        def press(self, key, now=None):
+            changed = key not in self._keys
+            self._keys.add(key)
+            return changed
+
+        def release(self, key, now=None):
+            changed = key in self._keys
+            self._keys.discard(key)
+            return changed
+
+        def clear(self):
+            changed = bool(self._keys)
+            self._keys.clear()
+            return changed
+
+        def expire(self, now=None):
+            return False
+
+        def pressed_keys(self):
+            return frozenset(self._keys)
+
+        def next_deadline(self):
+            return None
+
+    class VelocityRamp:  # unsmoothed fallback, matches pre-fix behaviour
+        def __init__(self, *args, **kwargs):
+            self._values = [0.0, 0.0, 0.0]
+
+        @property
+        def target(self):
+            return tuple(self._values)
+
+        @property
+        def current(self):
+            return tuple(self._values)
+
+        @property
+        def idle(self):
+            return not any(self._values)
+
+        @property
+        def update_hz(self):
+            return 50.0
+
+        def set_target(self, linear_x, linear_y, angular_z):
+            self._values = [float(linear_x), float(linear_y), float(angular_z)]
+            return self.target
+
+        def step(self, now=None):
+            return self.current
+
+        def reset(self):
+            was_moving = not self.idle
+            self._values = [0.0, 0.0, 0.0]
+            return was_moving
+
+    class KeyEventDiagnostics:  # inert fallback
+        enabled = False
+        path = None
+
+        def log(self, kind, **fields):
+            return None
+
+        def close(self):
+            return None
+
+    class VelocityRampDiagnostics:  # inert fallback
+        enabled = False
+        path = None
+
+        def record(self, timestamp, target, current):
+            return None
+
+        def close(self):
+            return None
+
 
 PACKAGE_NAME = 'control_center_slam'
 DISPLAY_LASER_POINTS = False
+
+
+class _UnavailableChassisLease:
+    """Fail-closed stand-in when control_center_chassis_guard is missing."""
+
+    held = False
+    last_error = 'control_center_chassis_guard 未安装，手动底盘控制已禁用。'
+
+    def acquire(self, timeout_sec=None):
+        return False
+
+    def release(self):
+        return True
+
+    def shutdown(self):
+        return None
 
 
 def _occupancy_pixels(cells, occupied_color=25):
@@ -42,7 +149,6 @@ def _occupancy_pixels(cells, occupied_color=25):
     cells = np.asarray(cells)
     pixels = np.full(cells.shape, 205, dtype=np.uint8)
     pixels[(cells >= 0) & (cells <= 25)] = 254
-    pixels[(cells > 25) & (cells < 65)] = 145
     pixels[cells >= 65] = occupied_color
     return pixels
 
@@ -184,10 +290,11 @@ class SlamSignals(QtCore.QObject):
     optimized_trajectory = QtCore.pyqtSignal(object)
     robot_pose = QtCore.pyqtSignal(object)
     laser_points = QtCore.pyqtSignal(str, object)
+    chassis_lease_error = QtCore.pyqtSignal(str)
 
 
 class SlamRosNode(Node):
-    def __init__(self, topic_suffix='0_307'):
+    def __init__(self, topic_suffix='0_283'):
         super().__init__('control_center_slam_ui')
         self.signals = SlamSignals()
         self.map_age = 1e9
@@ -215,7 +322,6 @@ class SlamRosNode(Node):
         )
         self.create_subscription(MarkerArray, '/trajectory_node_list',
                                  self._on_optimized_trajectory, 1)
-        self._last_trajectory_emit = 0.0
         if DISPLAY_LASER_POINTS:
             laser_qos = QoSProfile(
                 history=HistoryPolicy.KEEP_LAST,
@@ -244,6 +350,12 @@ class SlamRosNode(Node):
         self.velocity_pub = self.create_publisher(
             Twist, f'/topic_gv_target_cmd_vel_{topic_suffix}', 10
         )
+        # Keyboard input only sets the ramp target; the page's velocity timer
+        # advances the commanded velocity toward it, so a key press no longer
+        # steps the chassis command from zero to the slider speed.
+        self._velocity_diagnostics = VelocityRampDiagnostics(tag='slam')
+        self._velocity_ramp = VelocityRamp(
+            diagnostics=self._velocity_diagnostics)
         self.finish_client = self.create_client(
             FinishTrajectory, '/finish_trajectory'
         )
@@ -260,6 +372,15 @@ class SlamRosNode(Node):
             self.create_subscription(LaserScan, '/mapping_scan/' + side,
                 lambda m, side=side: self.alignment_scans.update({side: (time.monotonic(), m)}),
                 QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
+        self._chassis_lease = (
+            ChassisControlLease(
+                topic_hint=f'/topic_gv_target_cmd_vel_{topic_suffix}',
+                logger=self.get_logger(),
+                on_lease_lost=self._handle_chassis_lease_lost,
+            )
+            if ChassisControlLease is not None
+            else _UnavailableChassisLease()
+        )
 
     def alignment_points(self):
         now = time.monotonic()
@@ -293,10 +414,6 @@ class SlamRosNode(Node):
     def _on_optimized_trajectory(self, message):
         # Cartographer publishes complete optimized LINE_STRIPs, including old
         # trajectories. Rebuild instead of mixing samples from different maps.
-        now = time.monotonic()
-        if now - self._last_trajectory_emit < .5:
-            return
-        self._last_trajectory_emit = now
         segments = []
         for marker in message.markers:
             if (marker.action == Marker.ADD and marker.type == Marker.LINE_STRIP
@@ -320,8 +437,12 @@ class SlamRosNode(Node):
         except Exception:
             self.pose_age = 1e9
             return
+        stamp = transform.header.stamp
+        self.pose_age = max(0.0, self.get_clock().now().nanoseconds * 1e-9
+                            - stamp.sec - stamp.nanosec * 1e-9)
+        if self.pose_age > .5:
+            return
         self._last_pose = time.monotonic()
-        self.pose_age = 0.0
         translation = transform.transform.translation
         self.signals.robot_pose.emit({
             'x': float(translation.x),
@@ -386,16 +507,72 @@ class SlamRosNode(Node):
         self._scan_visible[sensor] = bool(points)
         self.signals.laser_points.emit(sensor, points)
 
-    def publish_velocity(self, linear_x, linear_y, angular_z):
-        self._velocity = (linear_x, linear_y, angular_z)
+    def set_target_velocity(self, linear_x, linear_y, angular_z):
+        """Request a velocity; the page timer ramps the command toward it.
+
+        The target applies on this call, so a key press is never delayed, but
+        the chassis sees the first limited increment instead of a step from zero.
+        """
+        nonzero = (
+            abs(float(linear_x)) > 1e-6
+            or abs(float(linear_y)) > 1e-6
+            or abs(float(angular_z)) > 1e-6
+        )
+        if nonzero and not self._chassis_lease.acquire():
+            # Fail closed: publish zeros and keep the state inert.
+            self._velocity_ramp.reset()
+            self._publish_velocity_values((0.0, 0.0, 0.0))
+            self.signals.chassis_lease_error.emit(
+                self._chassis_lease.last_error
+                or '未获得底盘控制所有权。')
+            return
+        self._velocity_ramp.set_target(linear_x, linear_y, angular_z)
+        self._publish_velocity_values(self._velocity_ramp.step())
+        if self._velocity_ramp.idle:
+            self._chassis_lease.release()
+
+    def _publish_velocity_values(self, values):
+        linear_x, linear_y, angular_z = values
+        self._velocity = (float(linear_x), float(linear_y), float(angular_z))
         message = Twist()
         message.linear.x = float(linear_x)
         message.linear.y = float(linear_y)
         message.angular.z = float(angular_z)
         self.velocity_pub.publish(message)
 
+    @property
+    def velocity_idle(self):
+        """True when no teleop command is outstanding."""
+        return self._velocity_ramp.idle
+
+    @property
+    def velocity_period(self):
+        """Seconds between two ramp ticks, shared with the page timer."""
+        return 1.0 / self._velocity_ramp.update_hz
+
+    def _handle_chassis_lease_lost(self, reason):
+        """Vendor takeover or Redis failure mid-drive: stop immediately."""
+        self.stop_motion()
+        self.signals.chassis_lease_error.emit(
+            self._chassis_lease.last_error or str(reason))
+
     def stop_motion(self):
-        self.publish_velocity(0.0, 0.0, 0.0)
+        """Zero the chassis command on this call, bypassing the ramp.
+
+        Reserved for the safety paths -- focus loss, page switch, mapping
+        shutdown -- which must keep their original instant-stop meaning and must
+        never leave a ramped command outstanding.
+        """
+        self._velocity_ramp.reset()
+        self._publish_velocity_values((0.0, 0.0, 0.0))
+        self._chassis_lease.release()
+
+    def destroy_node(self):
+        if self._velocity_diagnostics is not None:
+            self._velocity_diagnostics.close()
+        if self._chassis_lease is not None:
+            self._chassis_lease.shutdown()
+        super().destroy_node()
 
 
 class InitialAlignmentWorker(QtCore.QThread):
@@ -429,8 +606,8 @@ class SlamCanvas(QtWidgets.QWidget):
         self._saved_cells = None
         self.robot_pose = None
         self.lasers = {'front': [], 'rear': []}
-        self.trajectory = []
-        self._optimized_trajectory_received = False
+        self.live_trajectory = deque(maxlen=300)
+        self._trajectory_path = QtGui.QPainterPath()
         self.zoom = 1.0
         self.pan = QtCore.QPointF(0.0, 0.0)
         self._drag_start = None
@@ -452,14 +629,12 @@ class SlamCanvas(QtWidgets.QWidget):
         height = int(message.info.height)
         if width <= 0 or height <= 0:
             return
-        cells = np.asarray(message.data, dtype=np.int16).reshape(height, width)
+        cells = np.asarray(message.data, dtype=np.int8).reshape(height, width)
         # Once the final map is being edited, do not let a late latched /map
         # message silently erase the operator's brush strokes.
         if self.has_edits():
             return
-        self.map_cells = cells.copy()
-        self._saved_cells = self.map_cells.copy()
-        self.map_info = {
+        info = {
             'width': width,
             'height': height,
             'resolution': float(message.info.resolution),
@@ -467,6 +642,13 @@ class SlamCanvas(QtWidgets.QWidget):
             'origin_y': float(message.info.origin.position.y),
             'origin_yaw': _yaw(message.info.origin.orientation),
         }
+        if info == self.map_info and np.array_equal(cells, self.map_cells):
+            return
+        self.map_cells = cells.copy()
+        # Streaming maps need one owned byte per cell, not two int16 copies
+        # plus an undo baseline. Allocate the baseline only for actual editing.
+        self._saved_cells = self.map_cells.copy() if self.editing_enabled else None
+        self.map_info = info
         self._rebuild_map_image()
         self.update()
 
@@ -488,32 +670,36 @@ class SlamCanvas(QtWidgets.QWidget):
 
     def set_robot_pose(self, pose):
         self.robot_pose = pose
-        if self._optimized_trajectory_received:
-            self.update()
-            return
         point = (float(pose['x']), float(pose['y']))
-        if not self.trajectory:
-            self.trajectory.append(point)
+        if not self.live_trajectory:
+            self.live_trajectory.append(point)
         else:
-            previous = self.trajectory[-1]
+            previous = self.live_trajectory[-1]
             distance = math.hypot(point[0] - previous[0], point[1] - previous[1])
             if distance >= 0.025:
-                # A large discontinuity is normally a loop-closure correction;
-                # do not draw a misleading straight segment across the map.
                 if distance > 1.0:
-                    self.trajectory.append(None)
-                self.trajectory.append(point)
-                if len(self.trajectory) > 30000:
-                    self.trajectory = self.trajectory[-25000:]
+                    self.live_trajectory.clear()
+                self.live_trajectory.append(point)
         self.update()
 
     def set_optimized_trajectory(self, segments):
-        self._optimized_trajectory_received = True
-        self.trajectory = []
+        # History is rebuilt only on graph updates; the live tail does not
+        # wait for a new graph node (e.g. while insertion is motion-gated).
+        path = QtGui.QPainterPath()
         for segment in segments:
-            if self.trajectory:
-                self.trajectory.append(None)
-            self.trajectory.extend(segment)
+            if not segment:
+                continue
+            path.moveTo(*segment[0])
+            for point in segment[1:]:
+                path.lineTo(*point)
+        self._trajectory_path = path
+        if segments and segments[-1] and self.live_trajectory:
+            end = segments[-1][-1]
+            distances = [math.hypot(p[0]-end[0], p[1]-end[1]) for p in self.live_trajectory]
+            nearest = int(np.argmin(distances))
+            if distances[nearest] < .08:
+                for _ in range(nearest):
+                    self.live_trajectory.popleft()
         self.update()
 
     def set_laser(self, sensor, points):
@@ -540,6 +726,8 @@ class SlamCanvas(QtWidgets.QWidget):
 
     def set_editing_enabled(self, enabled):
         self.editing_enabled = bool(enabled)
+        if enabled and self._saved_cells is None and self.map_cells is not None:
+            self._saved_cells = self.map_cells.copy()
         if not self.editing_enabled:
             self.mode = 'browse'
         self._emit_edit_state()
@@ -695,18 +883,28 @@ class SlamCanvas(QtWidgets.QWidget):
         rect = self._base_rect()
         painter.drawImage(rect, self.map_image)
         painter.setClipRect(rect)
-        if len(self.trajectory) >= 2:
-            painter.setPen(QtGui.QPen(QtGui.QColor('#287fd1'), 2.2))
-            segment = []
-            for item in self.trajectory + [None]:
-                if item is None:
-                    if len(segment) >= 2:
-                        painter.drawPolyline(QtGui.QPolygonF(segment))
-                    segment = []
-                    continue
-                point = self._world_to_screen(*item)
-                if point is not None:
-                    segment.append(point)
+        # Transform cached world-space history, rather than rebuilding every
+        # historical point at the 30 Hz robot-pose redraw rate.
+        painter.save()
+        sx = rect.width() / (self.map_info['width'] * self.map_info['resolution'])
+        sy = -rect.height() / (self.map_info['height'] * self.map_info['resolution'])
+        painter.setTransform(QtGui.QTransform(sx, 0, 0, sy,
+            rect.left()-sx*self.map_info['origin_x'],
+            rect.bottom()-sy*self.map_info['origin_y']), True)
+        pen = QtGui.QPen(QtGui.QColor('#287fd1'), 2.2)
+        pen.setCosmetic(True)
+        painter.setPen(pen)
+        painter.drawPath(self._trajectory_path)
+        tail = QtGui.QPainterPath()
+        for i, point in enumerate(self.live_trajectory):
+            if i == 0:
+                tail.moveTo(*point)
+            else:
+                tail.lineTo(*point)
+        if self.live_trajectory and self.robot_pose:
+            tail.lineTo(self.robot_pose['x'], self.robot_pose['y'])
+        painter.drawPath(tail)
+        painter.restore()
         if DISPLAY_LASER_POINTS:
             for sensor, color in (
                 ('front', QtGui.QColor(225, 45, 60, 205)),
@@ -832,13 +1030,17 @@ class SlamPage(QtWidgets.QWidget):
         QtCore.Qt.Key_D: (0.0, 0.0, -1.0),
     }
 
-    def __init__(self, topic_suffix='0_307', parent=None, resume_state=None):
+    def __init__(self, topic_suffix='0_283', parent=None, resume_state=None):
         super().__init__(parent)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.node = SlamRosNode(topic_suffix=topic_suffix)
         self.executor = SingleThreadedExecutor()
         self.executor.add_node(self.node)
-        self._pressed = set()
+        self._key_filter = ManualKeyFilter()
+        self._key_diag = KeyEventDiagnostics()
+        self._release_timer = QtCore.QTimer(self)
+        self._release_timer.setSingleShot(True)
+        self._release_timer.timeout.connect(self._flush_pending_release)
         self._save_final = False
         self._trajectory_finished = False
         self._resume_state = Path(resume_state) if resume_state else None
@@ -859,6 +1061,8 @@ class SlamPage(QtWidgets.QWidget):
         if DISPLAY_LASER_POINTS:
             self.node.signals.laser_points.connect(self.canvas.set_laser)
         self.canvas.edit_state_changed.connect(self._map_edit_state_changed)
+        self.node.signals.chassis_lease_error.connect(self._chassis_lease_error)
+        self._last_chassis_lease_error = None
         self.canvas.select_initial_pose = bool(resume_state)
         self.canvas.initial_pose_selected.connect(self._initial_pose_marked)
         if resume_state:
@@ -872,7 +1076,8 @@ class SlamPage(QtWidgets.QWidget):
         self.velocity_timer = QtCore.QTimer(self)
         self.velocity_timer.setTimerType(QtCore.Qt.PreciseTimer)
         self.velocity_timer.timeout.connect(self._publish_pressed_motion)
-        self.velocity_timer.start(20)
+        self.velocity_timer.start(max(
+            10, int(round(self.node.velocity_period * 1000.0))))
         self.health_timer = QtCore.QTimer(self)
         self.health_timer.timeout.connect(self._update_health)
         self.health_timer.start(500)
@@ -1273,7 +1478,9 @@ class SlamPage(QtWidgets.QWidget):
             ],
             'negate': 0,
             'occupied_thresh': 0.65,
-            'free_thresh': 0.25,
+            # PGM unknown=205 must remain unknown after loading (50/255).
+            # The 25% occupancy decision has already been encoded above.
+            'free_thresh': 0.196,
         }
         yaml_text = yaml.safe_dump(
             yaml_record, allow_unicode=True, sort_keys=False
@@ -1408,6 +1615,12 @@ class SlamPage(QtWidgets.QWidget):
             self.executor.spin_once(timeout_sec=0.0)
 
     def _update_health(self):
+        lease = self.node._chassis_lease
+        if not lease.held and lease.last_error:
+            self.pose_chip.setText('底盘控制权：失败')
+            self.pose_chip.setStyleSheet('color: #c0392b;')
+            self.pose_chip.setToolTip(lease.last_error)
+            return
         map_good = self.node.map_age < 2.0
         pose_good = self.node.pose_age < 1.0
         self.map_chip.setText('地图：正常' if map_good else '地图：等待')
@@ -1424,7 +1637,10 @@ class SlamPage(QtWidgets.QWidget):
             event.accept()
             return
         if event.key() in self.MOVES:
-            self._pressed.add(event.key())
+            self._key_diag.log(
+                'press', key=int(event.key()), autorepeat=False,
+                pending=self._key_filter.pending_count)
+            self._key_filter.press(event.key())
             self._publish_pressed_motion()
             event.accept()
             return
@@ -1435,24 +1651,62 @@ class SlamPage(QtWidgets.QWidget):
             event.accept()
             return
         if event.key() in self.MOVES:
-            self._pressed.discard(event.key())
+            self._key_diag.log(
+                'release', key=int(event.key()), autorepeat=False,
+                pending=self._key_filter.pending_count)
+            if self._key_filter.release(event.key()):
+                self._schedule_release_flush()
             self._publish_pressed_motion()
             event.accept()
             return
         super().keyReleaseEvent(event)
 
+    def _schedule_release_flush(self):
+        """Arm the single-shot timer for the earliest pending key release."""
+        deadline = self._key_filter.next_deadline()
+        if deadline is None:
+            self._release_timer.stop()
+            return
+        delay_ms = max(
+            1, int(math.ceil((deadline - time.monotonic()) * 1000.0)))
+        self._release_timer.start(delay_ms)
+
+    def _flush_pending_release(self):
+        if self._key_filter.expire():
+            self._key_diag.log(
+                'expire',
+                pressed=sorted(int(key) for key in self._key_filter.pressed_keys()),
+            )
+            self._publish_pressed_motion()
+        self._schedule_release_flush()
+
     def focusOutEvent(self, event):
         if self._shutting_down:
             return super().focusOutEvent(event)
-        self._pressed.clear()
+        self._key_diag.log('focus_out')
+        self._key_filter.clear()
+        self._release_timer.stop()
         self.node.stop_motion()
         super().focusOutEvent(event)
 
+    def _chassis_lease_error(self, message):
+        if message == self._last_chassis_lease_error:
+            return
+        self._last_chassis_lease_error = message
+        QtWidgets.QMessageBox.warning(
+            self, '底盘手动控制不可用',
+            '未获得底盘控制所有权，本次按键不会产生非零速度：\n' + message,
+        )
+
     def _publish_pressed_motion(self):
         if self._trajectory_id is None:
+            # No mapping session: a command left over from a previous one must
+            # not be ramped anywhere, and nothing may stay outstanding.
+            if not self.node.velocity_idle:
+                self.node.stop_motion()
             return
         linear_x = linear_y = angular = 0.0
-        for key in self._pressed:
+        for key in self._key_filter.pressed_keys():
             dx, dy, da = self.MOVES[key]
             linear_x += dx
             linear_y += dy
@@ -1460,7 +1714,8 @@ class SlamPage(QtWidgets.QWidget):
         linear_x = max(-1.0, min(1.0, linear_x)) * self.linear_spin.value()
         linear_y = max(-1.0, min(1.0, linear_y)) * self.linear_spin.value()
         angular = max(-1.0, min(1.0, angular)) * self.angular_spin.value()
-        self.node.publish_velocity(linear_x, linear_y, angular)
+        # Keys released only zero the target; this timer decelerates the command.
+        self.node.set_target_velocity(linear_x, linear_y, angular)
 
     def _set_save_busy(self, busy):
         self.checkpoint_button.setEnabled(not busy and not self._trajectory_finished and self._trajectory_id is not None)
@@ -1613,7 +1868,10 @@ class SlamPage(QtWidgets.QWidget):
         if self._alignment_worker is not None and self._alignment_worker.isRunning():
             self._alignment_worker.requestInterruption()
             self._alignment_worker.wait()
-        self._pressed.clear()
+        self._key_diag.log('close')
+        self._key_diag.close()
+        self._key_filter.clear()
+        self._release_timer.stop()
         self.node.stop_motion()
         self.spin_timer.stop()
         self.velocity_timer.stop()

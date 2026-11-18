@@ -1,0 +1,80 @@
+map_yaml: /home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/3.yaml
+waypoints:
+  充电桩:
+    description: ''
+    frame_id: map
+    x: -0.036073
+    y: -0.020497
+    yaw: 0.001039779901875622
+  前台:
+    description: ''
+    frame_id: map
+    x: 4.719929
+    y: 5.892562
+    yaw: -0.016857070594169514
+  取衣处:
+    description: ''
+    frame_id: map
+    x: -11.142005
+    y: -0.704652
+    yaw: -3.0769905305109924
+  垃圾桶:
+    description: ''
+    frame_id: map
+    x: -4.156936
+    y: 7.462287
+    yaw: 3.1252358641724154
+  放衣服1:
+    description: ''
+    frame_id: map
+    x: -10.365678
+    y: -2.72319
+    yaw: -1.5151141451907255
+  桌子1:
+    description: ''
+    frame_id: map
+    x: 0.791518
+    y: 6.989093
+    yaw: -1.1951489024486468
+  桌子2:
+    description: ''
+    frame_id: map
+    x: -1.132425
+    y: 7.003145
+    yaw: -1.6690307002135334
+  桌子3:
+    description: ''
+    frame_id: map
+    x: 1.058307
+    y: 2.776003
+    yaw: 1.4123714641411398
+  桌子4:
+    description: ''
+    frame_id: map
+    x: -0.759894
+    y: 2.805873
+    yaw: 1.802745016784629
+  洗衣机1:
+    description: ''
+    frame_id: map
+    x: -10.211555
+    y: -2.4766
+    yaw: -1.5449318562772796
+  洗衣机2:
+    description: ''
+    frame_id: map
+    x: -9.555528
+    y: -2.550113
+    yaw: -1.530316294588154
+  洗衣篮:
+    description: ''
+    frame_id: map
+    x: -10.097297
+    y: -0.741488
+    yaw: 0.03920257336733047
+  等候处:
+    description: ''
+    frame_id: map
+    x: -9.582093
+    y: -1.926157
+    yaw: -3.079842607948261

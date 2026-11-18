@@ -1,0 +1,6 @@
+<library path="exact_goal_planner">
+  <class name="control_center_navigation::ExactGoalSmacPlanner"
+    type="control_center_navigation::ExactGoalSmacPlanner" base_class_type="nav2_core::GlobalPlanner">
+    <description>Smac2D with collision-checked exact requested endpoint.</description>
+  </class>
+</library>

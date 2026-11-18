@@ -110,14 +110,14 @@ def generate_launch_description():
     )
 
     occupancy_grid_node = Node(
-        package='cartographer_ros',
+        package=PACKAGE_NAME,
         executable='cartographer_occupancy_grid_node',
         name='cartographer_occupancy_grid_node_optimized',
         output='screen',
         parameters=[{'use_sim_time': use_sim_time}],
         arguments=[
             '-resolution', LaunchConfiguration('map_resolution'),
-            '-publish_period_sec', '0.5',
+            '-publish_period_sec', '0.2',
         ],
     )
 
@@ -172,7 +172,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'keyboard_cmd_vel_topic',
-            default_value='/topic_gv_target_cmd_vel_0_307',
+            default_value='/topic_gv_target_cmd_vel_0_283',
         ),
         DeclareLaunchArgument('keyboard_linear_speed', default_value='0.18'),
         DeclareLaunchArgument('keyboard_angular_speed', default_value='0.45'),
@@ -187,15 +187,15 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'front_scan_topic',
-            default_value='/topic_gv_front_lidar_0_307',
+            default_value='/topic_gv_front_lidar_0_283',
         ),
         DeclareLaunchArgument(
             'rear_scan_topic',
-            default_value='/topic_gv_rear_lidar_0_307',
+            default_value='/topic_gv_rear_lidar_0_283',
         ),
         DeclareLaunchArgument(
             'odom_topic',
-            default_value='/topic_gv_wheel_odom_0_307',
+            default_value='/topic_gv_wheel_odom_0_283',
         ),
         SetEnvironmentVariable('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'),
         SetEnvironmentVariable('ROS_DOMAIN_ID', '0'),

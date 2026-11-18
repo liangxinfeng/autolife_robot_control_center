@@ -1,0 +1,160 @@
+{
+    "active_map": "3",
+    "maps": {
+        "3": {
+            "yaml_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/3.yaml",
+            "png_path": "/home/ubuntu/ros2_ws/src/autolife_robot_control_center/control_center_navigation/maps/3.pgm",
+            "description": "",
+            "dock_pose": [
+                -0.036073,
+                -0.020497,
+                0.059575
+            ],
+            "prepared_positions": [
+                {
+                    "name": "充电桩",
+                    "description": "",
+                    "position": [
+                        [
+                            -0.036073,
+                            -0.020497,
+                            0.059575
+                        ]
+                    ]
+                },
+                {
+                    "name": "前台",
+                    "description": "",
+                    "position": [
+                        [
+                            4.719929,
+                            5.892562,
+                            -0.965839
+                        ]
+                    ]
+                },
+                {
+                    "name": "取衣处",
+                    "description": "",
+                    "position": [
+                        [
+                            -11.142005,
+                            -0.704652,
+                            -176.298571
+                        ]
+                    ]
+                },
+                {
+                    "name": "垃圾桶",
+                    "description": "",
+                    "position": [
+                        [
+                            -4.156936,
+                            7.462287,
+                            179.062825
+                        ]
+                    ]
+                },
+                {
+                    "name": "放衣服1",
+                    "description": "",
+                    "position": [
+                        [
+                            -10.365678,
+                            -2.72319,
+                            -86.809646
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子1",
+                    "description": "",
+                    "position": [
+                        [
+                            0.791518,
+                            6.989093,
+                            -68.476988
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子2",
+                    "description": "",
+                    "position": [
+                        [
+                            -1.132425,
+                            7.003145,
+                            -95.628415
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子3",
+                    "description": "",
+                    "position": [
+                        [
+                            1.058307,
+                            2.776003,
+                            80.922924
+                        ]
+                    ]
+                },
+                {
+                    "name": "桌子4",
+                    "description": "",
+                    "position": [
+                        [
+                            -0.759894,
+                            2.805873,
+                            103.289681
+                        ]
+                    ]
+                },
+                {
+                    "name": "洗衣机1",
+                    "description": "",
+                    "position": [
+                        [
+                            -10.211555,
+                            -2.4766,
+                            -88.518075
+                        ]
+                    ]
+                },
+                {
+                    "name": "洗衣机2",
+                    "description": "",
+                    "position": [
+                        [
+                            -9.555528,
+                            -2.550113,
+                            -87.680665
+                        ]
+                    ]
+                },
+                {
+                    "name": "洗衣篮",
+                    "description": "",
+                    "position": [
+                        [
+                            -10.097297,
+                            -0.741488,
+                            2.246142
+                        ]
+                    ]
+                },
+                {
+                    "name": "等候处",
+                    "description": "",
+                    "position": [
+                        [
+                            -9.582093,
+                            -1.926157,
+                            -176.461983
+                        ]
+                    ]
+                }
+            ]
+        }
+    }
+}

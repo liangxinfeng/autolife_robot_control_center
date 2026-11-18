@@ -25,7 +25,7 @@ class ProximityVoiceAlertNode(Node):
         )
         self.declare_parameter('enabled', True)
         self.declare_parameter(
-            'front_scan_topic', '/topic_gv_front_lidar_0_307'
+            'front_scan_topic', '/topic_gv_front_lidar_0_283'
         )
         self.declare_parameter(
             'navigation_status_topic', '/navigate_to_pose/_action/status'

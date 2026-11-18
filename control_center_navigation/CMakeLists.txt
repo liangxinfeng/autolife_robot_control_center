@@ -16,6 +16,34 @@ find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(nav2_smac_planner REQUIRED)
+find_package(nav2_core REQUIRED)
+find_package(nav2_costmap_2d REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(filters REQUIRED)
+add_library(wall_tail_filter SHARED src/wall_tail_filter.cpp)
+target_compile_features(wall_tail_filter PRIVATE cxx_std_17)
+ament_target_dependencies(wall_tail_filter filters sensor_msgs pluginlib)
+pluginlib_export_plugin_description_file(filters wall_tail_plugins.xml)
+install(TARGETS wall_tail_filter LIBRARY DESTINATION lib)
+find_package(nav2_mppi_controller REQUIRED)
+find_package(nav2_controller REQUIRED)
+find_package(nav2_amcl REQUIRED)
+add_executable(amcl_startup_compat src/amcl_startup_compat.cpp)
+ament_target_dependencies(amcl_startup_compat nav2_amcl rclcpp)
+install(TARGETS amcl_startup_compat RUNTIME DESTINATION lib/${PROJECT_NAME})
+add_library(settled_mppi SHARED src/settled_mppi.cpp)
+target_compile_features(settled_mppi PRIVATE cxx_std_17)
+ament_target_dependencies(settled_mppi nav2_mppi_controller nav2_controller nav2_core
+  nav2_costmap_2d pluginlib tf2 tf2_geometry_msgs nav_msgs)
+pluginlib_export_plugin_description_file(nav2_core settled_plugins.xml)
+install(TARGETS settled_mppi LIBRARY DESTINATION lib)
+add_library(exact_goal_planner SHARED src/exact_goal_planner.cpp)
+target_compile_features(exact_goal_planner PRIVATE cxx_std_17)
+ament_target_dependencies(exact_goal_planner nav2_smac_planner nav2_core
+  nav2_costmap_2d pluginlib tf2 tf2_geometry_msgs nav_msgs)
+pluginlib_export_plugin_description_file(nav2_core navigation_plugins.xml)
+install(TARGETS exact_goal_planner LIBRARY DESTINATION lib)
 
 # Isolated Jazzy 1.3.10 docking server with the upstream reverse-projection fix.
 # Keep /opt/ros and vendor services untouched; reuse installed controller/plugins.
@@ -73,6 +101,7 @@ install(TARGETS
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 install(PROGRAMS
+  scripts/dual_scan_tail_node.py
   scripts/arm_control_service_wrapper.py
   scripts/waypoint_manager_node.py
   scripts/nav_cmd_vel_relay_node.py
@@ -86,6 +115,9 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 install(FILES
+  scripts/dual_scan_tail_core.py
+  scripts/head_rgb_panel.py
+  scripts/charger_waypoints.py
   scripts/short_distance_servo.py
   scripts/pose_continuity.py
   DESTINATION lib/${PROJECT_NAME}
@@ -94,6 +126,59 @@ install(FILES
 ament_export_dependencies(rosidl_default_runtime)
 if(BUILD_TESTING)
   enable_testing()
+  add_executable(exact_near_goal_regression test/exact_near_goal_regression.cpp)
+  target_compile_features(exact_near_goal_regression PRIVATE cxx_std_17)
+  target_include_directories(exact_near_goal_regression PRIVATE src)
+  ament_target_dependencies(exact_near_goal_regression nav_msgs tf2_geometry_msgs)
+  add_test(NAME exact_near_goal_regression COMMAND exact_near_goal_regression)
+  add_executable(wall_tail_regression test/wall_tail_regression.cpp)
+  target_compile_features(wall_tail_regression PRIVATE cxx_std_17)
+  target_include_directories(wall_tail_regression PRIVATE src)
+  target_compile_options(wall_tail_regression PRIVATE -UNDEBUG)
+  add_test(NAME wall_tail_regression COMMAND wall_tail_regression)
+  add_executable(amcl_startup_regression test/amcl_startup_regression.cpp)
+  ament_target_dependencies(amcl_startup_regression nav2_amcl rclcpp)
+  add_test(NAME amcl_startup_regression COMMAND amcl_startup_regression --ros-args
+    --params-file ${CMAKE_CURRENT_SOURCE_DIR}/config/nav2_params.yaml)
+  set_tests_properties(amcl_startup_regression PROPERTIES
+    ENVIRONMENT "ROS_DOMAIN_ID=83;ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST" TIMEOUT 30)
+  add_test(NAME amcl_lifecycle_regression COMMAND ${CMAKE_COMMAND} -E env
+    AMCL_PROBE_EXECUTABLE=$<TARGET_FILE:amcl_startup_compat>
+    /usr/bin/python3 ${CMAKE_CURRENT_SOURCE_DIR}/test/amcl_configure_probe.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/nav2_params.yaml
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/nav2_params.yaml
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/nav2_params.yaml)
+  set_tests_properties(amcl_lifecycle_regression PROPERTIES TIMEOUT 45)
+  find_package(behaviortree_cpp REQUIRED)
+  add_executable(occupied_approach_bt_test test/occupied_approach_bt_test.cpp)
+  ament_target_dependencies(occupied_approach_bt_test behaviortree_cpp)
+  add_test(NAME occupied_approach_bt_test COMMAND occupied_approach_bt_test
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/occupied_approach.xml)
+  add_executable(occupied_approach_planner_test test/occupied_approach_planner_test.cpp)
+  target_compile_features(occupied_approach_planner_test PRIVATE cxx_std_17)
+  ament_target_dependencies(occupied_approach_planner_test nav2_smac_planner nav2_core
+    nav2_costmap_2d pluginlib tf2 tf2_geometry_msgs nav_msgs)
+  add_test(NAME occupied_approach_planner_test COMMAND occupied_approach_planner_test)
+  set_tests_properties(occupied_approach_planner_test PROPERTIES ENVIRONMENT "ROS_DOMAIN_ID=88" TIMEOUT 20)
+  add_executable(settled_checker_regression test/settled_checker_regression.cpp)
+  target_compile_features(settled_checker_regression PRIVATE cxx_std_17)
+  target_include_directories(settled_checker_regression PRIVATE src)
+  ament_target_dependencies(settled_checker_regression nav2_mppi_controller nav2_controller nav2_core
+    nav2_costmap_2d pluginlib tf2 tf2_geometry_msgs nav_msgs)
+  add_test(NAME settled_checker_regression COMMAND settled_checker_regression)
+  set_tests_properties(settled_checker_regression PROPERTIES ENVIRONMENT "ROS_DOMAIN_ID=88" TIMEOUT 10)
+  add_executable(arrival_settle_regression test/arrival_settle_regression.cpp)
+  target_include_directories(arrival_settle_regression PRIVATE src)
+  add_test(NAME arrival_settle_regression COMMAND arrival_settle_regression)
+  add_executable(terminal_approach_regression test/terminal_approach_regression.cpp)
+  target_compile_features(terminal_approach_regression PRIVATE cxx_std_17)
+  target_include_directories(terminal_approach_regression PRIVATE src)
+  ament_target_dependencies(terminal_approach_regression nav_msgs tf2 tf2_geometry_msgs)
+  add_test(NAME terminal_approach_regression COMMAND terminal_approach_regression)
+  add_executable(exact_goal_endpoint_regression test/exact_goal_endpoint_regression.cpp)
+  target_include_directories(exact_goal_endpoint_regression PRIVATE src)
+  ament_target_dependencies(exact_goal_endpoint_regression nav_msgs)
+  add_test(NAME exact_goal_endpoint_regression COMMAND exact_goal_endpoint_regression)
   add_executable(docking_projection_regression test/docking_projection_regression.cpp)
   target_compile_features(docking_projection_regression PRIVATE cxx_std_17)
   target_include_directories(docking_projection_regression PRIVATE src/docking_compat)

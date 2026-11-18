@@ -9,9 +9,9 @@ waypoints:
   前台区:
     description: ''
     frame_id: map
-    x: 9.434919
-    y: -11.322637
-    yaw: 0.10007471839510954
+    x: 9.295155
+    y: -11.31057
+    yaw: 0.0569491510147789
   毛巾区:
     description: ''
     frame_id: map
@@ -54,12 +54,18 @@ waypoints:
     x: 10.687152
     y: -16.168157
     yaw: -3.070321470359489
+  送物机器人:
+    description: ''
+    frame_id: map
+    x: 8.556348
+    y: -12.300228
+    yaw: -3.0892016044495225
   递水区:
     description: ''
     frame_id: map
-    x: 9.486266
-    y: -12.705543
-    yaw: -1.5073945539091544
+    x: 9.117735
+    y: -11.884588
+    yaw: -1.5521244628445034
   配送区:
     description: ''
     frame_id: map

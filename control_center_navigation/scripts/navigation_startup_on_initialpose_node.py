@@ -4,8 +4,21 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav2_msgs.srv import ManageLifecycleNodes
 from rclpy.duration import Duration
 import rclpy
+import math
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
+
+
+def covariance_converged(covariance, max_x, max_y, max_yaw):
+    # AMCL's E[x*x]-E[x]**2 can produce tiny negative diagonal entries
+    # for a nearly zero-variance cloud. Do not reject floating-point roundoff;
+    # retain the original upper limits and reject meaningful negative/NaN data.
+    if len(covariance) < 36:
+        return False
+    values = [covariance[0], covariance[7], covariance[35]]
+    limits = [max_x, max_y, max_yaw]
+    return all(math.isfinite(v) and math.isfinite(limit) and limit >= 0
+               and -1e-12 <= v <= limit for v, limit in zip(values, limits))
 
 
 class NavigationStartupOnInitialPoseNode(Node):
@@ -132,10 +145,9 @@ class NavigationStartupOnInitialPoseNode(Node):
             return
 
         covariance = self._latest_amcl_covariance
-        converged = (
-            0.0 <= covariance[0] <= self._max_covariance_x
-            and 0.0 <= covariance[7] <= self._max_covariance_y
-            and 0.0 <= covariance[35] <= self._max_covariance_yaw
+        converged = covariance_converged(
+            covariance, self._max_covariance_x, self._max_covariance_y,
+            self._max_covariance_yaw,
         )
         if not converged:
             if self._stable_sample_count:
