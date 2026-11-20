@@ -47,7 +47,7 @@ fi
 
 if [ "${1:-}" = "--check" ]; then
   printf 'OK: workspace=%q package=%s robot_id=%s topic_suffix=%s\n' \
-    "$WORKSPACE" "$(ros2 pkg prefix control_center_shell)" "$ROBOT_ID" "0_345"
+    "$WORKSPACE" "$(ros2 pkg prefix control_center_shell)" "$ROBOT_ID" "0_367"
   exit 0
 fi
 
@@ -61,7 +61,7 @@ printf '\n[%s] launching control center 300\n' "$(date '+%F %T')" >> "$LOG_FILE"
 
 ros2 launch control_center_shell control_center.launch.py \
   robot_id:=345 \
-  topic_suffix:=0_345 \
+  topic_suffix:=0_367 \
   start_navigation:=true >> "$LOG_FILE" 2>&1
 status=$?
 

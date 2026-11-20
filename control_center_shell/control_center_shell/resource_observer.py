@@ -86,7 +86,7 @@ class Graph:
         self.context = self.node = self.executor = None
 
     def read(self, topics, timeout=1.2,
-             anchor="/topic_arm_whole_body_and_gripper_current_joints_status_0_345"):
+             anchor="/topic_arm_whole_body_and_gripper_current_joints_status_0_367"):
         with self.lock:
             if self.node is None:
                 import rclpy

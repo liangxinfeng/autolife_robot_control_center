@@ -24,7 +24,8 @@ def main():
     window.resize(1540, 940)
     window.show()
     application.processEvents()
-    assert window.tabs.count() == 5
+    assert [window.tabs.tabText(i) for i in range(window.tabs.count())] == [
+        '导航与航点', '地图构建', '全身关节', '系统服务', '系统状态', '运行日志']
     assert window.tabs.tabText(3) == '系统服务'
 
     window.tabs.setCurrentIndex(3)
@@ -47,6 +48,7 @@ def main():
         def __init__(self):
             self.running = True
             self.stop_count = 0
+            self.process_group_id = None
 
         def stop(self):
             self.stop_count += 1

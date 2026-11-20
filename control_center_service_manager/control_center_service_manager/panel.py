@@ -17,7 +17,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 SAFE_SERVICE_RE = re.compile(r'^[A-Za-z0-9_.@:-]+\.service$')
 ARM_SETTINGS_PATH = Path(
-    '/home/ubuntu/miniconda3/envs/robot_env/lib/python3.12/site-packages/'
+    '/home/ubuntu/autolife-v3/env/lib/python3.12/site-packages/'
     'autolife_robot_arm/settings.toml'
 )
 VR_GV_SETTING_RE = re.compile(
@@ -27,15 +27,21 @@ RELAY_CONFIG_PATH = Path(
     '/home/ubuntu/Documents/autolife-relay/conf/config.yaml'
 )
 VISION_SETTINGS_PATH = Path(
-    '/home/ubuntu/miniconda3/envs/robot_env/lib/python3.12/site-packages/'
+    '/home/ubuntu/autolife-v3/env/lib/python3.12/site-packages/'
     'autolife_robot_vision/settings.toml'
 )
-NAVIGATION_VOICE_CONFIG_PATH = Path(
-    '/home/ubuntu/ros2_ws/src/'
-    'control_center_navigation/config/voice_feedback.yaml'
-)
+def navigation_voice_config():
+    from ament_index_python.packages import PackageNotFoundError, get_package_share_directory
+    try:
+        share = Path(get_package_share_directory('control_center_navigation'))
+    except PackageNotFoundError:
+        share = Path.home() / 'ros2_ws/src/control_center_navigation'
+    return share / 'config/voice_feedback.yaml'
+
+
+NAVIGATION_VOICE_CONFIG_PATH = navigation_voice_config()
 VISION_ROBOT_CONFIG_PATH = Path(
-    '/home/ubuntu/miniconda3/envs/robot_env/lib/python3.12/site-packages/'
+    '/home/ubuntu/autolife-v3/env/lib/python3.12/site-packages/'
     'autolife_robot_vision/configs/robot_v3_1.json'
 )
 ALSA_CARDS_PATH = Path('/proc/asound/cards')
@@ -279,7 +285,7 @@ def command_for(action, unit=None):
             args += ['--no-pager', '--full']
         elif action == 'show':
             args += [
-                '--property=ActiveState', '--property=SubState',
+                '--property=LoadState', '--property=ActiveState', '--property=SubState',
                 '--property=UnitFileState', '--property=Description',
                 '--no-pager',
             ]
@@ -312,6 +318,7 @@ def parse_show_output(text):
             key, value = line.split('=', 1)
             values[key.strip()] = value.strip()
     return {
+        'load': values.get('LoadState', 'unknown'),
         'active': values.get('ActiveState', 'unknown'),
         'sub': values.get('SubState', 'unknown'),
         'enabled': values.get('UnitFileState', 'unknown'),
@@ -636,7 +643,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self,
         action_guard=None,
         auto_refresh=True,
-        topic_suffix='0_345',
+        topic_suffix='0_367',
         parent=None,
     ):
         super().__init__(parent)
@@ -1178,7 +1185,7 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         )
 
     def set_voice_feedback_enabled(self, enabled):
-        if self._voice_feedback_busy:
+        if self._voice_feedback_busy or not self._guard_allows('restart', 'vision-service.service'):
             return
         try:
             vision_original = VISION_SETTINGS_PATH.read_text(encoding='utf-8')
@@ -1207,12 +1214,13 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._set_voice_feedback_state(enabled, '正在重启语音服务')
         self.event_label.setText('正在应用导航语音播报设置……')
 
-        def parameter_done(_success, _text, _code):
+        def parameter_done(success, text, _code):
             self._set_voice_feedback_busy(False)
             self.refresh_voice_feedback()
-            self.event_label.setText(
-                f'导航语音播报已{"开启" if enabled else "关闭"}并立即生效'
-            )
+            if success and re.search(r'\bset parameter successful\b', text or '', re.IGNORECASE):
+                self.event_label.setText(f'导航语音播报已{"开启" if enabled else "关闭"}并立即生效')
+            else:
+                self.event_label.setText('语音配置已保存；运行中的导航参数未确认，下一次启动将读取配置。')
 
         def service_restarted(success):
             if not success:
@@ -1278,13 +1286,17 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self.logo_display_status.style().unpolish(self.logo_display_status)
         self.logo_display_status.style().polish(self.logo_display_status)
         if not self._logo_busy:
-            self.logo_display_start_button.setEnabled(active is not True)
+            self.logo_display_start_button.setEnabled(active is False)
             self.logo_display_stop_button.setEnabled(active is True)
 
     def refresh_logo_display(self):
         def checked(success, text, _code):
-            state = parse_show_output(text) if success and text else {}
-            active_state = state.get('active', 'unknown')
+            state = parse_show_output(text or '')
+            if state['load'] == 'not-found':
+                self._set_logo_state(None, f'未安装 {LOGO_SERVICE_UNIT}')
+                self.logo_display_status.setText('专用胸屏服务未安装')
+                return
+            active_state = state.get('active', 'unknown') if success else 'unknown'
             if active_state == 'active':
                 active = True
             elif active_state in ('inactive', 'failed'):
@@ -1617,6 +1629,9 @@ class ServiceManagerPanel(QtWidgets.QWidget):
                 'arm-control-service.service 未运行，拒绝发送全身关节复位命令。'
             )
             return
+        if not self._guard_allows('joint_reset', 'arm-control-service.service'):
+            self._set_joint_reset_busy(False, '资源已被占用', 'stateWarn')
+            return
         self._set_joint_reset_busy(True, '正在发送…', 'stateWarn')
         self._run_command(
             'ros2',
@@ -1703,6 +1718,8 @@ class ServiceManagerPanel(QtWidgets.QWidget):
             self.refresh_navigation_mode()
             return
 
+        if not self._guard_allows('restart', 'arm-control-service.service'):
+            return
         try:
             content = ARM_SETTINGS_PATH.read_text(encoding='utf-8')
             value = 'true' if vendor_enabled else 'false'
@@ -1888,8 +1905,6 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         except ValueError as error:
             self._show_error(str(error))
             return
-        if not self._guard_allows(action, unit):
-            return
         if action == 'status':
             self.show_status(unit)
             return
@@ -1908,6 +1923,10 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._execute_action(action, unit)
 
     def _execute_action(self, action, unit, done=None):
+        if not self._guard_allows(action, unit):
+            if done is not None:
+                done(False)
+            return
         self.event_label.setText(f'正在执行：{action} {unit}')
 
         def completed(success, text, code):
@@ -1933,10 +1952,6 @@ class ServiceManagerPanel(QtWidgets.QWidget):
         self._run_named('status', unit, completed)
 
     def start_navigation_stack(self):
-        if not self._guard_allows('start', 'gv-slam-service.service'):
-            return
-        if not self._guard_allows('start', 'gv-control-service.service'):
-            return
         self._execute_action(
             'start', 'gv-slam-service.service',
             lambda success: self._execute_action(
@@ -1955,9 +1970,9 @@ class ServiceManagerPanel(QtWidgets.QWidget):
             return
         self._execute_action(
             'stop', 'gv-control-service.service',
-            lambda _success: self._execute_action(
+            lambda success: self._execute_action(
                 'stop', 'gv-slam-service.service'
-            ),
+            ) if success else None,
         )
 
     def refresh_all(self):

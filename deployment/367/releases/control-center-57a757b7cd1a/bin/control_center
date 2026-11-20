@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+base="$(cd "$(dirname "$0")/.." && pwd)"
+requested_domain="${ROS_DOMAIN_ID-}"
+source "$base/environment.sh"
+if [[ -n "$requested_domain" ]]; then export ROS_DOMAIN_ID="$requested_domain"; fi
+cd "$base"
+exec python -m control_center_shell.app --ros-args -p robot_id:=367 -p topic_suffix:=0_367

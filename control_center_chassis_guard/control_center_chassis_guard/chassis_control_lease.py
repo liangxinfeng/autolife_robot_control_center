@@ -68,7 +68,7 @@ def resolve_chassis_identity(topic_suffix=None, topic_hint=None, environ=None):
 
     Precedence: ``ROS_DOMAIN_ID`` / ``ROBOT_ID`` environment variables first,
     then the ``<domain>_<robot>`` topic suffix given directly or extracted
-    from a topic name such as ``/topic_gv_front_lidar_0_345``.  Unresolved
+    from a topic name such as ``/topic_gv_front_lidar_0_367``.  Unresolved
     parts come back as empty strings; the lease then fails closed instead of
     guessing a robot id.
     """

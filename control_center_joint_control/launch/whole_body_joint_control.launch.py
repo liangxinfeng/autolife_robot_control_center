@@ -2,6 +2,7 @@ from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from control_center_module_lease import controller_lease
 from launch.actions import (
     DeclareLaunchArgument,
     EmitEvent,
@@ -38,7 +39,7 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'robot_id': ParameterValue(robot_id, value_type=int),
-            # Values such as 0_345 otherwise look numeric to the launch
+            # Values such as 0_367 otherwise look numeric to the launch
             # YAML parameter parser (and can become octal integer 198).
             'topic_suffix': ParameterValue(topic_suffix, value_type=str),
             'require_operator_heartbeat': ParameterValue(
@@ -48,6 +49,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        controller_lease('joint'),
         # The vendor arm-control service uses CycloneDDS on loopback.  Set this
         # explicitly for every process started here so GUI launches and shells
         # with a stale Fast DDS daemon cannot silently join a different graph.
@@ -65,12 +67,12 @@ def generate_launch_description():
             '</Discovery></Domain></CycloneDDS>',
         ),
         DeclareLaunchArgument(
-            'robot_id', default_value='345',
+            'robot_id', default_value='367',
             description='Robot number used by vendor topic suffixes.',
         ),
         DeclareLaunchArgument(
             'topic_suffix', default_value='',
-            description='Explicit vendor suffix, e.g. 0_345. Empty uses ROS_DOMAIN_ID_robot_id.',
+            description='Explicit vendor suffix, e.g. 0_367. Empty uses ROS_DOMAIN_ID_robot_id.',
         ),
         DeclareLaunchArgument(
             'panel', default_value='true',

@@ -144,19 +144,38 @@ def _group(key, record, processes):
     return members
 
 
-def record_process(key, pid):
-    process = _proc(pid)
-    if key not in KEYS or not process or process['pgid'] != pid:
-        return
+@contextmanager
+def _record_lock(key):
+    import fcntl
     STATE_DIR.mkdir(parents=True, exist_ok=True)
-    target = STATE_DIR / (key + '.json')
+    with (STATE_DIR / (key + '.lock')).open('a') as stream:
+        fcntl.flock(stream, fcntl.LOCK_EX)
+        yield STATE_DIR / (key + '.json')
+
+
+def record_process(key, pid):
+    if key not in KEYS:
+        return
+    with _record_lock(key) as target:
+        processes = _processes()
+        process = processes.get(pid)
+        if not process or not _group(key, {'pid': pid, 'start': process['start']}, processes):
+            return
+        if target.exists():
+            record = json.loads(target.read_text())
+            if _group(key, record, processes) and record['pid'] != pid:
+                raise OSError(f'{key} 已有活动进程记录')
+        _write_record(key, target, pid, process['start'])
+
+
+def _write_record(key, target, pid, start):
     fd, temporary_name = tempfile.mkstemp(
         prefix=f'.{key}.', suffix='.tmp', dir=STATE_DIR
     )
     temporary = Path(temporary_name)
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as stream:
-            stream.write(json.dumps({'pid': pid, 'start': process['start']}))
+            stream.write(json.dumps({'pid': pid, 'start': start}))
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, target)
@@ -184,9 +203,21 @@ def _quarantine_process_record(key, target):
     return quarantine.name
 
 
-def forget_process(key):
-    if key in KEYS:
-        (STATE_DIR / (key + '.json')).unlink(missing_ok=True)
+def forget_process(key, pid=None):
+    if key not in KEYS:
+        return
+    with _record_lock(key) as target:
+        if not target.exists():
+            return
+        try:
+            record = json.loads(target.read_text())
+            recorded_pid = record['pid']
+        except (KeyError, TypeError, ValueError):
+            return
+        if pid is not None and recorded_pid != pid:
+            return
+        if not any(p['pgid'] == recorded_pid for p in _processes().values()):
+            target.unlink(missing_ok=True)
 
 
 def stop_managed_group(key, group_id, emit=print):
@@ -195,7 +226,7 @@ def stop_managed_group(key, group_id, emit=print):
         return False
     leader = _proc(int(group_id))
     if leader is None:
-        forget_process(key)
+        forget_process(key, group_id)
         return True
     record = {'pid': int(group_id), 'start': leader['start']}
     if _group(key, record, _processes()) is None:
@@ -203,7 +234,7 @@ def stop_managed_group(key, group_id, emit=print):
         return False
     if not _terminate_group(key, record, emit):
         return False
-    forget_process(key)
+    forget_process(key, group_id)
     return True
 
 
@@ -232,7 +263,7 @@ def _terminate_group(key, record, emit):
     return not any(p['pgid'] == pid for p in _processes().values())
 
 
-def _conflicts(processes, suffix='0_345'):
+def _conflicts(processes, suffix='0_367'):
     own = [p for p in processes.values() if p['uid'] == os.getuid()]
     result = {}
     for key, marker in LAUNCH.items():
@@ -249,6 +280,11 @@ def _conflicts(processes, suffix='0_345'):
                             'gv-slam-service.service' in p.get('cgroup', ''))]
         if matched:
             result[key] = matched
+    # The vendor workflow can issue both chassis and joint commands when idle.
+    workflow = [p for p in own if any(line.split('/')[-1] == 'flow-service.service'
+                                      for line in p.get('cgroup', '').splitlines())]
+    if workflow:
+        result['workflow_control'] = workflow
     legacy = [p for p in own if 'whole_body_joint_control' in p['command']
               and ('joint_bridge' in p['command'] or 'joint_control_panel' in p['command'])
               and 'control_center_joint_control' not in p['command']]
@@ -359,8 +395,12 @@ def _check_lidars(suffix, timeout, emit):
 def _lidar_frame(side, suffix):
     # 345 has a front 3D projector with its own level scan frame. Keep the
     # S2 contract strict; accepting arbitrary frame IDs can hide a bad TF.
-    if str(suffix).split('_')[-1] == '345' and side == 'front':
-        return 's3_front_scan_frame'
+    if side == 'front':
+        configured = os.environ.get('AUTOLIFE_FRONT_LIDAR_FRAME', '').strip()
+        if configured:
+            return configured
+        if str(suffix).split('_')[-1] in ('345', '367'):
+            return 's3_front_scan_frame'
     return side + '_laser_frame'
 
 
@@ -401,8 +441,8 @@ def _read_lidars(node, executor, suffix, timeout, emit, latest):
     missing = [side for side in ('front', 'rear') if not latest[side]]
     if missing:
         detail = '激光雷达未输出有效扫描：' + '、'.join(missing)
-        if str(suffix).split('_')[-1] == '345' and 'front' in missing:
-            detail += '；请检查前置3D点云和 robot345-s3-lidar.service 转换服务'
+        if str(suffix).split('_')[-1] == '367' and 'front' in missing:
+            detail += '；请检查前置3D点云和 robot367-s3-lidar.service 转换服务'
         return detail
     return '双雷达扫描未在 0.10 秒内同步'
 
@@ -472,11 +512,11 @@ def _check_joint_feedback(suffix, timeout=3.0, emit=print):
 
 NEVER_STOP_UNITS = frozenset({
     GV_CONTROL_SERVICE, 'arm-control-service.service',
-    'autolife_robot_kiosk.service', 'autolife-logo-display.service',
+    'autolife_robot_kiosk.service', 'autolife-logo-display.service', 'logo-backend.service',
     'autolife-relay.service', 'autolife-admin-build.service',
     'autolife-speaker-mixer-guard.service', 'dashboard-backend.service',
     'void-cog-h5.service',
-    'robot345-s3-lidar.service', 'vision-service.service', 'robot-action-service.service',
+    'robot367-s3-lidar.service', 'vision-service.service', 'robot-action-service.service',
 })
 
 
@@ -511,18 +551,18 @@ def _chassis_state(suffix):
     return text(navigating), text(owner), keys
 
 
-def check_module_health(module, group_id, timeout=12.0, emit=print, active_groups=None):
+def check_module_health(module, group_id, timeout=12.0, emit=print, active_groups=None, suffix='0_367'):
     """Verify a restarted navigation or mapping group without moving the robot."""
     if module not in MODULE_HEALTH_MARKERS:
         return f'不支持的模块：{module}'
     try:
         with _probe_node(f'control_center_{module}_repair_check') as (node, executor):
-            return _module_health_with_node(node, executor, module, group_id, timeout, emit, active_groups)
+            return _module_health_with_node(node, executor, module, group_id, timeout, emit, active_groups, suffix)
     except Exception as error:
         return f'{"导航" if module == "navigation" else "建图"}状态验证失败：{error}'
 
 
-def _module_health_with_node(node, executor, module, group_id, timeout, emit, active_groups=None):
+def _module_health_with_node(node, executor, module, group_id, timeout, emit, active_groups, suffix):
     from nav_msgs.msg import OccupancyGrid
     from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 
@@ -540,6 +580,7 @@ def _module_health_with_node(node, executor, module, group_id, timeout, emit, ac
     node.create_subscription(OccupancyGrid, '/map', receive_map, qos)
     deadline = time.monotonic() + timeout
     last_missing = []
+    resource_error = ''
     while time.monotonic() < deadline:
         all_processes = _processes()
         processes = [
@@ -553,13 +594,15 @@ def _module_health_with_node(node, executor, module, group_id, timeout, emit, ac
         executor.spin_once(
             timeout_sec=min(0.1, max(0, deadline-time.monotonic()))
         )
-        if not last_missing and received_map and module_snapshot(
-                module, '0_345', dict(active_groups or {}, **{module: int(group_id)})).ok:
-            emit(f'{module}: PASS critical processes and /map')
-            return None
+        if not last_missing and received_map:
+            snapshot = module_snapshot(module, suffix, dict(active_groups or {}, **{module: int(group_id)}))
+            if snapshot.ok:
+                emit(f'{module}: PASS critical processes and /map')
+                return None
+            resource_error = snapshot.detail
     if last_missing:
         return '关键进程未运行：' + '、'.join(last_missing)
-    return f'{"导航" if module == "navigation" else "建图"}启动后未输出 /map'
+    return resource_error or f'{"导航" if module == "navigation" else "建图"}启动后未输出 /map'
 
 
 # Hardware and process-identity helpers above are shared by all entrypoints.
@@ -569,11 +612,11 @@ from . import resource_repair as _repair
 def _proc(pid):
     return _observer.read_process(pid)
 
-def module_process_conflicts(module):
+def module_process_conflicts(module, suffix='0_367'):
     keys = {'navigation': ('navigation', 'chassis_control'),
             'slam': ('slam', 'dual_lidar'),
             'joint': ('joint', 'joint_control', 'legacy_joint')}.get(module, ())
-    conflicts = _conflicts(_processes())
+    conflicts = _conflicts(_processes(), suffix)
     return list({process['pid']: process for key in keys
                  for process in conflicts.get(key, [])}.values())
 
@@ -589,13 +632,13 @@ def paused_services():
     return _repair.load()
 
 
-def restore_paused(emit=print):
+def restore_paused(emit=print, suffix='0_367'):
     try:
-        return _repair.restore(emit)
+        return _repair.restore(emit, suffix)
     except Exception as error:
         return 'WARN', f'恢复未完成：{error}'
 
-def repair_plan(suffix='0_345', active_groups=None):
+def repair_plan(suffix='0_367', active_groups=None):
     snapshot = resource_snapshot(suffix, active_groups)
     units, groups, blocked = _repair.plan(snapshot)
     linked_units = { _repair.unit_key(member): member
@@ -622,7 +665,7 @@ def repair_plan(suffix='0_345', active_groups=None):
             "不会自动恢复旧导航目标。可取消，或修复后手动恢复被暂停服务。")
 
 
-def resource_snapshot(suffix='0_345', active_groups=None):
+def resource_snapshot(suffix='0_367', active_groups=None):
     snapshot = _observer.capture(suffix, active_groups)
     try:
         snapshot.issues.extend(_repair.paused_issues())
@@ -630,13 +673,13 @@ def resource_snapshot(suffix='0_345', active_groups=None):
         snapshot.issues.append(_observer.Issue('暂停记录', 'UNKNOWN', str(error)))
     return snapshot
 
-def module_snapshot(module, suffix='0_345', active_groups=None):
+def module_snapshot(module, suffix='0_367', active_groups=None):
     snapshot = resource_snapshot(suffix, active_groups)
     if module == 'joint':
-        relevant = lambda i: (i.resource in ('ROS', 'joint', 'joint_control', 'legacy_joint')
+        relevant = lambda i: (i.resource in ('ROS', 'joint', 'joint_control', 'legacy_joint', 'workflow_control')
                               or '/topic_arm_' in i.resource)
     else:
-        relevant = lambda i: (i.resource in ('ROS', '/map', '底盘租约', '底盘导航',
+        relevant = lambda i: (i.resource in ('ROS', '/map', '底盘租约', '底盘导航', 'workflow_control',
                                              'navigation', 'slam', 'dual_lidar', 'chassis_control')
                               or '/topic_gv_target_cmd_vel_' in i.resource
                               or i.state == 'REOCCUPIED')
@@ -644,8 +687,9 @@ def module_snapshot(module, suffix='0_345', active_groups=None):
     return snapshot
 
 
-def _map_publishers(timeout=1.2):
-    endpoints = _observer.GRAPH.read(['/map'], timeout=max(.5, timeout))
+def _map_publishers(timeout=1.2, suffix='0_367'):
+    endpoints = _observer.GRAPH.read(['/map'], timeout=max(.5, timeout),
+        anchor=f'/topic_arm_whole_body_and_gripper_current_joints_status_{suffix}')
     if any(not e.gid or '_UNKNOWN_' in e.name or '_NODE_NAME_UNKNOWN_' in e.name
            or '_NODE_NAMESPACE_UNKNOWN_' in e.name for e in endpoints):
         raise RuntimeError('地图端点仍在发现中，不能判为空闲')
@@ -654,11 +698,29 @@ def _map_publishers(timeout=1.2):
 
 def _external_map_publishers(active_groups=None):
     endpoints = _observer.GRAPH.read(['/map'])
-    snapshot = _observer.inspect_endpoints(endpoints, _processes(), active_groups or {}, '0_345')
+    snapshot = _observer.inspect_endpoints(endpoints, _processes(), active_groups or {}, '0_367')
     issues = [i for i in snapshot.issues if i.resource == '/map']
     if any(i.state in ('DISCOVERING', 'UNKNOWN') for i in issues):
         raise RuntimeError('；'.join(i.detail for i in issues))
     return [e.name for e in endpoints] if issues else []
+
+
+def supervised_launch(processes, active_groups=None, owner_pids=None):
+    """A shared PID record is not permission to stop another application's launch."""
+    for key in KEYS:
+        try:
+            record = json.loads((STATE_DIR / (key + '.json')).read_text())
+        except (OSError, ValueError):
+            continue
+        if not _group(key, record, processes):
+            continue
+        leader = processes[record['pid']]
+        if (active_groups or {}).get(key) == leader['pid']:
+            continue
+        if leader['ppid'] > 1 and leader['ppid'] in processes and (
+                owner_pids is None or any(_descends(pid, leader['pid'], processes) for pid in owner_pids)):
+            return f"{key} 仍由活动应用管理，请从该应用释放控制权后再接管"
+    return ''
 
 
 def _record_issues(active_groups):
@@ -705,7 +767,7 @@ def _diagnose(suffix, active_groups, emit, lidar_timeout=5.0):
     return problems
 
 
-def check_only(suffix='0_345', active_groups=None, emit=print, lidar_timeout=5.0):
+def check_only(suffix='0_367', active_groups=None, emit=print, lidar_timeout=5.0):
     try:
         problems = _diagnose(suffix, active_groups or {}, emit, lidar_timeout)
         return ('WARN', '；'.join(problems)) if problems else (
@@ -735,11 +797,13 @@ def _clean_records(active_groups, emit):
         if active_groups.get(key) == record['pid'] and members:
             continue
         if members:
-            if not _terminate_group(key, record, emit):
-                raise RuntimeError(f'{key} 旧进程组未能退出')
+            # A saved PID identifies a launch, not the application that owns it.
+            # Only the confirmed resource plan may stop a live controller.
+            emit(f'{key} 记录仍对应活动进程，保持原状')
+            continue
         elif any(p['pgid'] == record['pid'] for p in processes.values()):
             raise RuntimeError(f'{key} 进程组身份变化，未终止')
-        target.unlink(missing_ok=True)
+        forget_process(key, record['pid'])
 
 
 def _clear_proven_stale_flag(suffix, snapshot, actions, emit):
@@ -762,27 +826,34 @@ def _clear_proven_stale_flag(suffix, snapshot, actions, emit):
         client.close()
 
 
-def run(suffix='0_345', emit=print, lidar_timeout=5.0, takeover=False,
+def run(suffix='0_367', emit=print, lidar_timeout=5.0, takeover=False,
         active_groups=None):
     if not takeover:
         return check_only(suffix, active_groups, emit, lidar_timeout)
-    if not _repair.LOCK.acquire(blocking=False):
+    transaction = _repair.acquire_transaction()
+    if transaction is None:
         return 'WARN', '已有修复或恢复事务正在执行'
     actions = []
     try:
         groups = active_groups or {}
-        _clean_records(groups, emit)
-        _repair.maintain_guards(emit)
         before = resource_snapshot(suffix, groups)
         emit('repair_scan: ' + before.detail)
         actions, blocked = _repair.execute(before, emit)
         for reason in blocked:
             emit('repair_plan: 待重新确认：' + reason)
+        if blocked and not actions and any(i.owners for i in before.issues):
+            return 'WARN', '；'.join(blocked)
+        _clean_records(groups, emit)
+        _repair.maintain_guards(emit)
         if _gv_control_state() != 'active':
             fixed, reason = _recover_gv_control(suffix, 'start', emit)
             if not fixed:
                 return 'WARN', '共享底盘服务未能恢复：' + reason
             actions.append('已恢复共享底盘服务')
+        if before.ok and not actions and not blocked:
+            # No handoff to observe. Still sample the real hardware and verify
+            # resource ownership again before returning the result.
+            return check_only(suffix, groups, emit, lidar_timeout)
         after = resource_snapshot(suffix, groups)
         _clear_proven_stale_flag(suffix, after, actions, emit)
         # Require a continuous clean interval, not the first empty DDS query.
@@ -809,4 +880,5 @@ def run(suffix='0_345', emit=print, lidar_timeout=5.0, takeover=False,
     except Exception as error:
         return 'WARN', str(error)
     finally:
-        _repair.LOCK.release()
+        _repair.PREVIEWED = None
+        transaction.close()

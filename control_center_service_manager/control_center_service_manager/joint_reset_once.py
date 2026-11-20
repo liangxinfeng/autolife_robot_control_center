@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Publish one vendor full-body reset command after subscriber discovery."""
 
+import os
 import re
+from types import SimpleNamespace
+
+from control_center_module_lease import claim
 import time
 
 import rclpy
@@ -18,7 +22,7 @@ class JointResetOnce(Node):
             'control_center_joint_reset_once',
             parameter_overrides=parameter_overrides,
         )
-        self.declare_parameter('topic_suffix', '0_345')
+        self.declare_parameter('topic_suffix', '0_367')
         self.declare_parameter('discovery_timeout_sec', 5.0)
         suffix = str(self.get_parameter('topic_suffix').value).strip()
         if not SAFE_SUFFIX_RE.fullmatch(suffix):
@@ -59,6 +63,7 @@ def main(args=None):
     rclpy.init(args=args)
     node = None
     try:
+        claim(SimpleNamespace(environment=dict(os.environ)), 'joint')
         node = JointResetOnce()
         return 0 if node.publish_once() else 2
     except Exception as error:

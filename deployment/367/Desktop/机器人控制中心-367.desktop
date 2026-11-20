@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=机器人控制中心
+Comment=367本机适配，来源345 20261117版本
+Exec=/home/ubuntu/migration367_20261118/bin/control_center
+Path=/home/ubuntu/migration367_20261118
+Terminal=false
+Icon=applications-engineering
+Categories=Robotics;

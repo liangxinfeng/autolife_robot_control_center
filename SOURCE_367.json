@@ -1,0 +1,1786 @@
+{
+ "robot": "autolife-robot-367",
+ "repository": "autolife_robot_control_center",
+ "captured_utc": "2026-11-20T04:12:05.962716+00:00",
+ "base_source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center",
+ "control_center_release": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a",
+ "v6_release": "/home/ubuntu/migration367_20261118/releases/teleop-v6-afd1ad40ee86",
+ "files": {
+  ".gitattributes": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/.gitattributes",
+   "sha256": "e8440c72d9824dea4816c9d0652e824a4460b42e3c89be57a0b2ae6c5e1cd0c8",
+   "mode": "644",
+   "size": 315
+  },
+  ".gitignore": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/.gitignore",
+   "sha256": "e2f1da08fce5e84ce41b3fae8aa85edd9582cb005058b17f8b1de31241d9675d",
+   "mode": "644",
+   "size": 267
+  },
+  "AI_MIGRATION_GUIDE.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/AI_MIGRATION_GUIDE.md",
+   "sha256": "d1402d2a1b60f851902257b9197a23982e1122356842b12c3dacf2346987407f",
+   "mode": "644",
+   "size": 13642
+  },
+  "DEPENDENCIES_20261117.json": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/DEPENDENCIES_20261117.json",
+   "sha256": "7e28e68c2abacd245f37e10bbcf1e5250c1d5d099e8ca0e59541dcbff58a7b46",
+   "mode": "644",
+   "size": 1150
+  },
+  "HANDOFF_307.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/HANDOFF_307.md",
+   "sha256": "f00ede70b758c69863cae5c6e9990016f28777a21c2f485d31f8d27ac7376711",
+   "mode": "644",
+   "size": 5840
+  },
+  "README.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/README.md",
+   "sha256": "955b831eca8048caa94411f3dbfde651216ec35eb524e6c3859e5c81dda12230",
+   "mode": "644",
+   "size": 1638
+  },
+  "RELEASE_20261117.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/RELEASE_20261117.md",
+   "sha256": "ebca2863333e548ffaa5d8f90bcc0b6a50fa4e1941b1145ceecf1dd66e18dd44",
+   "mode": "644",
+   "size": 2624
+  },
+  "ROBOT300_20261015.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/ROBOT300_20261015.md",
+   "sha256": "799c50ca0c25846719b96c6bc4de462a07a7ed48a59f08c960ab249a62ff473d",
+   "mode": "644",
+   "size": 1712
+  },
+  "SOURCE_SNAPSHOT_20261117.json": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/SOURCE_SNAPSHOT_20261117.json",
+   "sha256": "4d7120ce85f67886b17ae47552a1a7bda524f9e1273e07ad278a7be01a21372b",
+   "mode": "644",
+   "size": 41467
+  },
+  "control_center_chassis_guard/README.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/README.md",
+   "sha256": "c2a741385a7a2f93edfe67760a929cbc23648cbfd3e43ef2a44891e26fa00565",
+   "mode": "644",
+   "size": 5706
+  },
+  "control_center_chassis_guard/conftest.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/conftest.py",
+   "sha256": "7ad47fb8b81f165d91427d0b281ea17c83fed477c42cab8329fa9cd1abdf0854",
+   "mode": "644",
+   "size": 622
+  },
+  "control_center_chassis_guard/control_center_chassis_guard/__init__.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_chassis_guard/lib/python3.12/site-packages/control_center_chassis_guard/__init__.py",
+   "sha256": "6c486dcfa951afee713cc2195baf03c5a02a41610c2aae75a336c1ed2bddd3b9",
+   "mode": "644",
+   "size": 689
+  },
+  "control_center_chassis_guard/control_center_chassis_guard/chassis_control_lease.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_chassis_guard/lib/python3.12/site-packages/control_center_chassis_guard/chassis_control_lease.py",
+   "sha256": "9fa8dd2b80692918fe6f015477382385ec399f4a9729e86a6f91040f6bfad533",
+   "mode": "644",
+   "size": 12833
+  },
+  "control_center_chassis_guard/control_center_chassis_guard/chassis_teleop_smoothing.yaml": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_chassis_guard/lib/python3.12/site-packages/control_center_chassis_guard/chassis_teleop_smoothing.yaml",
+   "sha256": "8bff6c0b7e1125cbd45f16f496612378106405e25461aabea7412e1e77d0a4e6",
+   "mode": "644",
+   "size": 4922
+  },
+  "control_center_chassis_guard/control_center_chassis_guard/manual_key_filter.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_chassis_guard/lib/python3.12/site-packages/control_center_chassis_guard/manual_key_filter.py",
+   "sha256": "5b494ec211e2b09992e809c18639061bd7f509269e5204ec0be0ad690b605d40",
+   "mode": "644",
+   "size": 6044
+  },
+  "control_center_chassis_guard/control_center_chassis_guard/velocity_ramp.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_chassis_guard/lib/python3.12/site-packages/control_center_chassis_guard/velocity_ramp.py",
+   "sha256": "4a52e41f6553d809ac6b84a408e029f7b0e40ead99cccce3df3a7430e42ad5ff",
+   "mode": "644",
+   "size": 12818
+  },
+  "control_center_chassis_guard/package.xml": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/package.xml",
+   "sha256": "6448f3504e1982746c1bbfdf9da7de77d0053e169b8285ad472b9deec2f94195",
+   "mode": "644",
+   "size": 635
+  },
+  "control_center_chassis_guard/resource/control_center_chassis_guard": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/resource/control_center_chassis_guard",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "mode": "644",
+   "size": 0
+  },
+  "control_center_chassis_guard/setup.cfg": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/setup.cfg",
+   "sha256": "2437d8285e35b8ccd6fbd357399a17f16f2edd16484d1d02c05c8b062fa59254",
+   "mode": "644",
+   "size": 125
+  },
+  "control_center_chassis_guard/setup.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/setup.py",
+   "sha256": "8fd362e9161d5f5387fd736e8691b6805ead051033cb8a348cefca1d0dc34833",
+   "mode": "644",
+   "size": 871
+  },
+  "control_center_chassis_guard/test/fake_redis.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/test/fake_redis.py",
+   "sha256": "19202a6e948e9102b1ab5bab4abeb220f4d9f2489e234e4125a6462df56bacd7",
+   "mode": "644",
+   "size": 3483
+  },
+  "control_center_chassis_guard/test/test_chassis_control_lease.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/test/test_chassis_control_lease.py",
+   "sha256": "9a421702b0b3c63eb5bd261a182b4654bdc474c16ed2614c6c1be62695243582",
+   "mode": "644",
+   "size": 6726
+  },
+  "control_center_chassis_guard/test/test_identity.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/test/test_identity.py",
+   "sha256": "d823f2b8b3120866ebe37b52c5ffb99c63f4bd57b832dd15dcacdade1f4f86d8",
+   "mode": "644",
+   "size": 1850
+  },
+  "control_center_chassis_guard/test/test_manual_key_filter.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/test/test_manual_key_filter.py",
+   "sha256": "edec4959d88c505592fc8d015756e7fa4cb3992f37f7071872ae214c9a531a7d",
+   "mode": "644",
+   "size": 7014
+  },
+  "control_center_chassis_guard/test/test_redis_integration.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/test/test_redis_integration.py",
+   "sha256": "0d5342236326b968fd74a0cd24fad864958780116763a4894f16de11ad3695ce",
+   "mode": "644",
+   "size": 2323
+  },
+  "control_center_chassis_guard/test/test_ui_gating_integration.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/test/test_ui_gating_integration.py",
+   "sha256": "9aff748fb650c8ee67d10b99fb39bedf3ca888271992062bdd08eac3e32459e4",
+   "mode": "644",
+   "size": 8847
+  },
+  "control_center_chassis_guard/test/test_ui_key_debounce_integration.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/test/test_ui_key_debounce_integration.py",
+   "sha256": "07bd7e06a02eec7278e53f13e8e5e9f2930942d5e4129321c907eecdb641a209",
+   "mode": "644",
+   "size": 11907
+  },
+  "control_center_chassis_guard/test/test_ui_ramp_integration.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/test/test_ui_ramp_integration.py",
+   "sha256": "33a3436cf223e6f3c0797a57de2a132991a4ef3f5baf42921b99f09ff903d4ec",
+   "mode": "644",
+   "size": 23290
+  },
+  "control_center_chassis_guard/test/test_velocity_ramp.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_chassis_guard/test/test_velocity_ramp.py",
+   "sha256": "3ced950f298035c11181c4ec7e25cab7b103ef14d60d6b38616b7b2d26aa4a58",
+   "mode": "644",
+   "size": 14437
+  },
+  "control_center_joint_control/AI_MIGRATION_GUIDE.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/AI_MIGRATION_GUIDE.md",
+   "sha256": "16e9d3b60afd95cd2c1162b44715e2f3a68b63bf831117401cddbab973e34469",
+   "mode": "644",
+   "size": 3927
+  },
+  "control_center_joint_control/README.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/README.md",
+   "sha256": "78eb93493a3cbed1edc577e9b1ba8c0eabbe8ab96faf7d7f5a9cf3284c4c275d",
+   "mode": "644",
+   "size": 11925
+  },
+  "control_center_joint_control/config/saved_joint_actions.yaml": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/config/saved_joint_actions.yaml",
+   "sha256": "a8c02c244ce316c89c23baba1fc1d3cdddf719e9e18f40e85fc8a253cd9fbeb7",
+   "mode": "644",
+   "size": 23
+  },
+  "control_center_joint_control/config/saved_joint_poses.yaml": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/config/saved_joint_poses.yaml",
+   "sha256": "5e083521d6590cd029d0aa5db4ceca87deb30c98198880ee265c27920b4f7d3c",
+   "mode": "644",
+   "size": 3407
+  },
+  "control_center_joint_control/control_center_joint_control/__init__.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/__init__.py",
+   "sha256": "44ecd1c24b4d407b72dfbd8e1901331778e6deef561fcf132da251aa080312a9",
+   "mode": "644",
+   "size": 55
+  },
+  "control_center_joint_control/control_center_joint_control/action_editor.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/action_editor.py",
+   "sha256": "221d7ee759efad24cbf900e5ff9126bc780579189ebb01b21775254331363b9a",
+   "mode": "644",
+   "size": 20685
+  },
+  "control_center_joint_control/control_center_joint_control/action_library.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/action_library.py",
+   "sha256": "0b1cbbd1424375929f8760c01d56c7be01ada3ddd533ec20c8a037dd142122e7",
+   "mode": "644",
+   "size": 5742
+  },
+  "control_center_joint_control/control_center_joint_control/body_height.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/body_height.py",
+   "sha256": "db550bb32fa4b4676da88925c8c0ba5589e266ec6a53e5f2800f52ae3a2df897",
+   "mode": "644",
+   "size": 2888
+  },
+  "control_center_joint_control/control_center_joint_control/control_panel.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/control_panel.py",
+   "sha256": "95ff0c55c3136a0fd05d07da08c8ffbbca6016833562698dcbea880113e2d504",
+   "mode": "644",
+   "size": 94255
+  },
+  "control_center_joint_control/control_center_joint_control/joint_bridge.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/joint_bridge.py",
+   "sha256": "4c9eb5480bff3c8ce386f048a9f26431fc58605b99134327cb829265d54b3f92",
+   "mode": "644",
+   "size": 73336
+  },
+  "control_center_joint_control/control_center_joint_control/joint_definitions.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/joint_definitions.py",
+   "sha256": "7bdb1a5421dcf521523414bf4a8ced5c27d52f5a8ad1863c923c8fcfd8428910",
+   "mode": "644",
+   "size": 4894
+  },
+  "control_center_joint_control/control_center_joint_control/motion_storage.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/motion_storage.py",
+   "sha256": "8d4b312c6602c23b8ff8ad035160194840d6863afcc22ef3de8a4755a2c37e48",
+   "mode": "644",
+   "size": 2156
+  },
+  "control_center_joint_control/control_center_joint_control/operator_targets.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/operator_targets.py",
+   "sha256": "c4424f4dd3ef4ffa65ca9b00ede059bca86cd59461b3e7a939da55174aa4b123",
+   "mode": "644",
+   "size": 1093
+  },
+  "control_center_joint_control/control_center_joint_control/pose_library.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/pose_library.py",
+   "sha256": "db8c16f3902cd7736ae83548452b65b4597ca612b45e0700939ea586d5018257",
+   "mode": "644",
+   "size": 2431
+  },
+  "control_center_joint_control/control_center_joint_control/robot_view.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/robot_view.py",
+   "sha256": "7d58894c3ac97f7f690f9da7969de807efea9c0b2e8fccc0ebfe8396632f5327",
+   "mode": "644",
+   "size": 35445
+  },
+  "control_center_joint_control/control_center_joint_control/trajectory_pickle.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/trajectory_pickle.py",
+   "sha256": "182aabfa0043f96f84ac7d3c1f81cb1ee80622648f6e0cd921df9e42f95e22fa",
+   "mode": "644",
+   "size": 6255
+  },
+  "control_center_joint_control/control_center_joint_control/vr_reset_pose.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_joint_control/lib/python3.12/site-packages/control_center_joint_control/vr_reset_pose.py",
+   "sha256": "8aa58b422a142edf9f492ad9d180d07c9995587f9812fac2922e9c4dfd7c4453",
+   "mode": "644",
+   "size": 11458
+  },
+  "control_center_joint_control/launch/whole_body_joint_control.launch.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_joint_control/launch/whole_body_joint_control.launch.py",
+   "sha256": "01bf6b4b8e148e9ec8862ba45b1271521811df96ecef01d7714e2b65a7984435",
+   "mode": "644",
+   "size": 5544
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Ankle_to_Knee.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Ankle_to_Knee.STL",
+   "sha256": "1afc2714313f183d12ee0d68850950baec95ea286ab26f2f61d82290df4cc000",
+   "mode": "644",
+   "size": 277984
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Left.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Left.STL",
+   "sha256": "9f3690b61c343a496bd7d209e7bb289357efa3fb0ac9abd02c8f324cca954215",
+   "mode": "644",
+   "size": 8484
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Right.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Camera_Gripper_Right.STL",
+   "sha256": "80642a3e4708a29316d34ec9bdbd11d98a0dc121ea7069da09cf7884f0bab65b",
+   "mode": "644",
+   "size": 8484
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Back.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Back.STL",
+   "sha256": "18003a8af0a5483b607753f0de981f7ccb7851432cef18f87045fea6680156d3",
+   "mode": "644",
+   "size": 61884
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Forehead.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Forehead.STL",
+   "sha256": "9c16bd112c09fe8476be06acddd7ade7df53f18f555aa89cc80449264e0a6fb6",
+   "mode": "644",
+   "size": 65784
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Left_Eye.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Left_Eye.STL",
+   "sha256": "c742d0e313ce92af131ccdabb16f901557583b912ef4544125ff0b5052876f23",
+   "mode": "644",
+   "size": 60984
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Right_Eye.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Camera_Head_Right_Eye.STL",
+   "sha256": "da735a9cb7b2ef12fd15afc024b974642d904b96a0573d45d73d23be292b5359",
+   "mode": "644",
+   "size": 60984
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Ground_Vehicle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Ground_Vehicle.STL",
+   "sha256": "8dd85b2d8c0b5ea2df730c99c355f99e635b77c73fae48ceaf4b82ba5ad7bc77",
+   "mode": "644",
+   "size": 1140134
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_IMU.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_IMU.STL",
+   "sha256": "05036f7d6f9b338be55325e3572720600e2a4e28184f19877f0ffda5db103447",
+   "mode": "644",
+   "size": 24284
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Knee_to_Waist_Pitch.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Knee_to_Waist_Pitch.STL",
+   "sha256": "ca18902a232322f9d963fa4ea02d14d56ab3c6fed29ec871d649668d64f6748e",
+   "mode": "644",
+   "size": 475584
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Elbow_to_Forearm.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Elbow_to_Forearm.STL",
+   "sha256": "7240a7aff0b85e0e51d9bf66b8e8e13836eb688e8e5ab10e9f45a6a82f0b9585",
+   "mode": "644",
+   "size": 511484
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Forearm_to_Wrist_Upper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Forearm_to_Wrist_Upper.STL",
+   "sha256": "c460d5a89bc871575bb9b4603cff24b68a8d87e3344630f6cbd213b63a0a2f68",
+   "mode": "644",
+   "size": 594334
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper.STL",
+   "sha256": "014f18e9a0fa0c2e1089ba9c17d30345d50dc1f108054baf85cdaff93bcc69bd",
+   "mode": "644",
+   "size": 393084
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Finger.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Finger.STL",
+   "sha256": "aa7acd7ba602993674bbbcd3699dc3e9e291363cf6f7b9ac7690d592e3e8c644",
+   "mode": "644",
+   "size": 196084
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Inner_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Left_Inner_Knuckle.STL",
+   "sha256": "b81196b9763fc4a153aff14c20bab37f31e59aee557f58f06510e1990d915e3f",
+   "mode": "644",
+   "size": 97184
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Finger.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Finger.STL",
+   "sha256": "13e28d9bb3a25e5d1d53d201df588c2c8419c07e6b74ea841fa828c5a1b95029",
+   "mode": "644",
+   "size": 195984
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Inner_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Inner_Knuckle.STL",
+   "sha256": "64e60a8a38025453b4e9a28aa9966d79f2d1f9adbcb1d71a8598e9791fdee98d",
+   "mode": "644",
+   "size": 94984
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Outer_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Gripper_Right_Outer_Knuckle.STL",
+   "sha256": "a0dcbae9fcfce99c2e30fa974ac0ba4c9c29ac0ba61eb7160c0ff584c3ea8c2f",
+   "mode": "644",
+   "size": 395484
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Inner_to_Shoulder_Outer.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Inner_to_Shoulder_Outer.STL",
+   "sha256": "4331eb7c039e2dd9b7ed81e2beedbdebd5bca110330f040b2c641dab2769fdd0",
+   "mode": "644",
+   "size": 428534
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Outer_to_UpperArm.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Shoulder_Outer_to_UpperArm.STL",
+   "sha256": "c553ee859be2c47264c81015b4d077851f6b3ff784965a2b3ff2380ca5dd5f52",
+   "mode": "644",
+   "size": 537784
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_UpperArm_to_Elbow.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_UpperArm_to_Elbow.STL",
+   "sha256": "9e4d5f6aba352a0d2bc6eed2396aa7c6886edae40c0f6eebc96ae1267c2c4aa7",
+   "mode": "644",
+   "size": 378384
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_Single_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_Single_Gripper.STL",
+   "sha256": "d9cc18ace17758aed771a0a92bdd2dba79bcdc2efa7ec0e0f25416b78e6935e4",
+   "mode": "644",
+   "size": 442334
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_to_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Lower_to_Gripper.STL",
+   "sha256": "c4280ad4a7eef277135794ee803edc9f82e19fb78c5201f5a29b70dc7cc57aad",
+   "mode": "644",
+   "size": 407934
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Upper_to_Wrist_Lower.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Left_Wrist_Upper_to_Wrist_Lower.STL",
+   "sha256": "369d0ebb7748aede577fe36ea4822e7055fb98176790dd8fa18093659f1ace3c",
+   "mode": "644",
+   "size": 477434
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Back.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Back.STL",
+   "sha256": "14f867027da347efc9c54242ddae2e743d3856905f6298dfefa5f4898fe0d67e",
+   "mode": "644",
+   "size": 429684
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Front.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Lidar_Front.STL",
+   "sha256": "a6f4a8d2b158f4cfce625faeece402a5f4d07a6075950b541bdc2e91290fe6f0",
+   "mode": "644",
+   "size": 430284
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Pitch_to_Neck_Yaw.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Neck_Pitch_to_Neck_Yaw.STL",
+   "sha256": "d64045307b47bdf0512a18d89f30356145ca35a0a02fecbc4a096ea9f1750b98",
+   "mode": "644",
+   "size": 350084
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Roll_to_Neck_Pitch.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Neck_Roll_to_Neck_Pitch.STL",
+   "sha256": "3337c06dbbe6fc775c2e9234faf60112c84fbca02e5bb6d88fa384ebd7554ae0",
+   "mode": "644",
+   "size": 540284
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Neck_Yaw_to_Head.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Neck_Yaw_to_Head.STL",
+   "sha256": "e215dc5af7a2199106ec33bd68976365f705825408c91b50812a2cbfc361566c",
+   "mode": "644",
+   "size": 355784
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Elbow_to_Forearm.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Elbow_to_Forearm.STL",
+   "sha256": "5fb8ce641d360ba7b330530ab903b615c38cdc261d06a227087abccb01a05e21",
+   "mode": "644",
+   "size": 256384
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Forearm_to_Wrist_Upper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Forearm_to_Wrist_Upper.STL",
+   "sha256": "a8069f263424c42fb3e031dab532216cfbe6dd6d1cb5eb2050dc6f4ca2d57188",
+   "mode": "644",
+   "size": 297084
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper.STL",
+   "sha256": "8f8baad1c8d02a8b9f106c6b9c3db2a2f3076f9b77b6f45c4ce9bd53c62e61e5",
+   "mode": "644",
+   "size": 393084
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Finger.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Finger.STL",
+   "sha256": "27ccc64cde0c23a249a7c6d053b8bab50ff9f3871d863713edc5226de8059bea",
+   "mode": "644",
+   "size": 196084
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Inner_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Left_Inner_Knuckle.STL",
+   "sha256": "af62d6f5a702a2a30f086b0f618ebd2d20df3c47ec09d0a4c68203925edfcf4c",
+   "mode": "644",
+   "size": 97184
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Finger.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Finger.STL",
+   "sha256": "f28cb7d6f18a14c69a2968111ce325e08734d6effd3ccebb378a0306647881a3",
+   "mode": "644",
+   "size": 195984
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Inner_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Inner_Knuckle.STL",
+   "sha256": "38cc69b141f507e5b3c5fd334a89f446739a60373be2feb21af8cf0754a5b628",
+   "mode": "644",
+   "size": 94984
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Outer_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Gripper_Right_Outer_Knuckle.STL",
+   "sha256": "d0dc2e63078db74699702a3156b1ce68e0bd42ba73310915bb2737c03bd15a5f",
+   "mode": "644",
+   "size": 395484
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Inner_to_Shoulder_Outer.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Inner_to_Shoulder_Outer.STL",
+   "sha256": "1611a990d687a03a0fe7965bdf8d446cd002b471237435230f90c55cbda42808",
+   "mode": "644",
+   "size": 433284
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Outer_to_UpperArm.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Shoulder_Outer_to_UpperArm.STL",
+   "sha256": "262bc445a67ab1d5604a7be16707a9fd74cf5562c824570e59e4b5590f17b1ef",
+   "mode": "644",
+   "size": 539934
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_UpperArm_to_Elbow.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_UpperArm_to_Elbow.STL",
+   "sha256": "6e474b883cdc40d1746b0058464f6bcfa6cba113989ee2da5506b768aef48cae",
+   "mode": "644",
+   "size": 380084
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_Single_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_Single_Gripper.STL",
+   "sha256": "4b3c77e2818d3c9999d189ac60a26b16ebdeb307551d042951f8f538fb622cd3",
+   "mode": "644",
+   "size": 442334
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_to_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Lower_to_Gripper.STL",
+   "sha256": "d1172404f2dafab6cb92ab574ae199df4e99d65452496d2f32517a594eca4c73",
+   "mode": "644",
+   "size": 407934
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Upper_to_Wrist_Lower.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Right_Wrist_Upper_to_Wrist_Lower.STL",
+   "sha256": "71d6e35589da570ba1a6883a6113e0830dc127c9d06be95037a95523e8457a00",
+   "mode": "644",
+   "size": 477134
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Waist_Pitch_to_Waist_Yaw.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Waist_Pitch_to_Waist_Yaw.STL",
+   "sha256": "a910641e7fb4abd50823fb0a5934e06fa0a3725d6e670ad6254b4b3fd1cb370e",
+   "mode": "644",
+   "size": 300784
+  },
+  "control_center_joint_control/meshes/robot_v2_2/Link_Waist_Yaw_to_Shoulder_Inner.STL": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/meshes/robot_v2_2/Link_Waist_Yaw_to_Shoulder_Inner.STL",
+   "sha256": "414dc74b9db409b863146e5220614e5dbe9066ae714097325c878db879c45a8d",
+   "mode": "644",
+   "size": 709734
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Ankle_to_Knee.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Ankle_to_Knee.STL",
+   "sha256": "7cae2195c24d8dda6486c2f87491e4286124c64fae69702e55f5f0d4b59c9b26",
+   "mode": "644",
+   "size": 267434
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Knee_to_Waist_Pitch.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Knee_to_Waist_Pitch.STL",
+   "sha256": "cc7ee30de1c18a8075f27f77f89e089f508bdb1f4b2ac3d61e4aeb332383c138",
+   "mode": "644",
+   "size": 334734
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Elbow_to_Forearm.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Elbow_to_Forearm.STL",
+   "sha256": "b73ece87724e237bfd60f2a9f0f0962aa25440317988fa60605a14f0f2391d11",
+   "mode": "644",
+   "size": 185984
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Forearm_to_Wrist_Upper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Forearm_to_Wrist_Upper.STL",
+   "sha256": "9877fdddc517ea88cbaa7e49f66dd235958ed53c83da33ab836d350c3458438b",
+   "mode": "644",
+   "size": 178634
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper.STL",
+   "sha256": "79332ed7ae9fd12ef3185f8e63203c33b821e3c44e29e9e7126fa42ada204adb",
+   "mode": "644",
+   "size": 71484
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper_Left_Finger.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper_Left_Finger.STL",
+   "sha256": "417878b16c28a9642b454fffac8d51c82807c5b0cb17262f0a6c271c5ff5eaaa",
+   "mode": "644",
+   "size": 284784
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper_Left_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper_Left_Knuckle.STL",
+   "sha256": "ca39140eaaf56a823dc6e54fca2ed491d0f5dd34cb5bc44a870d89e138db164e",
+   "mode": "644",
+   "size": 52084
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper_Right_Finger.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper_Right_Finger.STL",
+   "sha256": "4e9acd30a53a80260aa89ec436e6bb142fc77c24486e22aaef6aeb544a6e23e1",
+   "mode": "644",
+   "size": 284784
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper_Right_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Gripper_Right_Knuckle.STL",
+   "sha256": "792378622843f6c8989f74a0b2a03ce6a1a37c45a4dc31739def4f9afd75d9db",
+   "mode": "644",
+   "size": 33884
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Shoulder_Inner_to_Shoulder_Outer.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Shoulder_Inner_to_Shoulder_Outer.STL",
+   "sha256": "75db400100fb4f35e0ca1eb1e6a4fca897600dcf6371ee5bd924be1ba8415589",
+   "mode": "644",
+   "size": 174084
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Shoulder_Outer_to_UpperArm.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Shoulder_Outer_to_UpperArm.STL",
+   "sha256": "a41f43967331a71aa4754dcf146a65d7f2a1c8801366c9ae935ee7fe8d824cf2",
+   "mode": "644",
+   "size": 239884
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_UpperArm_to_Elbow.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_UpperArm_to_Elbow.STL",
+   "sha256": "7144cb25674f0782398ba66f4aa8531e05c69ce2427f1836df2bcf20a5465a2b",
+   "mode": "644",
+   "size": 196384
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Wrist_Lower_to_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Wrist_Lower_to_Gripper.STL",
+   "sha256": "98e3ca403f10ab21ec0e0b2c2b38f75c763eafb4556d0c9e8098be496c1c5608",
+   "mode": "644",
+   "size": 141034
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Left_Wrist_Upper_to_Wrist_Lower.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Left_Wrist_Upper_to_Wrist_Lower.STL",
+   "sha256": "a875f550d45d49a6de6ac743a6b02cc463d35cb0829567488dccf390ec559e24",
+   "mode": "644",
+   "size": 200984
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Neck_Pitch_to_Neck_Yaw.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Neck_Pitch_to_Neck_Yaw.STL",
+   "sha256": "c89dc4dc51a30d6536a7eab2465fff7eb77517d48f2b281dddd40e85e4016a20",
+   "mode": "644",
+   "size": 43734
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Neck_Roll_to_Neck_Pitch.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Neck_Roll_to_Neck_Pitch.STL",
+   "sha256": "3ed4e96957c0043a041c30962aa9b62e4b18add56a0b9f59af3aed2ba63a0989",
+   "mode": "644",
+   "size": 23534
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Neck_Yaw_to_Head.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Neck_Yaw_to_Head.STL",
+   "sha256": "0d8a5dabc17b6ff17efefca7006ce55e10324108c57229bc1829b7de31eba7e1",
+   "mode": "644",
+   "size": 333534
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Elbow_to_Forearm.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Elbow_to_Forearm.STL",
+   "sha256": "a4b78a4a5160cb22ba5e2ce8d6d4ec95aa9c43ff10048025369d1afca61b772a",
+   "mode": "644",
+   "size": 176884
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Forearm_to_Wrist_Upper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Forearm_to_Wrist_Upper.STL",
+   "sha256": "210db58fdd91b5dfda4cf9a4c73fe3f6171bfd1c45262fa182e9cc0300c6a3b9",
+   "mode": "644",
+   "size": 185434
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper.STL",
+   "sha256": "b94e823fc6299a0c13c4d7810298c788d97225c81e695d7807fc17d455f0f895",
+   "mode": "644",
+   "size": 71484
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper_Left_Finger.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper_Left_Finger.STL",
+   "sha256": "0720377b2a55925ee1f4e541f6bdd3f2053d2b8811cb3e6d768c97b416b66072",
+   "mode": "644",
+   "size": 284784
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper_Left_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper_Left_Knuckle.STL",
+   "sha256": "95566b39270345ef7e5ad46b46bced519f5aebb3a11b684daca6fadc375b1035",
+   "mode": "644",
+   "size": 33884
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper_Right_Finger.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper_Right_Finger.STL",
+   "sha256": "e44840818bb2bd43d1aaa37fd86215ed876fbd223f6d6caebbb155e96d7dda70",
+   "mode": "644",
+   "size": 284784
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper_Right_Knuckle.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Gripper_Right_Knuckle.STL",
+   "sha256": "22cddef2ff6b5d2c5803720785d4f2a9d870d2aecc10abcf8b7cc5e7e47c6376",
+   "mode": "644",
+   "size": 52084
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Shoulder_Inner_to_Shoulder_Outer.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Shoulder_Inner_to_Shoulder_Outer.STL",
+   "sha256": "7e0791754721d83d69dc4b38263f0962c4ef9a385f2153d0f211e78f0ae77c1a",
+   "mode": "644",
+   "size": 162484
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Shoulder_Outer_to_UpperArm.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Shoulder_Outer_to_UpperArm.STL",
+   "sha256": "30de22d19c89ad60b769cb78eed56655abfa68353871bd160864a0308b580398",
+   "mode": "644",
+   "size": 295234
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_UpperArm_to_Elbow.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_UpperArm_to_Elbow.STL",
+   "sha256": "e2ca0e036ef8679b1619804692336eff1cec1c5033789f1f69555ef298ff4fa7",
+   "mode": "644",
+   "size": 163934
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Wrist_Lower_to_Gripper.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Wrist_Lower_to_Gripper.STL",
+   "sha256": "ecf1075688eff3893a9bdd6439f44d541153829cd47a731eb958b95191f68bce",
+   "mode": "644",
+   "size": 119934
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Right_Wrist_Upper_to_Wrist_Lower.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Right_Wrist_Upper_to_Wrist_Lower.STL",
+   "sha256": "7afb325dda74db8d4710b5eebe3fb9e7b95db706f5b80614fe48cae65b34d5f9",
+   "mode": "644",
+   "size": 188384
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Torso_Extra_Mass.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Torso_Extra_Mass.STL",
+   "sha256": "d0030af7d303681a2dab8d36ccd0bdd0fdac68bf9b074ce42663fc61f293d4cc",
+   "mode": "644",
+   "size": 80
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Waist_Pitch_to_Waist_Yaw.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Waist_Pitch_to_Waist_Yaw.STL",
+   "sha256": "c9766f59d2891c500b8853a90fcefa235de1dcbfe9c6c0f7f576b5142615fabd",
+   "mode": "644",
+   "size": 88234
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Waist_Yaw_to_Shoulder_Inner.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Waist_Yaw_to_Shoulder_Inner.STL",
+   "sha256": "f2e4ed3b39151e872bbd811bfab769a707b6d47e3f311b13a7397726a8344dbc",
+   "mode": "644",
+   "size": 614384
+  },
+  "control_center_joint_control/meshes/robot_v3_1/Link_Zero_Point.STL": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes/robot_v3_1/Link_Zero_Point.STL",
+   "sha256": "9fb360746b0ea2cf1b9dc6ffad0cc8e22084848b83046d11f2f43a65e53ae818",
+   "mode": "644",
+   "size": 3642334
+  },
+  "control_center_joint_control/motion_library/saved_joint_actions.yaml": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/motion_library/saved_joint_actions.yaml",
+   "sha256": "a8c02c244ce316c89c23baba1fc1d3cdddf719e9e18f40e85fc8a253cd9fbeb7",
+   "mode": "644",
+   "size": 23
+  },
+  "control_center_joint_control/motion_library/saved_joint_poses.yaml": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/motion_library/saved_joint_poses.yaml",
+   "sha256": "3d514799590123a922daeb201eb4fc0c6ef3e43f80cae70502e8fecee7d0b5b0",
+   "mode": "644",
+   "size": 5538
+  },
+  "control_center_joint_control/package.xml": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/package.xml",
+   "sha256": "4ce0819d01f58cd69ca68ac2892e00fb345f8fc6eb9dacda9017c0090bb342ad",
+   "mode": "644",
+   "size": 1084
+  },
+  "control_center_joint_control/resource/control_center_joint_control": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/resource/control_center_joint_control",
+   "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+   "mode": "644",
+   "size": 1
+  },
+  "control_center_joint_control/setup.cfg": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/setup.cfg",
+   "sha256": "29bbbaf4d256ab94dfd0c1089235ba32569c18e4945481281a9f97e7a7cf6c3e",
+   "mode": "644",
+   "size": 125
+  },
+  "control_center_joint_control/setup.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/setup.py",
+   "sha256": "56f30c1caa5bce8a1901241cd253a207c73e5ff48e048c5ec16f234da3edcca8",
+   "mode": "644",
+   "size": 1495
+  },
+  "control_center_joint_control/shake_hand_example.pkl": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/shake_hand_example.pkl",
+   "sha256": "667b92a4da956a1bccc14ab40e02bfdc1b25513b8351d3028ed7ac445c5307b6",
+   "mode": "644",
+   "size": 4793179
+  },
+  "control_center_joint_control/test/action_bridge_integration.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/action_bridge_integration.py",
+   "sha256": "ead60591b1aed718d6c0824ed59c7bcfaf2cbca853344212650f7b02135908ed",
+   "mode": "644",
+   "size": 8327
+  },
+  "control_center_joint_control/test/progressive_bridge_integration.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/progressive_bridge_integration.py",
+   "sha256": "7b60f6e4f15e33613bf99e1ac97581caa5ede4ae495b0392eca04f6fb74d238a",
+   "mode": "644",
+   "size": 10307
+  },
+  "control_center_joint_control/test/render_action_editor_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/render_action_editor_smoke.py",
+   "sha256": "90093ce41507065a7b4b9f97ea390b2cb38526a7b9c3532946072f0273fbbdcb",
+   "mode": "644",
+   "size": 4264
+  },
+  "control_center_joint_control/test/render_control_panel_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/render_control_panel_smoke.py",
+   "sha256": "02ac9b6e7d7f1bb1911dc38cb4b1b083b8f90a1473b359a38ec996f5176e5bb1",
+   "mode": "644",
+   "size": 3587
+  },
+  "control_center_joint_control/test/render_pose_library_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/render_pose_library_smoke.py",
+   "sha256": "d3ea94edd653bd8975634bb823028ffc23beb62ff512bf3bce7b3a9acabf3adb",
+   "mode": "644",
+   "size": 1833
+  },
+  "control_center_joint_control/test/render_robot_view_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/render_robot_view_smoke.py",
+   "sha256": "f48ae9af586f3855b53c9b4cda1b20283b029fe3e944356c2bd3439bb9bf13f1",
+   "mode": "644",
+   "size": 3075
+  },
+  "control_center_joint_control/test/test_action_library.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_action_library.py",
+   "sha256": "6d543ddc6da87b013ce05220e40e1504c8f628e07da556b04031487086bb5090",
+   "mode": "644",
+   "size": 3444
+  },
+  "control_center_joint_control/test/test_body_height.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_body_height.py",
+   "sha256": "bb122a64bd2035b0902b16bf76fef3c5413c7d9d0a9ea6547fb9bcec0947b87a",
+   "mode": "644",
+   "size": 2293
+  },
+  "control_center_joint_control/test/test_height_control_s3.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_height_control_s3.py",
+   "sha256": "9096229deb12f7f387f2e942a7a9f8a0379d36c04c0d5380669431fe494668a2",
+   "mode": "644",
+   "size": 4683
+  },
+  "control_center_joint_control/test/test_joint_definitions.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_joint_definitions.py",
+   "sha256": "3deb4b42ad19d8da1c67d8e9771e31b2d01f9e51db809a3f888b8e1d7a40c438",
+   "mode": "644",
+   "size": 1297
+  },
+  "control_center_joint_control/test/test_pose_library.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_pose_library.py",
+   "sha256": "ae8df8d3cbb6f1557016e46e0ed45cb64cbf895ea8301744b25d7c3095edc0e2",
+   "mode": "644",
+   "size": 954
+  },
+  "control_center_joint_control/test/test_robot_view_model.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_robot_view_model.py",
+   "sha256": "f9d8390d86e99e41c21b04f69e11fcaf205d79ed60dd6f390c9028a069fc5725",
+   "mode": "644",
+   "size": 2529
+  },
+  "control_center_joint_control/test/test_single_joint_operator.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_single_joint_operator.py",
+   "sha256": "624575bcd034b8d3ddecada1843081e51c10d5be60810972bba68b2eaf891481",
+   "mode": "644",
+   "size": 5804
+  },
+  "control_center_joint_control/test/test_stable_progressive_target.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_stable_progressive_target.py",
+   "sha256": "a3e4e1b31125953c5c32cd97511d3d58369406f4ac8e2f4460d7a799ed778f2a",
+   "mode": "644",
+   "size": 4294
+  },
+  "control_center_joint_control/test/test_trajectory_pickle.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_trajectory_pickle.py",
+   "sha256": "48af9e57218ec753cd605e2a8cb33d379c810049e342742e5ff4c785ac33ebcd",
+   "mode": "644",
+   "size": 3433
+  },
+  "control_center_joint_control/test/test_vr_reset_pose.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_vr_reset_pose.py",
+   "sha256": "960302d0d962f7a091a1f96881a1280c748bfd015cecfd48795b36af3d2054f4",
+   "mode": "644",
+   "size": 3084
+  },
+  "control_center_joint_control/test/test_water_pose_coordination.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/test_water_pose_coordination.py",
+   "sha256": "c1f586e409094ec9b027166581a7eb8e74cbd6f47751b8f4976316c34e18c282",
+   "mode": "644",
+   "size": 2232
+  },
+  "control_center_joint_control/test/verify_reference_pickle.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/test/verify_reference_pickle.py",
+   "sha256": "5d1ce62b9d427145efb32a32890430aa2030562607a1763167cef7fda2f812ac",
+   "mode": "644",
+   "size": 2153
+  },
+  "control_center_joint_control/urdf/robot_v2_2.urdf": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/urdf/robot_v2_2.urdf",
+   "sha256": "0a2c883e19aa1af25c04fa91b6f669a46640f181ceba631fa1b78d2fa138cae0",
+   "mode": "644",
+   "size": 58773
+  },
+  "control_center_joint_control/urdf/robot_v3_1.srdf": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/urdf/robot_v3_1.srdf",
+   "sha256": "31d787a5dc2e616c1daf5820c1a75c420a8719cca578e40428e1cfad47c78a04",
+   "mode": "644",
+   "size": 4890
+  },
+  "control_center_joint_control/urdf/robot_v3_1.urdf": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/urdf/robot_v3_1.urdf",
+   "sha256": "ef656e4086b637c77167ba12a6947150a37469f114a28efe54dabde7fc3651cc",
+   "mode": "644",
+   "size": 49042
+  },
+  "control_center_joint_control/urdf/robot_v3_1_calibration.urdf": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/urdf/robot_v3_1_calibration.urdf",
+   "sha256": "156fade874e2332506b0157362835adf11d5c7eaf43e754c14d7c123071e5825",
+   "mode": "644",
+   "size": 46729
+  },
+  "control_center_joint_control/urdf/robot_v3_1_simplified.urdf": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/urdf/robot_v3_1_simplified.urdf",
+   "sha256": "18bc869a98ede3e8cf9a5f8f26f3db11a861f2e86d35c7a31a249df5d47a364e",
+   "mode": "644",
+   "size": 26530
+  },
+  "control_center_module_lease.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_module_lease.py",
+   "sha256": "39e7753657d9fd70c112a0ef88cc1222e16b0c631fd2abd9c40ca8b44591e3a7",
+   "mode": "644",
+   "size": 8217
+  },
+  "control_center_navigation/src/docking_compat/LICENSE": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_navigation/src/docking_compat/LICENSE",
+   "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+   "mode": "644",
+   "size": 11358
+  },
+  "control_center_service_manager/README.md": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/README.md",
+   "sha256": "f7b0f342b1aed5b93fd3d8120f28eb5febae8ef027e6d76f9ace8a1d12151e3d",
+   "mode": "644",
+   "size": 1075
+  },
+  "control_center_service_manager/control_center_service_manager/__init__.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/__init__.py",
+   "sha256": "eb398e9e111444d00b3e8de75011ed3d7655a1a35b812f62056213be0c68b18b",
+   "mode": "644",
+   "size": 52
+  },
+  "control_center_service_manager/control_center_service_manager/joint_reset_once.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/joint_reset_once.py",
+   "sha256": "f59c757c99a95d34e2d27651998fedaef0e625b17428e3b82ca9109b31a45099",
+   "mode": "644",
+   "size": 2624
+  },
+  "control_center_service_manager/control_center_service_manager/panel.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/panel.py",
+   "sha256": "028df746ad5cf4d8a94d76084e7bdf9d0756824308dab1678980806438b579ac",
+   "mode": "644",
+   "size": 91486
+  },
+  "control_center_service_manager/control_center_service_manager/speaker_volume.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/speaker_volume.py",
+   "sha256": "d52ecd3344875db79407149973c7839556979cc0c8ddc91e7785926362a5eef5",
+   "mode": "644",
+   "size": 5169
+  },
+  "control_center_service_manager/package.xml": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/package.xml",
+   "sha256": "1747068a27f2ec4a2630308d738f75f5b2e4287d5e935d00153e052c10e26b9b",
+   "mode": "644",
+   "size": 605
+  },
+  "control_center_service_manager/resource/control_center_service_manager": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/resource/control_center_service_manager",
+   "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+   "mode": "644",
+   "size": 1
+  },
+  "control_center_service_manager/setup.cfg": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/setup.cfg",
+   "sha256": "900377d8abbf431c331c3657c4a306bbfe5933b77976d4dac71ce01b1b9f8b59",
+   "mode": "644",
+   "size": 129
+  },
+  "control_center_service_manager/setup.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/setup.py",
+   "sha256": "5a30f6b6c4756bbcd66378c1e9f52393407d7bd0b8b6a7a6145555c51e242aa2",
+   "mode": "644",
+   "size": 831
+  },
+  "control_center_service_manager/test/joint_reset_once_integration.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/test/joint_reset_once_integration.py",
+   "sha256": "f1e109238b0058e02642a6aa216a09b3a9266cf640f0204d5a13262cec408127",
+   "mode": "644",
+   "size": 1392
+  },
+  "control_center_service_manager/test/service_manager_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/test/service_manager_smoke.py",
+   "sha256": "d55e95d7cde50c1be5836a6ffffff85f12fcd0cdd8957b6490c0d1f70607e111",
+   "mode": "644",
+   "size": 6799
+  },
+  "control_center_service_manager/test/test_speaker_volume.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/test/test_speaker_volume.py",
+   "sha256": "4ccaac00fb76dd5efb7849b26cedfb8e622e5b098f4a4ce00ea7b7e17cc3b8ec",
+   "mode": "644",
+   "size": 1964
+  },
+  "control_center_shell/README.md": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/README.md",
+   "sha256": "4c68e5807b6cd9840c5d15a828553f817f27aca1501db635ea382300c97070ae",
+   "mode": "644",
+   "size": 1304
+  },
+  "control_center_shell/control_center_shell/__init__.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/__init__.py",
+   "sha256": "d7fad4398d85e9397c860ec977387060e661285246e2759f20439e89df082436",
+   "mode": "644",
+   "size": 48
+  },
+  "control_center_shell/control_center_shell/app.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/app.py",
+   "sha256": "8a161ad02ad8bae2c3fb9833b02c5e225f594521d361820af1178a1486dde86b",
+   "mode": "644",
+   "size": 91298
+  },
+  "control_center_shell/control_center_shell/preflight.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/preflight.py",
+   "sha256": "cabd6893b100fc56edc1a4ceef106b637b8483f0d9f975b62986420bc194ba6d",
+   "mode": "644",
+   "size": 35352
+  },
+  "control_center_shell/control_center_shell/resource_observer.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/resource_observer.py",
+   "sha256": "8e5c674af4df0588e91ced653c36eebfda36f78084ef555b1c70f7ff7aa6a845",
+   "mode": "644",
+   "size": 14228
+  },
+  "control_center_shell/control_center_shell/resource_repair.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/resource_repair.py",
+   "sha256": "d1f9aad23b5e66ccfc6a9bdc6027746607f9fd23dd9a675d15c4d0e735c0d43f",
+   "mode": "644",
+   "size": 20792
+  },
+  "control_center_shell/control_center_shell/system_status.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/system_status.py",
+   "sha256": "76e1ecad124a3c613c7cbffd738cb0dc8054b10fa00569c67987acb7f104bbae",
+   "mode": "644",
+   "size": 20785
+  },
+  "control_center_shell/control_center_shell/system_status_metrics.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/system_status_metrics.py",
+   "sha256": "695edc6edfc3671a3bed91229b6c3a1dc78f7095c7afc960b09561bec1ca2633",
+   "mode": "644",
+   "size": 7960
+  },
+  "control_center_shell/launch/control_center.launch.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/launch/control_center.launch.py",
+   "sha256": "d437332acff27f35ada1d0f88308a72f0ac714fb099951e05923fdbcd02ecaf1",
+   "mode": "644",
+   "size": 1678
+  },
+  "control_center_shell/package.xml": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/package.xml",
+   "sha256": "6e641b23b33c7e2def2fb1d21f39261cf56a5ce85b636e214ff324aa4288cb93",
+   "mode": "644",
+   "size": 911
+  },
+  "control_center_shell/resource/control_center_shell": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/resource/control_center_shell",
+   "sha256": "0fce6614f8b80d5536d73302d46e3f209fe0756ecc45281400fd5fbab406c638",
+   "mode": "644",
+   "size": 21
+  },
+  "control_center_shell/setup.cfg": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/setup.cfg",
+   "sha256": "39edad7e870caee181ca18aecb5a11ae5f9e5c110f4edb63e8bd11815962090e",
+   "mode": "644",
+   "size": 109
+  },
+  "control_center_shell/setup.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/setup.py",
+   "sha256": "49ac9f6e52dca088ed911217848bb1c35a7b9ce98a3f74fa2627c6265c1dbea3",
+   "mode": "644",
+   "size": 791
+  },
+  "control_center_shell/test/functional_pages.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/functional_pages.py",
+   "sha256": "4297d730c227275acd5a473a432b9c7ff1e5df167ec074f43b2d035401f23853",
+   "mode": "644",
+   "size": 1241
+  },
+  "control_center_shell/test/service_manager_integration_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/service_manager_integration_smoke.py",
+   "sha256": "8eaa71d115b2657f46b50ffc8163a7f288b27096fd7f34285d667a9140227283",
+   "mode": "644",
+   "size": 3050
+  },
+  "control_center_shell/test/test_composite_lease.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_composite_lease.py",
+   "sha256": "80ee0e353c25b4df3b80ff477c5966ccc970cc4fc55c4798bb6acab9dcc941ad",
+   "mode": "644",
+   "size": 1820
+  },
+  "control_center_shell/test/test_controller_lease.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_controller_lease.py",
+   "sha256": "976a98fdc17acf92259ed0e133511d5560a745a19fd8f5ad1dbc82069dc33c40",
+   "mode": "644",
+   "size": 3648
+  },
+  "control_center_shell/test/test_launch_ownership.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_launch_ownership.py",
+   "sha256": "322134c1314ff490cba4103d948053b76940a80ed60f8cd58de37f72532fef56",
+   "mode": "644",
+   "size": 2629
+  },
+  "control_center_shell/test/test_map_owner_guard.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_map_owner_guard.py",
+   "sha256": "b2b039978ce880ff12a4878f8c318b42398250346bc19e37a4903e602c91b9fe",
+   "mode": "644",
+   "size": 2515
+  },
+  "control_center_shell/test/test_probe_executor.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_probe_executor.py",
+   "sha256": "1b7dec677106befaa7b9da01df26884e06f5bdc5b8e666280ab08dc1bd2a017d",
+   "mode": "644",
+   "size": 1872
+  },
+  "control_center_shell/test/test_repair_boundaries.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_repair_boundaries.py",
+   "sha256": "4a6c55f01b229271c9992dec888825275197a6574ecc9713b63f67314814088b",
+   "mode": "644",
+   "size": 5389
+  },
+  "control_center_shell/test/test_repair_transaction.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_repair_transaction.py",
+   "sha256": "6e18cd9ad87084fe6284ceba3d512fa9c1c100b0c2635a83c62145d777596eea",
+   "mode": "644",
+   "size": 1690
+  },
+  "control_center_shell/test/test_s3_lidar_preflight.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_s3_lidar_preflight.py",
+   "sha256": "e3016e1851d863cfc8357fcac62772ec064e2e5a304afba43bd78d3885c9834a",
+   "mode": "644",
+   "size": 3228
+  },
+  "control_center_shell/test/test_window_crash.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_window_crash.py",
+   "sha256": "b96925a0c7efd8fa58015e4bf9cac4c92f1dcd6ced5225c1ca3eac63e7f8b87e",
+   "mode": "644",
+   "size": 2203
+  },
+  "deployment/367/Desktop/机器人控制中心-367.desktop": {
+   "source": "/home/ubuntu/Desktop/机器人控制中心-367.desktop",
+   "sha256": "1493d60ecc8dd60c8de8056de50debf08791f22ff070f38a8d295f49afe6044c",
+   "mode": "755",
+   "size": 288
+  },
+  "deployment/367/autolife_gui_runtime.py": {
+   "source": "/home/ubuntu/migration367_20261118/autolife_gui_runtime.py",
+   "sha256": "c9055a74ce3f245466aa369e6d97e1620372755a479f140a7b1708032a1d7b5f",
+   "mode": "644",
+   "size": 675
+  },
+  "deployment/367/autolife_v3_camera.py": {
+   "source": "/home/ubuntu/migration367_20261118/autolife_v3_camera.py",
+   "sha256": "dd3160d4abceb4445f522baff843097cfa8cef09bc6160451b3c4da8b7af9df3",
+   "mode": "644",
+   "size": 7972
+  },
+  "deployment/367/base_sources/control_center_joint_control/launch/whole_body_joint_control.launch.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_joint_control/launch/whole_body_joint_control.launch.py",
+   "sha256": "2937f37975d58e525f054064ca9bb71927b1145621893c5716bc44881ec202ac",
+   "mode": "644",
+   "size": 5452
+  },
+  "deployment/367/base_sources/control_center_service_manager/control_center_service_manager/joint_reset_once.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_service_manager/lib/python3.12/site-packages/control_center_service_manager/joint_reset_once.py",
+   "sha256": "117ae2afedb43ae079dd16fa069f8a5ed65eb829049747d2c6f0d87d638df4a5",
+   "mode": "644",
+   "size": 2463
+  },
+  "deployment/367/base_sources/control_center_service_manager/control_center_service_manager/panel.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_service_manager/lib/python3.12/site-packages/control_center_service_manager/panel.py",
+   "sha256": "426f1a0f15f816783c75816ce09dae6b11a5b23d099fcaa438e737c8947d5b56",
+   "mode": "644",
+   "size": 90427
+  },
+  "deployment/367/base_sources/control_center_service_manager/test/service_manager_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_service_manager/test/service_manager_smoke.py",
+   "sha256": "eedac602dd329561f4c66b0083460689bfcc6bdfc104615aa9091add68b8c351",
+   "mode": "755",
+   "size": 6780
+  },
+  "deployment/367/base_sources/control_center_shell/control_center_shell/app.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_shell/lib/python3.12/site-packages/control_center_shell/app.py",
+   "sha256": "f778757331e257f123b3115d550e1f9cb6191dfd8cb100aef1cc7e1240d924e7",
+   "mode": "644",
+   "size": 97873
+  },
+  "deployment/367/base_sources/control_center_shell/control_center_shell/preflight.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_shell/lib/python3.12/site-packages/control_center_shell/preflight.py",
+   "sha256": "8978a2cee121ba600b0c1eb8b8c003187906049979f0897ed871b32eedd16284",
+   "mode": "644",
+   "size": 32078
+  },
+  "deployment/367/base_sources/control_center_shell/control_center_shell/resource_repair.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/control_center_shell/lib/python3.12/site-packages/control_center_shell/resource_repair.py",
+   "sha256": "44071771706e71920709e006138c53d1a47e64a8a9e8e79bb41f43c7ab6b2077",
+   "mode": "644",
+   "size": 19916
+  },
+  "deployment/367/base_sources/control_center_shell/test/service_manager_integration_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_shell/test/service_manager_integration_smoke.py",
+   "sha256": "c545e74afb057563458755300bd38d7eb7cd644b9b06ad4e956c9157a50dd211",
+   "mode": "755",
+   "size": 2861
+  },
+  "deployment/367/base_sources/control_center_shell/test/test_map_owner_guard.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_shell/test/test_map_owner_guard.py",
+   "sha256": "c0aa51c6fa0c920069c029f8010000f3b6108bc471dbd5d7725b0b3970189e8f",
+   "mode": "644",
+   "size": 1818
+  },
+  "deployment/367/base_sources/control_center_shell/test/test_probe_executor.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_shell/test/test_probe_executor.py",
+   "sha256": "b95506bf6c4894ef246a3b9375693890e2256bf95e694ad7a61c41edc72bfe2a",
+   "mode": "644",
+   "size": 1823
+  },
+  "deployment/367/base_sources/control_center_shell/test/test_s3_lidar_preflight.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/control_center_shell/test/test_s3_lidar_preflight.py",
+   "sha256": "12f3c433e31a4e319c48e41c1f79be7146f3f4a5c74ac8a3563a213099e68562",
+   "mode": "644",
+   "size": 3462
+  },
+  "deployment/367/bin/control_center": {
+   "source": "/home/ubuntu/migration367_20261118/bin/control_center",
+   "sha256": "d83d32a020156355d40cf075282bfe4fd2b4e17057efcbb89c42a41055f74d23",
+   "mode": "755",
+   "size": 327
+  },
+  "deployment/367/bin/prepare_control_session": {
+   "source": "/home/ubuntu/migration367_20261118/bin/prepare_control_session",
+   "sha256": "8fb2ae4b69c15cfc1b3315eeed259cbb4a8d7e65f469ebe8ad09b773302eacf2",
+   "mode": "755",
+   "size": 295
+  },
+  "deployment/367/dependencies.lock": {
+   "source": "/home/ubuntu/migration367_20261118/dependencies.lock",
+   "sha256": "1c331fcb55b2e516834584ffc849440f171fb2b34a44239edbfbf4fefa35872d",
+   "mode": "644",
+   "size": 438
+  },
+  "deployment/367/dependency_manifest.json": {
+   "source": "/home/ubuntu/migration367_20261118/dependency_manifest.json",
+   "sha256": "f1393f86dc51a5c4217d099a5898019896a99ae2c49461398c48f290e9665557",
+   "mode": "644",
+   "size": 390
+  },
+  "deployment/367/environment.sh": {
+   "source": "/home/ubuntu/migration367_20261118/environment.sh",
+   "sha256": "44c065b24399e76bf0bed144f5019823c7d73002ee49e035b4ad0d6ad1601942",
+   "mode": "644",
+   "size": 3756
+  },
+  "deployment/367/migration_feedback_refresh.py": {
+   "source": "/home/ubuntu/migration367_20261118/migration_feedback_refresh.py",
+   "sha256": "c52dfd325c9ec590af51a750315b6a9a979d26a9da0b4720a54a584a34ba6256",
+   "mode": "644",
+   "size": 6233
+  },
+  "deployment/367/migration_sync_bridge.py": {
+   "source": "/home/ubuntu/migration367_20261118/migration_sync_bridge.py",
+   "sha256": "9a359b939701ad3634797c2d6f7e477e26eeed09cb1692f4e78e7c070afe3a6a",
+   "mode": "644",
+   "size": 20777
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/bin/control_center": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/bin/control_center",
+   "sha256": "b39d1ff74665c1456c3793aa2be6db0b68f6797b922d9abb953a2be84f6dfc68",
+   "mode": "755",
+   "size": 320
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_joint_control/launch/whole_body_joint_control.launch.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_joint_control/launch/whole_body_joint_control.launch.py",
+   "sha256": "01bf6b4b8e148e9ec8862ba45b1271521811df96ecef01d7714e2b65a7984435",
+   "mode": "644",
+   "size": 5544
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_module_lease.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_module_lease.py",
+   "sha256": "39e7753657d9fd70c112a0ef88cc1222e16b0c631fd2abd9c40ca8b44591e3a7",
+   "mode": "644",
+   "size": 8217
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/README.md": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/README.md",
+   "sha256": "f7b0f342b1aed5b93fd3d8120f28eb5febae8ef027e6d76f9ace8a1d12151e3d",
+   "mode": "644",
+   "size": 1075
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/__init__.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/__init__.py",
+   "sha256": "eb398e9e111444d00b3e8de75011ed3d7655a1a35b812f62056213be0c68b18b",
+   "mode": "644",
+   "size": 52
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/joint_reset_once.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/joint_reset_once.py",
+   "sha256": "f59c757c99a95d34e2d27651998fedaef0e625b17428e3b82ca9109b31a45099",
+   "mode": "644",
+   "size": 2624
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/panel.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/panel.py",
+   "sha256": "028df746ad5cf4d8a94d76084e7bdf9d0756824308dab1678980806438b579ac",
+   "mode": "644",
+   "size": 91486
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/speaker_volume.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/control_center_service_manager/speaker_volume.py",
+   "sha256": "d52ecd3344875db79407149973c7839556979cc0c8ddc91e7785926362a5eef5",
+   "mode": "644",
+   "size": 5169
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/package.xml": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/package.xml",
+   "sha256": "1747068a27f2ec4a2630308d738f75f5b2e4287d5e935d00153e052c10e26b9b",
+   "mode": "644",
+   "size": 605
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/resource/control_center_service_manager": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/resource/control_center_service_manager",
+   "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+   "mode": "644",
+   "size": 1
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/setup.cfg": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/setup.cfg",
+   "sha256": "900377d8abbf431c331c3657c4a306bbfe5933b77976d4dac71ce01b1b9f8b59",
+   "mode": "644",
+   "size": 129
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/setup.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/setup.py",
+   "sha256": "5a30f6b6c4756bbcd66378c1e9f52393407d7bd0b8b6a7a6145555c51e242aa2",
+   "mode": "644",
+   "size": 831
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/test/joint_reset_once_integration.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/test/joint_reset_once_integration.py",
+   "sha256": "f1e109238b0058e02642a6aa216a09b3a9266cf640f0204d5a13262cec408127",
+   "mode": "644",
+   "size": 1392
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/test/service_manager_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/test/service_manager_smoke.py",
+   "sha256": "d55e95d7cde50c1be5836a6ffffff85f12fcd0cdd8957b6490c0d1f70607e111",
+   "mode": "644",
+   "size": 6799
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_service_manager/test/test_speaker_volume.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_service_manager/test/test_speaker_volume.py",
+   "sha256": "4ccaac00fb76dd5efb7849b26cedfb8e622e5b098f4a4ce00ea7b7e17cc3b8ec",
+   "mode": "644",
+   "size": 1964
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/README.md": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/README.md",
+   "sha256": "4c68e5807b6cd9840c5d15a828553f817f27aca1501db635ea382300c97070ae",
+   "mode": "644",
+   "size": 1304
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/__init__.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/__init__.py",
+   "sha256": "d7fad4398d85e9397c860ec977387060e661285246e2759f20439e89df082436",
+   "mode": "644",
+   "size": 48
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/app.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/app.py",
+   "sha256": "8a161ad02ad8bae2c3fb9833b02c5e225f594521d361820af1178a1486dde86b",
+   "mode": "644",
+   "size": 91298
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/preflight.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/preflight.py",
+   "sha256": "cabd6893b100fc56edc1a4ceef106b637b8483f0d9f975b62986420bc194ba6d",
+   "mode": "644",
+   "size": 35352
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/resource_observer.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/resource_observer.py",
+   "sha256": "8e5c674af4df0588e91ced653c36eebfda36f78084ef555b1c70f7ff7aa6a845",
+   "mode": "644",
+   "size": 14228
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/resource_repair.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/resource_repair.py",
+   "sha256": "d1f9aad23b5e66ccfc6a9bdc6027746607f9fd23dd9a675d15c4d0e735c0d43f",
+   "mode": "644",
+   "size": 20792
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/system_status.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/system_status.py",
+   "sha256": "76e1ecad124a3c613c7cbffd738cb0dc8054b10fa00569c67987acb7f104bbae",
+   "mode": "644",
+   "size": 20785
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/system_status_metrics.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/control_center_shell/system_status_metrics.py",
+   "sha256": "695edc6edfc3671a3bed91229b6c3a1dc78f7095c7afc960b09561bec1ca2633",
+   "mode": "644",
+   "size": 7960
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/launch/control_center.launch.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/launch/control_center.launch.py",
+   "sha256": "d437332acff27f35ada1d0f88308a72f0ac714fb099951e05923fdbcd02ecaf1",
+   "mode": "644",
+   "size": 1678
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/package.xml": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/package.xml",
+   "sha256": "6e641b23b33c7e2def2fb1d21f39261cf56a5ce85b636e214ff324aa4288cb93",
+   "mode": "644",
+   "size": 911
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/resource/control_center_shell": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/resource/control_center_shell",
+   "sha256": "0fce6614f8b80d5536d73302d46e3f209fe0756ecc45281400fd5fbab406c638",
+   "mode": "644",
+   "size": 21
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/setup.cfg": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/setup.cfg",
+   "sha256": "39edad7e870caee181ca18aecb5a11ae5f9e5c110f4edb63e8bd11815962090e",
+   "mode": "644",
+   "size": 109
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/setup.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/setup.py",
+   "sha256": "49ac9f6e52dca088ed911217848bb1c35a7b9ce98a3f74fa2627c6265c1dbea3",
+   "mode": "644",
+   "size": 791
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/functional_pages.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/functional_pages.py",
+   "sha256": "4297d730c227275acd5a473a432b9c7ff1e5df167ec074f43b2d035401f23853",
+   "mode": "644",
+   "size": 1241
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/service_manager_integration_smoke.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/service_manager_integration_smoke.py",
+   "sha256": "8eaa71d115b2657f46b50ffc8163a7f288b27096fd7f34285d667a9140227283",
+   "mode": "644",
+   "size": 3050
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/test_composite_lease.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_composite_lease.py",
+   "sha256": "80ee0e353c25b4df3b80ff477c5966ccc970cc4fc55c4798bb6acab9dcc941ad",
+   "mode": "644",
+   "size": 1820
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/test_controller_lease.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_controller_lease.py",
+   "sha256": "976a98fdc17acf92259ed0e133511d5560a745a19fd8f5ad1dbc82069dc33c40",
+   "mode": "644",
+   "size": 3648
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/test_launch_ownership.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_launch_ownership.py",
+   "sha256": "322134c1314ff490cba4103d948053b76940a80ed60f8cd58de37f72532fef56",
+   "mode": "644",
+   "size": 2629
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/test_map_owner_guard.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_map_owner_guard.py",
+   "sha256": "b2b039978ce880ff12a4878f8c318b42398250346bc19e37a4903e602c91b9fe",
+   "mode": "644",
+   "size": 2515
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/test_probe_executor.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_probe_executor.py",
+   "sha256": "1b7dec677106befaa7b9da01df26884e06f5bdc5b8e666280ab08dc1bd2a017d",
+   "mode": "644",
+   "size": 1872
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/test_repair_boundaries.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_repair_boundaries.py",
+   "sha256": "4a6c55f01b229271c9992dec888825275197a6574ecc9713b63f67314814088b",
+   "mode": "644",
+   "size": 5389
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/test_repair_transaction.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_repair_transaction.py",
+   "sha256": "6e18cd9ad87084fe6284ceba3d512fa9c1c100b0c2635a83c62145d777596eea",
+   "mode": "644",
+   "size": 1690
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/test_s3_lidar_preflight.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_s3_lidar_preflight.py",
+   "sha256": "e3016e1851d863cfc8357fcac62772ec064e2e5a304afba43bd78d3885c9834a",
+   "mode": "644",
+   "size": 3228
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/control_center_shell/test/test_window_crash.py": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center_shell/test/test_window_crash.py",
+   "sha256": "b96925a0c7efd8fa58015e4bf9cac4c92f1dcd6ced5225c1ca3eac63e7f8b87e",
+   "mode": "644",
+   "size": 2203
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/environment.sh": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/environment.sh",
+   "sha256": "9633bc7f98d57b7628d02779093c02c0f1d4f200c7945a64053cc14126a498b0",
+   "mode": "644",
+   "size": 151
+  },
+  "deployment/367/releases/control-center-57a757b7cd1a/overlay.sh": {
+   "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay.sh",
+   "sha256": "30884fa70eb14ee3778281a8c8cc4ef9f5813e87acfb2034b89e0329f9dbd474",
+   "mode": "644",
+   "size": 889
+  },
+  "deployment/367/reset_neck_compat367.json": {
+   "source": "/home/ubuntu/migration367_20261118/reset_neck_compat367.json",
+   "sha256": "3d84c52be7744dc0c336f1ee6a76521a89bcf164c5348c231b7c72e209b656a6",
+   "mode": "644",
+   "size": 374
+  },
+  "deployment/367/test_sync_bridge.py": {
+   "source": "/home/ubuntu/migration367_20261118/test_sync_bridge.py",
+   "sha256": "3d8015f90412615330ad84ffe9271f843704e6939e474df1133c1f8924d85017",
+   "mode": "644",
+   "size": 5410
+  },
+  "launcher/start_autolife_control_center_300.sh": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/launcher/start_autolife_control_center_300.sh",
+   "sha256": "757aba2c53c7ae3530d58bc15705bced00c3aafa9201eaa70b697165c537e01a",
+   "mode": "755",
+   "size": 2392
+  },
+  "launcher/start_autolife_control_center_306.sh": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/launcher/start_autolife_control_center_306.sh",
+   "sha256": "757aba2c53c7ae3530d58bc15705bced00c3aafa9201eaa70b697165c537e01a",
+   "mode": "755",
+   "size": 2392
+  },
+  "launcher/机器人综合控制中心-300.desktop": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/launcher/机器人综合控制中心-300.desktop",
+   "sha256": "0a341c753ad49c4de97cbdc0f2edb5e7a754235f9f22f9838b92c7611af16f1c",
+   "mode": "644",
+   "size": 348
+  },
+  "launcher/机器人综合控制中心-306.desktop": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/launcher/机器人综合控制中心-306.desktop",
+   "sha256": "5aeda07c2cc2882da290d94779937c5887ea85c05649665f813b76902b4ef016",
+   "mode": "644",
+   "size": 348
+  },
+  "logo/README.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/README.md",
+   "sha256": "060cf65ed6ec2e17d8f917e6ddcd4b83599c998a2ad9bd833a184f0727818b4a",
+   "mode": "644",
+   "size": 2416
+  },
+  "logo/app.js": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/app.js",
+   "sha256": "da72eea91e5713581b2ddfc281fc6421b4295c7521b8da286595de9cd3eb6147",
+   "mode": "644",
+   "size": 12021
+  },
+  "logo/autolife-logo-display.service": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/autolife-logo-display.service",
+   "sha256": "4d2f414308780c81bbaf2bee05adbea5356f16e8431be0678c3bf2587de85f21",
+   "mode": "644",
+   "size": 557
+  },
+  "logo/index.html": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/index.html",
+   "sha256": "e8e56592dad530f078191ed1b5661acde5e626854f8488a60109f7b24608de04",
+   "mode": "644",
+   "size": 2689
+  },
+  "logo/install_logo_service.sh": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/install_logo_service.sh",
+   "sha256": "99995c61cef0fd41a98d03a2577cb8962c53f2089c3088bebfb9388517e69516",
+   "mode": "755",
+   "size": 435
+  },
+  "logo/logo_server.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/logo_server.py",
+   "sha256": "af33b6e50131b6169ba7d5c7fc10172b328e20329e2d29e7ba148544d99511d0",
+   "mode": "755",
+   "size": 7049
+  },
+  "logo/set_display_mode.sh": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/set_display_mode.sh",
+   "sha256": "b68bbe16f40a0569770cc15f58447d6629ff8765b29d3351582718c507557ad3",
+   "mode": "755",
+   "size": 1643
+  },
+  "logo/start_logo_display.sh": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/start_logo_display.sh",
+   "sha256": "0632b54e00e841692fc6f3d3a12cc94af14de093b87e68fe958a53ce06906ee8",
+   "mode": "755",
+   "size": 4631
+  },
+  "logo/styles.css": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/styles.css",
+   "sha256": "643e0b301388152de78219feea8f9becc31f37a8829052df8e189a30f90dcb24",
+   "mode": "644",
+   "size": 11271
+  },
+  "logo/yundie.webp": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/yundie.webp",
+   "sha256": "393d8fb74505e74ee5adff648cacf6c36d3a50536174dac62c140235f2a98080",
+   "mode": "644",
+   "size": 22830
+  },
+  "logo/启动云蝶Logo.desktop": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/logo/启动云蝶Logo.desktop",
+   "sha256": "31b984aaabef50f22d1df9de92307f3c5c4a4839e272af955e60d048409ffb7a",
+   "mode": "644",
+   "size": 347
+  },
+  "text_voice_control/README_ZH.md": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/text_voice_control/README_ZH.md",
+   "sha256": "a64c371f2ebe32849c601e9779761e5a526f5f722fba89eb36666bfb3024a448",
+   "mode": "644",
+   "size": 5010
+  },
+  "text_voice_control/config/text_voice_control.yaml": {
+   "source": "/home/ubuntu/migration367_20261118/install/text_voice_control/share/text_voice_control/config/text_voice_control.yaml",
+   "sha256": "ce72a27fb37f5a2fc3132613600775bc469c8618ea8025b01deada2b437720f6",
+   "mode": "644",
+   "size": 387
+  },
+  "text_voice_control/launch/bringup.launch.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/text_voice_control/share/text_voice_control/launch/bringup.launch.py",
+   "sha256": "293469581583434d2c3654edc42cede81ef826f51dfdf26b9f1cc071283d2e19",
+   "mode": "644",
+   "size": 1509
+  },
+  "text_voice_control/package.xml": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/text_voice_control/package.xml",
+   "sha256": "d36527c3e8f3548b31f86e56f5b73ef31f2a932087eed9e4e31b03d7ec86c241",
+   "mode": "644",
+   "size": 816
+  },
+  "text_voice_control/resource/text_voice_control": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/text_voice_control/resource/text_voice_control",
+   "sha256": "559c6d099ea0ea3799d178a247f9fc59b0533a016cdd63ce891ae78c3b90022d",
+   "mode": "644",
+   "size": 19
+  },
+  "text_voice_control/setup.cfg": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/text_voice_control/setup.cfg",
+   "sha256": "42f9732728c56c60987b0b4c7e89c85853c71db62ea82df5443112e3827f95f0",
+   "mode": "644",
+   "size": 105
+  },
+  "text_voice_control/setup.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/text_voice_control/setup.py",
+   "sha256": "bdc481387168e7cea54e30159f0696503c2b0a008c15f6e55b4e77fc16e4a283",
+   "mode": "644",
+   "size": 1080
+  },
+  "text_voice_control/test/test_command_parser.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/text_voice_control/test/test_command_parser.py",
+   "sha256": "83b688efb8d03fde100d1b74b15021d54118149e8411a87400ee6396c2be864e",
+   "mode": "644",
+   "size": 926
+  },
+  "text_voice_control/text_voice_control/__init__.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/text_voice_control/lib/python3.12/site-packages/text_voice_control/__init__.py",
+   "sha256": "e5d65ef3b1f40edaf4ef09a72eaa637bb0a4974f895b790309ed2097e4e42c4b",
+   "mode": "644",
+   "size": 34
+  },
+  "text_voice_control/text_voice_control/asr_tts_bridge_node.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/text_voice_control/lib/python3.12/site-packages/text_voice_control/asr_tts_bridge_node.py",
+   "sha256": "1c52b96c8426b636b585a4bbdc265f84daaa6593a6e42e4b1c924d51de784953",
+   "mode": "644",
+   "size": 2316
+  },
+  "text_voice_control/text_voice_control/command_parser.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/text_voice_control/lib/python3.12/site-packages/text_voice_control/command_parser.py",
+   "sha256": "bd4773f64687ce17d6b85fc58202b80d5cc55b4c68e48b00dcac8a85d26cfb96",
+   "mode": "644",
+   "size": 1623
+  },
+  "text_voice_control/text_voice_control/say_text.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/text_voice_control/lib/python3.12/site-packages/text_voice_control/say_text.py",
+   "sha256": "4db574c5bc8b728c577ec82e36513456dea76677e5f97499bcd4e34b35d44fd0",
+   "mode": "644",
+   "size": 1655
+  },
+  "text_voice_control/text_voice_control/text_voice_control_node.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/text_voice_control/lib/python3.12/site-packages/text_voice_control/text_voice_control_node.py",
+   "sha256": "41180dae5cdb7c6fb50a0215af9534941319e36e060f5369e7f59908c2b90391",
+   "mode": "644",
+   "size": 2067
+  },
+  "text_voice_control/text_voice_control/topics.py": {
+   "source": "/home/ubuntu/migration367_20261118/install/text_voice_control/lib/python3.12/site-packages/text_voice_control/topics.py",
+   "sha256": "fd9444b4ddb098af2597d6047b1ecd8a5002d346363018067b80419b99e37e34",
+   "mode": "644",
+   "size": 340
+  },
+  "tools/fisheye360_test/fisheye360_345": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/fisheye360_345",
+   "sha256": "d6e1f650217c2a6bf45d4b2907a107ed25cbc92ae9eda3700c8d6c14cb844106",
+   "mode": "755",
+   "size": 2199
+  },
+  "tools/fisheye360_test/fisheye360_service.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/fisheye360_service.py",
+   "sha256": "85b11b5570da9cee9f28317087642d4b333fe66fa8fa2d3d032ff3c475945d17",
+   "mode": "644",
+   "size": 4004
+  },
+  "tools/fisheye360_test/fisheye_camera.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/fisheye_camera.py",
+   "sha256": "e7ec26ac0dcabbc747aedcac91213ad731dbf01826bde5804f67e5fc2861bba3",
+   "mode": "644",
+   "size": 12173
+  },
+  "tools/fisheye360_test/fisheye_profile.py": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/fisheye_profile.py",
+   "sha256": "30285f6246425889663bbf6b28a102bc412994b2a48e654750ed257bf86d99c4",
+   "mode": "644",
+   "size": 7469
+  },
+  "tools/fisheye360_test/web/app.js": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/web/app.js",
+   "sha256": "ad21052fdcdd844925e4d89feb43e3fabb3152ff3368fe85f613b97ade2f9a9c",
+   "mode": "644",
+   "size": 11365
+  },
+  "tools/fisheye360_test/web/index.html": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/web/index.html",
+   "sha256": "67f9936ec8f54c69469217416815f598f9dadee78046632d7534b146d42b3eb7",
+   "mode": "644",
+   "size": 69930
+  },
+  "tools/fisheye360_test/web/jpeg_stream.js": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/web/jpeg_stream.js",
+   "sha256": "da2a9aa6829576fb04a744a1866f3d5584ff6ed3142a967a21747663622a18bf",
+   "mode": "644",
+   "size": 3554
+  },
+  "tools/fisheye360_test/web/profile.json": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/web/profile.json",
+   "sha256": "86af9b3b5c7ddcfd889d28c428c94f8afc271358858d71458435ac8a4a32ec2a",
+   "mode": "644",
+   "size": 830
+  },
+  "tools/fisheye360_test/web/projection.js": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/web/projection.js",
+   "sha256": "197e9484df9af3925c6dbf4268dac24c608c95b57af932714f6068680583b497",
+   "mode": "644",
+   "size": 5169
+  },
+  "tools/fisheye360_test/web/projection_renderer.js": {
+   "source": "/home/ubuntu/migration367_20261118/sources/autolife_robot_control_center/tools/fisheye360_test/web/projection_renderer.js",
+   "sha256": "bb46c1851766d9840851d4e28fda0ec23729755573f0e75263571a2584902ce1",
+   "mode": "644",
+   "size": 4197
+  }
+ }
+}

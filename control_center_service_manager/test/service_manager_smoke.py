@@ -139,11 +139,11 @@ def main():
     assert panel.voice_feedback_off_button.text() == '关闭播报'
     assert panel.voice_volume_slider.minimum() == 0
     assert panel.voice_volume_slider.maximum() == 100
-    assert panel.voice_volume_apply_button.text() == '应用音量'
+    assert panel.voice_volume_apply_button.text() == '应用并试听'
     assert panel.logo_display_start_button.text() == '开启 Logo 网页'
     assert panel.logo_display_stop_button.text() == '关闭 Logo 网页'
     assert module.LOGO_SERVICE_UNIT == 'autolife-logo-display.service'
-    assert '/control_reset_0_345' in panel.joint_reset_button.toolTip()
+    assert f'/control_reset_{panel.topic_suffix}' in panel.joint_reset_button.toolTip()
     for card in panel._core_cards.values():
         card.apply_state({
             'active': 'active', 'sub': 'running', 'enabled': 'enabled'

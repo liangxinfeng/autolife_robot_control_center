@@ -1,5 +1,6 @@
 """Bounded supervisor-level handoff. No programme-specific stop hooks."""
 
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -7,7 +8,6 @@ import re
 import signal
 import subprocess
 import tempfile
-import threading
 import time
 from dataclasses import asdict
 from hashlib import sha256
@@ -15,7 +15,19 @@ from hashlib import sha256
 from .resource_observer import Unit, unit_for
 
 
-LOCK = threading.Lock()
+def acquire_transaction():
+    JOURNAL.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    stream = JOURNAL.with_suffix('.lock').open('a')
+    try:
+        fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        stream.close()
+        return None
+    except BaseException:
+        stream.close()
+        raise
+    return stream
+
 PREVIEWED = None
 JOURNAL = Path.home() / ".local/state/autolife-control-center/paused-services.json"
 UNIT_RE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.@:-]*\.(service|timer|socket|path)")
@@ -174,6 +186,10 @@ def plan(snapshot):
     from . import preflight as p
     units, groups, blocked = {}, {}, []
     current = p._processes()
+    owner_pids = {owner['pid'] for issue in snapshot.issues for owner in issue.owners}
+    owner = p.supervised_launch(current, owner_pids=owner_pids)
+    if owner:
+        return [], [], [owner]
     for issue in snapshot.issues:
         if issue.state not in ("CONFLICT", "REOCCUPIED") or not issue.owners:
             blocked.append(f"{issue.resource}：{issue.detail}")
@@ -346,14 +362,15 @@ def maintain_guards(emit):
 
 def execute(snapshot, emit):
     units, groups, blocked = plan(snapshot)
-    if PREVIEWED is not None:
-        at, allowed_units, allowed_groups = PREVIEWED
-        if time.monotonic() - at > 120:
-            raise RuntimeError("修复计划已过期，请重新确认")
-        if any(not preview_allows(u, allowed_units) for u, _ in units):
-            raise RuntimeError("冲突服务身份或计划发生变化，请重新自检并确认")
-        if any((p["pid"], p["start"]) not in allowed_groups for p in groups):
-            raise RuntimeError("冲突进程组发生变化，请重新自检并确认")
+    if PREVIEWED is None:
+        raise RuntimeError("请先预览并确认本次修复计划")
+    at, allowed_units, allowed_groups = PREVIEWED
+    if time.monotonic() - at > 120:
+        raise RuntimeError("修复计划已过期，请重新确认")
+    if any(not preview_allows(u, allowed_units) for u, _ in units):
+        raise RuntimeError("冲突服务身份或计划发生变化，请重新自检并确认")
+    if any((p["pid"], p["start"]) not in allowed_groups for p in groups):
+        raise RuntimeError("冲突进程组发生变化，请重新自检并确认")
     for unit, evidence in units:
         stop_unit(unit, evidence, emit)
     for identity in groups:
@@ -362,17 +379,18 @@ def execute(snapshot, emit):
         f"已清理独立进程组 {x['pid']}" for x in groups], blocked
 
 
-def restore(emit):
+def restore(emit, suffix='0_367'):
     from . import preflight as p
-    if not LOCK.acquire(blocking=False):
+    transaction = acquire_transaction()
+    if transaction is None:
         return "WARN", "其他修复/恢复正在运行"
     try:
         entries, failures = load(), []
         if not entries:
             return "PASS", "没有需要恢复的暂停服务"
-        if any(p._conflicts(p._processes()).values()):
+        if any(p._conflicts(p._processes(), suffix).values()):
             return "WARN", "请先停止本中心及其他正在运行的导航/建图/关节控制模块"
-        snapshot = p.resource_snapshot()
+        snapshot = p.resource_snapshot(suffix)
         if not snapshot.ok:
             return "WARN", "资源尚被占用或归属未确认，未恢复任何服务：" + snapshot.detail
         if any(protected(Unit(**e["unit"])) for e in entries):
@@ -406,10 +424,15 @@ def restore(emit):
                     result = command(unit, "start")
                     if result.returncode:
                         raise RuntimeError((result.stderr or result.stdout).strip())
-                    if properties(unit).get("ActiveState") not in ("active", "activating"):
-                        raise RuntimeError("启动后服务未进入运行状态")
                 else:
                     handoff_guard(unit, False)
+                state = properties(unit).get("ActiveState")
+                deadline = time.monotonic() + 4.0
+                while state == "activating" and time.monotonic() < deadline:
+                    time.sleep(.2)
+                    state = properties(unit).get("ActiveState")
+                if state != "active":
+                    raise RuntimeError(f"服务未进入运行状态（{state}）")
                 entries.remove(entry)
                 save(entries)
                 emit(f"restore: {unit.manager}/{unit.name} 已恢复")
@@ -423,4 +446,4 @@ def restore(emit):
         return ("WARN", "；".join(failures)) if failures else (
             "PASS", "本次暂停服务已恢复；原导航目标未由控制中心恢复，请重新自检")
     finally:
-        LOCK.release()
+        transaction.close()

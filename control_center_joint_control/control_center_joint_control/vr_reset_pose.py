@@ -37,12 +37,12 @@ HOME_KEYS = (
 
 DEFAULT_CONFIG_PATHS = (
     Path('/home/ubuntu/Documents/AutolifeRobotArm/configs/robot_v3_1.json'),
-    Path('/home/ubuntu/miniconda3/envs/robot_env/lib/python3.12/site-packages/'
+    Path('/home/ubuntu/autolife-v3/env/lib/python3.12/site-packages/'
          'autolife_robot_arm/configs/autolife_s1/robot_v3_1.json'),
 )
 DEFAULT_SETTINGS_PATHS = (
     Path('/home/ubuntu/Documents/AutolifeRobotArm/src/autolife_robot_arm/settings.toml'),
-    Path('/home/ubuntu/miniconda3/envs/robot_env/lib/python3.12/site-packages/'
+    Path('/home/ubuntu/autolife-v3/env/lib/python3.12/site-packages/'
          'autolife_robot_arm/settings.toml'),
 )
 DEFAULT_STATE_PATH = Path.home() / '.config' / 'autolife_robot_control_center' / 'vr_reset_pose.json'

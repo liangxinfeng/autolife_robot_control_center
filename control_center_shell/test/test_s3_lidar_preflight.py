@@ -54,22 +54,16 @@ def test_s3_projection_failure_does_not_restart_chassis(monkeypatch, tmp_path):
     assert status == 'WARN' and 'front scan missing' in detail
 
 
-def test_map_discovery_waits_for_node_names():
-    from types import SimpleNamespace
-    unknown=SimpleNamespace(node_namespace='_NODE_NAMESPACE_UNKNOWN_',node_name='_NODE_NAME_UNKNOWN_')
-    known=SimpleNamespace(node_namespace='/',node_name='map_server')
-    owners=[unknown]
-    node=SimpleNamespace(get_publishers_info_by_topic=lambda _: owners)
-    def spin(timeout_sec):
-        owners[:]=[known]
-        time.sleep(timeout_sec)
-    executor=SimpleNamespace(spin_once=spin)
-    assert preflight._read_map_publishers(node,executor,.02)==['/map_server']
-
-
-def test_unresolved_map_owner_is_not_ignored():
-    from types import SimpleNamespace
-    node=SimpleNamespace(get_publishers_info_by_topic=lambda _: [
-        SimpleNamespace(node_namespace='/',node_name='_NODE_NAME_UNKNOWN_')])
-    with pytest.raises(RuntimeError,match='节点名称尚未就绪'):
-        preflight._read_map_publishers(node,None,0)
+@pytest.mark.parametrize('name,gid,ready', [('/map_server', 'ab' * 16, True),
+    ('/_NODE_NAME_UNKNOWN_', 'ab' * 16, False), ('/map_server', '', False)])
+def test_map_endpoint_discovery(monkeypatch, name, gid, ready):
+    from control_center_shell.resource_observer import Endpoint
+    def read(topics, timeout, anchor):
+        assert anchor.endswith('_0_345')
+        return [Endpoint('/map', name, gid)]
+    monkeypatch.setattr(preflight._observer.GRAPH, 'read', read)
+    if ready:
+        assert preflight._map_publishers(suffix='0_345') == [name]
+    else:
+        with pytest.raises(RuntimeError, match='发现中'):
+            preflight._map_publishers(suffix='0_345')

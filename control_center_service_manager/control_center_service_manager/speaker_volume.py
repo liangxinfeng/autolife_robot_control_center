@@ -80,7 +80,7 @@ def preview(card):
         raise RuntimeError(detail or '扬声器试听播放失败') from error
 
 
-SAVED_VOLUME_PATH = Path('/home/ubuntu/miniconda3/envs/robot_env/lib/python3.12/site-packages/'
+SAVED_VOLUME_PATH = Path('/home/ubuntu/autolife-v3/env/lib/python3.12/site-packages/'
                         'autolife_robot_vision/configs/robot_v3_1.json')
 def ensure_saved_volume():
     """Apply the control-center setting, including intentional mute."""

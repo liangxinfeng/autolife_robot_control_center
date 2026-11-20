@@ -8,6 +8,8 @@ def test_background_probes_do_not_share_or_shutdown_gui_executor():
     # Run only under isolated ROS_DOMAIN_ID, no robot services or motion.
     rclpy.init()
     node=rclpy.create_node('isolated_gui_probe_test')
+    from std_msgs.msg import String
+    node.create_publisher(String, '/topic_arm_whole_body_and_gripper_current_joints_status_0_367', 1)
     calls=[];node.create_timer(.01,lambda:calls.append(1))
     try:
         with ThreadPoolExecutor(max_workers=3) as pool:
@@ -27,8 +29,8 @@ def test_navigation_placeholder_click_reaches_start_handler(monkeypatch):
     calls = []
     monkeypatch.setattr(app, '_service_is_active', lambda _: False)
     monkeypatch.setattr(app.ControlCenterWindow, 'start_navigation', lambda _: calls.append('start'))
-    parameters = {'robot_id': 300, 'topic_suffix': '0_345', 'start_navigation': False}
-    node = SimpleNamespace(get_parameter=lambda key: SimpleNamespace(value=parameters[key]))
+    rclpy.init()
+    node = app.ControlCenterNode()
     window = app.ControlCenterWindow(node)
     window.centralWidget().setEnabled(True)
     placeholder = window.nav_host.findChild(app.EmptyModulePage)
@@ -37,4 +39,6 @@ def test_navigation_placeholder_click_reaches_start_handler(monkeypatch):
     QtTest.QTest.mouseClick(button, QtCore.Qt.LeftButton)
     assert calls == ['start']
     window._operator_heartbeat_timer.stop()
-    window.deleteLater()
+    window.close()
+    node.destroy_node()
+    rclpy.shutdown()
