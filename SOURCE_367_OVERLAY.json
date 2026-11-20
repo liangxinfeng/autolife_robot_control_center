@@ -1,0 +1,102 @@
+{
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/lib": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/lib",
+  "sha256": "4aa28a684b47cb78b2f2510d318abc904fa88c92c6d2f8acaef694f588f2d702"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/config": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/config",
+  "sha256": "44df27167834e677b37cf86430c0f1b21ab891dc38edaca78267c725dedbbceb"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/README.md": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/README.md",
+  "sha256": "717bed8dc2e8acde59346c3758dfc49fe2fd46c4840f43f00503c5ad7cb01120"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.bash": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.bash",
+  "sha256": "f7381ac7eb5264f5d1208c3d6ff63fb3e2afdc1d19b7ce1130b1f361e55d35fd"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/urdf": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/urdf",
+  "sha256": "cf13b85ba1e2a4ee7786b300d291ad9afba3f45246b98c89ac93c9dc7a297e6c"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.zsh": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.zsh",
+  "sha256": "a519a2c1c3d96ee6680851779645f7e6a929d109d55b5bd17d965f0c65a9f1d8"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.dsv": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.dsv",
+  "sha256": "70f1b0575967704c529969a49c055380e905248acac51bdecbabbedfcb1cdc82"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/hook": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/hook",
+  "sha256": "a03511944ea880be397770495ce6510bb71c28a69216b26eb142930352a13b1e"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.ps1": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.ps1",
+  "sha256": "f73fe11e2b9e66685694ff24f49d20d4d4573f54d40be14c3e197b1d64546e86"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.xml": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.xml",
+  "sha256": "a406d9262dcbdbf599077e4606e3089551f9e408b8bf6c5a088227fd59770d5d"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/AI_MIGRATION_GUIDE.md": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/AI_MIGRATION_GUIDE.md",
+  "sha256": "fcc993f4263177bc1fd3c2057a9be58a8c43e67f4ca3e143e234262bca181a70"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/motion_library": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/motion_library",
+  "sha256": "3a2a24fe7e4e374502e14556d31fe26eecb30bcfdb07bb36113eb4949f704efe"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.sh": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/package.sh",
+  "sha256": "2afbd0e1994a8341f633a0129ab24cefdd9fa04a3ba3a9462a56f7595db53dcc"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/meshes",
+  "sha256": "92fe29894b3e6e7729a617ac8ede1c9b7fe5ddabfac32d876c63fc3dcedbcc72"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/ament_index/resource_index/packages/control_center_joint_control": {
+  "mode": "100644",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/ament_index/resource_index/packages/control_center_joint_control",
+  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/launch/whole_body_joint_control.launch.py": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/overlay/control_center_joint_control/share/control_center_joint_control/launch/whole_body_joint_control.launch.py",
+  "sha256": "9c1a8ccfdfd05fa304a475196966eb63c2f6327bcf21d62a7dd639ad3932dda1"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/control_center": {
+  "mode": "100644",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/control_center",
+  "sha256": "b39d1ff74665c1456c3793aa2be6db0b68f6797b922d9abb953a2be84f6dfc68"
+ },
+ "deployment/367/releases/control-center-57a757b7cd1a/src": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-57a757b7cd1a/src",
+  "sha256": "e917532416d9794732bcae20f2c3c71bd5802a2cffce6967dde9000a7e158f04"
+ },
+ "deployment/367/releases/control-center-current": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/releases/control-center-current",
+  "sha256": "8f0627e87362ceb8a6ea200f7e3fb3f94ba06e2cecfcdc6a9f3ec989c872165f"
+ },
+ "deployment/367/src": {
+  "mode": "120000",
+  "source": "/home/ubuntu/migration367_20261118/src",
+  "sha256": "92bfcb532853e9fe0330e4c407aa85e48161fc3ec9be23db16e6ffab72bfffb0"
+ }
+}
